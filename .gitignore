@@ -1,0 +1,22 @@
+# compiled source
+*.o
+*.so
+# temporary vim files
+*.swp
+
+# tex stuff
+*.pdf
+*.tex
+*.bbl
+*.blg
+*.log
+*.aux
+
+pkg/DESCRIPTION
+pkg/NAMESPACE
+
+# ignored directories
+output/
+pkg/man/
+
+
