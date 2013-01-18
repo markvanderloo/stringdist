@@ -27,8 +27,9 @@ static double min2(double x, double y){
  * and extended with custom weights.
  */
 static double osa(const char *a, int na, const char *b, int nb, double *w, double *d){
-   int i, j, sub=0, tran=0;
+   int i, j;
    int I = na+1, J = nb+1;
+   double sub, tran;
 
    for ( i = 0; i < I; ++i ){
       d[i] = i;
@@ -90,14 +91,15 @@ SEXP R_osa(SEXP A, SEXP B, SEXP ncharA, SEXP ncharB, SEXP w){
 
    // output vector
    t = (NA > NB) ? NA : NB;   
-   SEXP out;
-   PROTECT(out = allocVector(INTSXP,t));
-   
+   SEXP yy;
+   PROTECT(yy = allocVector(REALSXP,t));
+   double *y = REAL(yy);   
+
    int k,l;
    for ( int i=0; i < t; ++i ){
       k = i % NA;
       l = i % NB; 
-      INTEGER(out)[i] = osa(
+      y[i] = osa(
          CHAR(STRING_ELT(A,k)), 
          INTEGER(ncharA)[k], 
          CHAR(STRING_ELT(B,l)), 
@@ -109,7 +111,7 @@ SEXP R_osa(SEXP A, SEXP B, SEXP ncharA, SEXP ncharB, SEXP w){
    
    free(workspace);
    UNPROTECT(6);
-   return(out);
+   return(yy);
 }
 
 
