@@ -1,5 +1,4 @@
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <R.h>
 #include <Rdefines.h>
@@ -27,7 +26,7 @@ static double min2(double x, double y){
  * Algorithm taken from http://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance
  * and extended with custom weights.
  */
-int osa(const char *a, int na, const char *b, int nb, double *w, double *d){
+static double osa(const char *a, int na, const char *b, int nb, double *w, double *d){
    int i, j, sub=0, tran=0;
    int I = na+1, J = nb+1;
 
@@ -61,7 +60,7 @@ int osa(const char *a, int na, const char *b, int nb, double *w, double *d){
    return(d[I*J-1]);
 }
 
-//----- R interface ---------------------------------
+//-- interface with R
 
 int vmax(int *x, int n){
    double m = x[0];
@@ -114,20 +113,4 @@ SEXP R_osa(SEXP A, SEXP B, SEXP ncharA, SEXP ncharB, SEXP w){
 }
 
 
-
-/* Simple test
-void main(){
-   int na=3, nb=2;
-   char a[3] = "abc";
-   char b[2] = "b0";
-   int *d;
-   d = (int *) calloc((na+1)*(nb+1), sizeof(int));
-   for ( int i=0; i < (na+1)*(nb+1); printf("%d, ",d[i++]));
-   printf("\n");
-   int x = osa(a,na,b,nb,d);
-   printf("Distance: %d\n",x);
-   free(d);
-}
-
-*/
 
