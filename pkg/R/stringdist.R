@@ -14,17 +14,17 @@
 #' @param b \code{character} vector
 #' @param method Method for distance calculation (see details)
 #' @param weight The penalty for deletion, insertion, substitution and transposition (where applicable).
+#' @param maxDist Maximum string distance before calculation is stopped
 #' @return A vector with string distances of size \code{max(length(a),length(b))}
 #' @export
-stringdist <- function(a, b, method="osa", weight=c(d=1,i=1,s=1,t=1)){
+stringdist <- function(a, b, method=c("osa","dl"), weight=c(d=1,i=1,s=1,t=1),maxDist=1e5){
    stopifnot(is.character(a), is.character(b))
-
-   .Call('R_osa',
-      a,
-      b,
-      nchar(a),
-      nchar(b),
-      as.double(weight)
+   method <- match.arg(method)
+   na <- nchar(a)
+   nb <- nchar(b)
+   switch(method,
+      osa = .Call('R_osa', a, b, na, nb, as.double(weight)),
+      dl  = .Call('R_dl', a, b, na, nb, as.integer(maxDist))
    )
 }
 
