@@ -24,7 +24,7 @@ stringdist <- function(a, b, method=c("osa","dl"), weight=c(d=1,i=1,s=1,t=1),max
    nb <- nchar(b)
    switch(method,
       osa = .Call('R_osa', a, b, na, nb, as.double(weight)),
-      dl  = .Call('R_dl', a, b, na, nb, as.integer(maxDist))
+      dl  = .Call('R_dl' , a, b, na, nb, as.integer(maxDist), max(pmax(na,nb)))
    )
 }
 

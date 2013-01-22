@@ -20,6 +20,10 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
 
+/* ugexe@cpan.org (Nick Logan)    */
+
+#define MIN(a,b) (((a)<(b))?(a):(b))
+
 /* Our unsorted dictionary linked list.   */
 /* Note we use character ints, not chars. */
 
@@ -89,14 +93,13 @@ static int distance(unsigned int src[],unsigned int tgt[],unsigned int x,unsigne
   unsigned int swapCount,swapScore,targetCharCount,i,j;
   unsigned int *scores = malloc( (x + 2) * (y + 2) * sizeof(unsigned int) );
   unsigned int score_ceil = x + y;
- 
+
   /* intialize matrix start values */
   scores[0] = score_ceil;  
   scores[1 * (y + 2) + 0] = score_ceil;
   scores[0 * (y + 2) + 1] = score_ceil;
   scores[1 * (y + 2) + 1] = 0;
   head = uniquePush(uniquePush(head,src[0]),tgt[0]);
-
   /* work loops    */
   /* i = src index */
   /* j = tgt index */
@@ -118,7 +121,7 @@ static int distance(unsigned int src[],unsigned int tgt[],unsigned int x,unsigne
 
       if(src[i-1] != tgt[j-1]){      
         scores[(i+1) * (y + 2) + (j + 1)] = MIN(swapScore,(MIN(scores[i * (y + 2) + j], MIN(scores[(i+1) * (y + 2) + j], scores[i * (y + 2) + (j + 1)])) + 1));
-      }else{ 
+      }else{
         swapCount = j;
         scores[(i+1) * (y + 2) + (j + 1)] = MIN(scores[i * (y + 2) + j], swapScore);
       } 
@@ -144,39 +147,56 @@ static int distance(unsigned int src[],unsigned int tgt[],unsigned int x,unsigne
   }
 }
 
-
 // -- interface with R 
 
-SEXP R_dl(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP maxDistance){
+// We need to convert R's char type (1 word) to unsigned int (4 words)
+static void char2uint(unsigned int *destination, const char *source){
+   int i = 0;
+   while(source[i]){
+      destination[i] = (unsigned int) source[i];
+      ++i;
+   }
+}
+
+SEXP R_dl(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP maxDistance, SEXP maxchar){
    PROTECT(a);
    PROTECT(b);
    PROTECT(ncharA);
    PROTECT(ncharB);
+   PROTECT(maxDistance);
+   PROTECT(maxchar);
    
-   unsigned int i, j, k;
-   unsigned int na = length(a);
-   unsigned int nb = length(b);
+   int i, j, k;
+   int na = length(a);
+   int nb = length(b);
 
    SEXP yy; 
    PROTECT(yy = allocVector(INTSXP, MAX(na,nb)));
    int *y = INTEGER(yy);
 
+   unsigned int *aa = (unsigned int *) calloc(INTEGER(maxchar)[0], sizeof(unsigned int));
+   unsigned int *bb = (unsigned int *) calloc(INTEGER(maxchar)[0], sizeof(unsigned int));
+
    for ( k=0; k < MAX(na,nb); ++k ){
       i = k % na;
       j = k % nb;
+      char2uint(aa, CHAR(STRING_ELT(a,i)));
+      char2uint(bb, CHAR(STRING_ELT(b,j)));
       y[k] = distance(
-         (unsigned int *) CHAR(STRING_ELT(a,i)),
-         (unsigned int *) CHAR(STRING_ELT(b,j)),
-         INTEGER(ncharA)[i],
-         INTEGER(ncharB)[j],
-         INTEGER(maxDistance)[0]
+       aa,
+       bb,
+       (unsigned int)  INTEGER(ncharA)[i],
+       (unsigned int)  INTEGER(ncharB)[j],
+       (unsigned int)  INTEGER(maxDistance)[0]
       );
       if ( y[k] == -1 ){
          warning("maxDistance exceeded in element %d\n",k);
       }
    }
 
-   UNPROTECT(5);
-   return(yy);
+   free(aa);
+   free(bb);
+   UNPROTECT(7);
+   return yy;
 } 
 
