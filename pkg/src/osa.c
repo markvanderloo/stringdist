@@ -2,40 +2,23 @@
 #include <stdlib.h>
 #include <R.h>
 #include <Rdefines.h>
-
-static double min3(double x, double y, double z){
-   if ( x <= y && x <= z ){ 
-      return(x);
-   } else if ( y <= x && y <= z ) {
-      return(y);
-   } else {
-      return(z);
-   }
-}
-
-static double min2(double x, double y){
-   if ( x <= y ){
-      return(x);
-   } else {
-      return(y);
-   }
-}
+#include "utils.h"
 
 /* Optimal string alignment algorithm. 
  * Computes Damerau-Levenshtein distance, restricted to single transpositions.
- * Algorithm taken from http://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance
- * and extended with custom weights.
+ * - See pseudocode at http://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance
+ * - Extended with custom weights and maxDistance
  */
-static double osa(const char *a, int na, const char *b, int nb, double *w, double *d){
+static double osa(const char *a, int na, const char *b, int nb, double *weight, double maxDistance, double *scores){
    int i, j;
    int I = na+1, J = nb+1;
    double sub, tran;
 
    for ( i = 0; i < I; ++i ){
-      d[i] = i;
+      scores[i] = i;
    }
    for ( j = 1; j < J; ++j ){
-      d[I*j] = j;
+      scores[I*j] = j;
    }
 
    for ( i = 1; i <= na; ++i ){
@@ -44,26 +27,29 @@ static double osa(const char *a, int na, const char *b, int nb, double *w, doubl
             sub = 0;
             tran= 0;
          } else {
-            sub = w[2];
-            tran= w[3];
+            sub = weight[2];
+            tran= weight[3];
          }
          
-         d[i + I*j] = min3( 
-            d[i-1 + I*j    ] + w[0],     // deletion
-            d[i   + I*(j-1)] + w[1],     // insertion
-            d[i-1 + I*(j-1)] + sub       // substitution
+         scores[i + I*j] = min3( 
+            scores[i-1 + I*j    ] + weight[0],     // deletion
+            scores[i   + I*(j-1)] + weight[1],     // insertion
+            scores[i-1 + I*(j-1)] + sub            // substitution
          );
          if ( i>1 && j>1 && a[i-1] == b[j-2] && a[i-2] == b[j-1] ){
-            d[i + I*j] = min2(d[i + I*j],d[i-2+I*(j-2)]) + tran; // transposition
+            scores[i + I*j] = min2(scores[i + I*j], scores[i-2+I*(j-2)]) + tran; // transposition
+         }
+         if ( maxDistance > 0 && scores[i + I*j] > maxDistance ){
+            return -1;
          }
       }
    }
-   return(d[I*J-1]);
+   return(scores[I*J-1]);
 }
 
 //-- interface with R
 
-int vmax(int *x, int n){
+static int vmax(int *x, int n){
    double m = x[0];
    for ( int i = 1; i < n; ++i ){
       if ( x[i] > m ){ 
@@ -73,44 +59,49 @@ int vmax(int *x, int n){
    return(m);
 }
 
-SEXP R_osa(SEXP A, SEXP B, SEXP ncharA, SEXP ncharB, SEXP w){
-   PROTECT(A);
-   PROTECT(B);
+SEXP R_osa(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP weight, SEXP maxDistance){
+   PROTECT(a);
+   PROTECT(b);
    PROTECT(ncharA);
    PROTECT(ncharB);
-   PROTECT(w);
-   int t, dsize, NA = length(A), NB = length(B);
-   double *workspace; 
+   PROTECT(weight);
+   PROTECT(maxDistance);
+
+   int dsize, na = length(a), nb = length(b);
+   double *scores; 
+   double *w = REAL(weight);
+   double maxDist = REAL(maxDistance)[0];
 
    // determine workspace size 
-   dsize = (vmax(INTEGER(ncharA),NA)+1) * (vmax(INTEGER(ncharB),NB)+1);
-   workspace = calloc(dsize, sizeof(double)); 
-   if ( workspace == NULL ){
+   dsize = (vmax(INTEGER(ncharA),na)+1) * (vmax(INTEGER(ncharB),nb)+1);
+   scores = calloc(dsize, sizeof(double)); 
+   if ( scores == NULL ){
       error("%s\n","unable to allocate enough memory for workspace");
    }
 
    // output vector
-   t = (NA > NB) ? NA : NB;   
+   int nt = (na > nb) ? na : nb;   
    SEXP yy;
-   PROTECT(yy = allocVector(REALSXP,t));
+   PROTECT(yy = allocVector(REALSXP, nt));
    double *y = REAL(yy);   
 
    int k,l;
-   for ( int i=0; i < t; ++i ){
-      k = i % NA;
-      l = i % NB; 
+   for ( int i=0; i < nt; ++i ){
+      k = i % na;
+      l = i % nb; 
       y[i] = osa(
-         CHAR(STRING_ELT(A,k)), 
+         CHAR(STRING_ELT(a,k)), 
          INTEGER(ncharA)[k], 
-         CHAR(STRING_ELT(B,l)), 
+         CHAR(STRING_ELT(b,l)), 
          INTEGER(ncharB)[l], 
-         REAL(w), 
-         workspace
+         w,
+         maxDist,
+         scores
       );
    }
    
-   free(workspace);
-   UNPROTECT(6);
+   free(scores);
+   UNPROTECT(7);
    return(yy);
 }
 

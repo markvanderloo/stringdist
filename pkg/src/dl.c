@@ -3,11 +3,11 @@
  * 
  *
  * Changes/additions to original code:
- * - Added MAX macro
  * - Added R.h, Rdefines.h inclusion
  * - Added R interface function
+ * - Added edit weights (function is now of type double)
  *
- * MvdL, 2013.01.17
+ * MvdL, 2013.01.23
  * mark.vanderloo@gmail.com
  */
 
@@ -15,9 +15,8 @@
 
 #include <R.h>
 #include <Rdefines.h>
+#include "utils.h"
 
-#define MAX(a,b) (((a)>(b))?(a):(b))
-#define MIN(a,b) (((a)<(b))?(a):(b))
 
 
 /* ugexe@cpan.org (Nick Logan)    */
@@ -87,7 +86,7 @@ static void dict_free(item* head){
  
 /* All calculations/work are done here */
 
-static double distance(unsigned int src[],unsigned int tgt[],unsigned int x,unsigned int y,double *weight,unsigned int maxDistance){
+static double distance(unsigned int src[],unsigned int tgt[],unsigned int x,unsigned int y,double *weight,double maxDistance){
   item *head = NULL;
   unsigned int swapCount, targetCharCount,i,j;
   double delScore, insScore, subScore, swapScore;
@@ -123,10 +122,10 @@ static double distance(unsigned int src[],unsigned int tgt[],unsigned int x,unsi
         subScore = scores[i * (y + 2) + j] + weight[2];
         insScore = scores[(i+1) * (y + 2) + j] + weight[1];
         delScore = scores[i * (y + 2) + (j + 1)] + weight[0];
-        scores[(i+1) * (y + 2) + (j + 1)] = MIN(swapScore, MIN(delScore, MIN(insScore, subScore)));
-      }else{
+        scores[(i+1) * (y + 2) + (j + 1)] = min2(swapScore, min3(delScore, insScore, subScore));
+      } else {
         swapCount = j;
-        scores[(i+1) * (y + 2) + (j + 1)] = MIN(scores[i * (y + 2) + j], swapScore);
+        scores[(i+1) * (y + 2) + (j + 1)] = min2(scores[i * (y + 2) + j], swapScore);
       } 
     }
 
@@ -173,30 +172,30 @@ SEXP R_dl(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP weight, SEXP maxDistanc
    int i, j, k;
    int na = length(a);
    int nb = length(b);
+   int nt = (na > nb) ? na : nb;
+   double maxDist = REAL(maxDistance)[0];
+   double *w = REAL(weight);
 
    SEXP yy; 
-   PROTECT(yy = allocVector(REALSXP, MAX(na,nb)));
+   PROTECT(yy = allocVector(REALSXP, nt));
    double *y = REAL(yy);
 
    unsigned int *aa = (unsigned int *) calloc(INTEGER(maxchar)[0], sizeof(unsigned int));
    unsigned int *bb = (unsigned int *) calloc(INTEGER(maxchar)[0], sizeof(unsigned int));
 
-   for ( k=0; k < MAX(na,nb); ++k ){
+   for ( k=0; k < nt; ++k ){
       i = k % na;
       j = k % nb;
       char2uint(aa, CHAR(STRING_ELT(a,i)));
       char2uint(bb, CHAR(STRING_ELT(b,j)));
       y[k] = distance(
-       aa,
-       bb,
-       (unsigned int)  INTEGER(ncharA)[i],
-       (unsigned int)  INTEGER(ncharB)[j],
-       REAL(weight),
-       (unsigned int)  INTEGER(maxDistance)[0]
+         aa,
+         bb,
+         (unsigned int)  INTEGER(ncharA)[i],
+         (unsigned int)  INTEGER(ncharB)[j],
+         w,
+         maxDist
       );
-      if ( y[k] == -1 ){
-         warning("maxDistance exceeded in element %d\n",k);
-      }
    }
 
    free(aa);
