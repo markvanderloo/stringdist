@@ -22,7 +22,6 @@
 
 /* ugexe@cpan.org (Nick Logan)    */
 
-#define MIN(a,b) (((a)<(b))?(a):(b))
 
 /* Our unsorted dictionary linked list.   */
 /* Note we use character ints, not chars. */
@@ -88,10 +87,11 @@ static void dict_free(item* head){
  
 /* All calculations/work are done here */
 
-static int distance(unsigned int src[],unsigned int tgt[],unsigned int x,unsigned int y,unsigned int maxDistance){
+static double distance(unsigned int src[],unsigned int tgt[],unsigned int x,unsigned int y,double *weight,unsigned int maxDistance){
   item *head = NULL;
-  unsigned int swapCount,swapScore,targetCharCount,i,j;
-  unsigned int *scores = malloc( (x + 2) * (y + 2) * sizeof(unsigned int) );
+  unsigned int swapCount, targetCharCount,i,j;
+  double delScore, insScore, subScore, swapScore;
+  double *scores = malloc( (x + 2) * (y + 2) * sizeof(double) );
   unsigned int score_ceil = x + y;
 
   /* intialize matrix start values */
@@ -117,10 +117,13 @@ static int distance(unsigned int src[],unsigned int tgt[],unsigned int x,unsigne
       }
 
       targetCharCount = find(head,tgt[j-1])->value;
-      swapScore = scores[targetCharCount * (y + 2) + swapCount] + i - targetCharCount - 1 + j - swapCount;
+      swapScore = scores[targetCharCount * (y + 2) + swapCount] + i - targetCharCount - 2 + j - swapCount + weight[3];
 
-      if(src[i-1] != tgt[j-1]){      
-        scores[(i+1) * (y + 2) + (j + 1)] = MIN(swapScore,(MIN(scores[i * (y + 2) + j], MIN(scores[(i+1) * (y + 2) + j], scores[i * (y + 2) + (j + 1)])) + 1));
+      if(src[i-1] != tgt[j-1]){
+        subScore = scores[i * (y + 2) + j] + weight[2];
+        insScore = scores[(i+1) * (y + 2) + j] + weight[1];
+        delScore = scores[i * (y + 2) + (j + 1)] + weight[0];
+        scores[(i+1) * (y + 2) + (j + 1)] = MIN(swapScore, MIN(delScore, MIN(insScore, subScore)));
       }else{
         swapCount = j;
         scores[(i+1) * (y + 2) + (j + 1)] = MIN(scores[i * (y + 2) + j], swapScore);
@@ -140,7 +143,7 @@ static int distance(unsigned int src[],unsigned int tgt[],unsigned int x,unsigne
   }
 
   {
-  unsigned int score = scores[(x+1) * (y + 2) + (y + 1)];
+  double score = scores[(x+1) * (y + 2) + (y + 1)];
   dict_free(head);
   free(scores);
   return score;
@@ -158,21 +161,22 @@ static void char2uint(unsigned int *destination, const char *source){
    }
 }
 
-SEXP R_dl(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP maxDistance, SEXP maxchar){
+SEXP R_dl(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP weight, SEXP maxDistance, SEXP maxchar){
    PROTECT(a);
    PROTECT(b);
    PROTECT(ncharA);
    PROTECT(ncharB);
    PROTECT(maxDistance);
    PROTECT(maxchar);
+   PROTECT(weight);
    
    int i, j, k;
    int na = length(a);
    int nb = length(b);
 
    SEXP yy; 
-   PROTECT(yy = allocVector(INTSXP, MAX(na,nb)));
-   int *y = INTEGER(yy);
+   PROTECT(yy = allocVector(REALSXP, MAX(na,nb)));
+   double *y = REAL(yy);
 
    unsigned int *aa = (unsigned int *) calloc(INTEGER(maxchar)[0], sizeof(unsigned int));
    unsigned int *bb = (unsigned int *) calloc(INTEGER(maxchar)[0], sizeof(unsigned int));
@@ -187,6 +191,7 @@ SEXP R_dl(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP maxDistance, SEXP maxch
        bb,
        (unsigned int)  INTEGER(ncharA)[i],
        (unsigned int)  INTEGER(ncharB)[j],
+       REAL(weight),
        (unsigned int)  INTEGER(maxDistance)[0]
       );
       if ( y[k] == -1 ){
@@ -196,7 +201,7 @@ SEXP R_dl(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP maxDistance, SEXP maxch
 
    free(aa);
    free(bb);
-   UNPROTECT(7);
+   UNPROTECT(8);
    return yy;
 } 
 
