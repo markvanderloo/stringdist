@@ -33,8 +33,6 @@ test_that("weights are handled correctly",{
       stringdist("abc","ac",method='dl',weight=c(0.5,1,1,1)),
       stringdist("ac","abc",method='dl',weight=c(1,0.5,1,1))
    )
-
-
 })
 
 context("Damerau-Levenstein")

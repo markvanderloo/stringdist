@@ -6,7 +6,7 @@ LazyData: no
 Type: Package
 LazyLoad: yes
 Author: Mark van der Loo
-Description: Implements several string distance functions.
+Description: Implements the restricted Damerau-Levenshtein distance (optimal string alignment), the full Damerau-Levenshtein distance and the Hamming distance. In all cases, edit operations can be weighted.
 Version: 0.1-0
 Depends: R (>= 2.13.0)
 URL: https://github.com/markvanderloo/stringdist
