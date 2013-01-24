@@ -18,7 +18,8 @@
 #' @return A vector with string distances of size \code{max(length(a),length(b))}
 #' @export
 stringdist <- function(a, b, method=c("osa","dl"), weight=c(d=1,i=1,s=1,t=1), maxDist=0){
-   stopifnot(is.character(a), is.character(b))
+   a <- as.character(a)
+   b <- as.character(b)
    if (length(a) == 0 || length(b) == 0){ 
       return(numeric(0))
    }

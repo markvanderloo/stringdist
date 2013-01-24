@@ -186,6 +186,10 @@ SEXP R_dl(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP weight, SEXP maxDistanc
    for ( k=0; k < nt; ++k ){
       i = k % na;
       j = k % nb;
+      if ( STRING_ELT(a,i) == NA_STRING || STRING_ELT(b,j) == NA_STRING){
+         y[k] == NA_REAL;
+         continue;
+      }
       char2uint(aa, CHAR(STRING_ELT(a,i)));
       char2uint(bb, CHAR(STRING_ELT(b,j)));
       y[k] = distance(
