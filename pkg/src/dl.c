@@ -1,4 +1,4 @@
-/* This code is gratefully copied from Nick Logan's githup repository
+/* This code is gratefully based on Nick Logan's github repository
  * https://github.com/ugexe/Text--Levenshtein--Damerau--XS/blob/master/damerau-int.c
  * 
  *
@@ -6,6 +6,7 @@
  * - Added R.h, Rdefines.h inclusion
  * - Added R interface function
  * - Added edit weights (function is now of type double)
+ * - Added corner cases for length-zero strings.
  *
  * MvdL, 2013.01.23
  * mark.vanderloo@gmail.com
