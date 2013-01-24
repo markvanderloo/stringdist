@@ -10,6 +10,7 @@ test_that("Argument parsing",{
 
 context("Optimal String Alignment")
 test_that("Edge cases in OSA method",{
+   expect_equal(stringdist( "", "",method='osa'),0)
    expect_equal(stringdist( "","a",method='osa'),1)
    expect_equal(stringdist("a", "",method='osa'),1)
    expect_equal(stringdist("a","a",method='osa'),0)
@@ -30,13 +31,51 @@ test_that("weights are handled correctly",{
    expect_equal(stringdist("ac","ca",method='osa',weight=c(1,1,1,0.5)),0.5)
    # symmetry property in simple case
    expect_equal(
+      stringdist("abc","ac",method='osa',weight=c(0.5,1,1,1)),
+      stringdist("ac","abc",method='osa',weight=c(1,0.5,1,1))
+   )
+})
+
+test_that("NA's are handled correctly",{
+   expect_true(is.na(stringdist(NA ,'a',method='osa')))
+   expect_true(is.na(stringdist('a',NA ,method='osa')))
+   expect_true(is.na(stringdist(NA ,NA ,method='osa')))
+
+})
+
+
+context("Damerau-Levenstein")
+test_that("Edge cases in DL method",{
+   expect_equal(stringdist( "", "",method='dl'),0)
+   expect_equal(stringdist( "","a",method='dl'),1)
+   expect_equal(stringdist("a", "",method='dl'),1)
+   expect_equal(stringdist("a","a",method='dl'),0)
+})
+
+test_that("max distance is obeyed",{
+   expect_equal(stringdist("aa","bb",method='dl',maxDist=1),-1)
+})
+
+test_that("weights are handled correctly",{
+   # deletion
+   expect_equal(stringdist("ab","a", method='dl',weight=c(0.5,1,1,1)),0.5)
+   # insertion
+   expect_equal(stringdist("a" ,"ab",method='dl',weight=c(1,0.5,1,1)),0.5)
+   # substitution
+   expect_equal(stringdist("a" ,"b", method='dl',weight=c(1,1,0.5,1)),0.5)
+   # transposition
+   expect_equal(stringdist("ac","ca",method='dl',weight=c(1,1,1,0.5)),0.5)
+   # symmetry property in simple case
+   expect_equal(
       stringdist("abc","ac",method='dl',weight=c(0.5,1,1,1)),
       stringdist("ac","abc",method='dl',weight=c(1,0.5,1,1))
    )
 })
 
-context("Damerau-Levenstein")
-
-
+test_that("NA's are handled correctly",{
+   expect_true(is.na(stringdist(NA ,'a',method='dl')))
+   expect_true(is.na(stringdist('a',NA ,method='dl')))
+   expect_true(is.na(stringdist(NA ,NA ,method='dl')))
+})
 
 

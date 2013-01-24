@@ -87,6 +87,9 @@ static void dict_free(item* head){
 /* All calculations/work are done here */
 
 static double distance(unsigned int src[],unsigned int tgt[],unsigned int x,unsigned int y,double *weight,double maxDistance){
+  if ( x==0 ) return y;
+  if ( y==0 ) return x;
+
   item *head = NULL;
   unsigned int swapCount, targetCharCount,i,j;
   double delScore, insScore, subScore, swapScore;
@@ -187,7 +190,7 @@ SEXP R_dl(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP weight, SEXP maxDistanc
       i = k % na;
       j = k % nb;
       if ( STRING_ELT(a,i) == NA_STRING || STRING_ELT(b,j) == NA_STRING){
-         y[k] == NA_REAL;
+         y[k] = NA_REAL;
          continue;
       }
       char2uint(aa, CHAR(STRING_ELT(a,i)));
