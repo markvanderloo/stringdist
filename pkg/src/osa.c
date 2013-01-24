@@ -81,19 +81,23 @@ SEXP R_osa(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP weight, SEXP maxDistan
 
    // output vector
    int nt = (na > nb) ? na : nb;   
+   int i,j,k;
    SEXP yy;
    PROTECT(yy = allocVector(REALSXP, nt));
    double *y = REAL(yy);   
-
-   int k,l;
-   for ( int i=0; i < nt; ++i ){
-      k = i % na;
-      l = i % nb; 
-      y[i] = osa(
-         CHAR(STRING_ELT(a,k)), 
-         INTEGER(ncharA)[k], 
-         CHAR(STRING_ELT(b,l)), 
-         INTEGER(ncharB)[l], 
+   
+   for ( int k=0; k < nt; ++k ){
+      i = k % na;
+      j = k % nb;      
+      if (STRING_ELT(a,i) == NA_STRING || STRING_ELT(b,j) == NA_STRING){
+         y[k] = NA_REAL;
+         continue;
+      }
+      y[k] = osa(
+         CHAR(STRING_ELT(a,i)), 
+         INTEGER(ncharA)[i], 
+         CHAR(STRING_ELT(b,j)), 
+         INTEGER(ncharB)[j], 
          w,
          maxDist,
          scores
