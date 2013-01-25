@@ -20,6 +20,11 @@ test_that("max distance is obeyed",{
    expect_equal(stringdist("aa","bb",method='osa',maxDist=1),-1)
 })
 
+test_that("Shortest argument is recycled",{
+   expect_equal(stringdist(c('a','b'),'a',method='osa'),c(0,1))
+   expect_equal(stringdist('a',c('a','b'),method='osa'),c(0,1))
+})
+
 test_that("weights are handled correctly",{
    # deletion
    expect_equal(stringdist("ab","a", method='osa',weight=c(0.5,1,1,1)),0.5)
@@ -56,6 +61,11 @@ test_that("max distance is obeyed",{
    expect_equal(stringdist("aa","bb",method='dl',maxDist=1),-1)
 })
 
+test_that("Shortest argument is recycled",{
+   expect_equal(stringdist(c('a','b'),'a',method='dl'),c(0,1))
+   expect_equal(stringdist('a',c('a','b'),method='dl'),c(0,1))
+})
+
 test_that("weights are handled correctly",{
    # deletion
    expect_equal(stringdist("ab","a", method='dl',weight=c(0.5,1,1,1)),0.5)
@@ -77,5 +87,31 @@ test_that("NA's are handled correctly",{
    expect_true(is.na(stringdist('a',NA ,method='dl')))
    expect_true(is.na(stringdist(NA ,NA ,method='dl')))
 })
+
+
+context("Hamming distance")
+
+test_that("Edge cases in DL method",{
+   expect_equal(stringdist( "", "",method='h'),0)
+   expect_error(stringdist( "","a",method='h'))
+   expect_error(stringdist("a", "",method='h'))
+   expect_equal(stringdist("a","a",method='h'),0)
+})
+
+test_that("max distance is obeyed",{
+   expect_equal(stringdist("aa","bb",method='h',maxDist=1),-1)
+})
+
+test_that("Shortest argument is recycled",{
+   expect_equal(stringdist(c('a','b'),'a',method='h'),c(0,1))
+   expect_equal(stringdist('a',c('a','b'),method='h'),c(0,1))
+})
+
+test_that("NA's are handled correctly",{
+   expect_true(is.na(stringdist(NA ,'a',method='h')))
+   expect_true(is.na(stringdist('a',NA ,method='h')))
+   expect_true(is.na(stringdist(NA ,NA ,method='h')))
+})
+
 
 
