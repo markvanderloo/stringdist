@@ -30,6 +30,8 @@ stringdist <- function(a, b, method=c("osa","dl","h"), weight=c(d=1,i=1,s=1,t=1)
       osa = .Call('R_osa', a, b, na, nb, as.double(weight), as.double(maxDist)),
       dl  = .Call('R_dl' , a, b, na, nb, as.double(weight), as.double(maxDist), max(max(na),max(nb))),
       h   = {
+          a <- lapply(enc2utf8(a),utf8ToInt)
+          b <- lapply(enc2utf8(b),utf8ToInt)
          .Call('R_hm' , a, b, na, nb, as.integer(maxDist))
       }
    )

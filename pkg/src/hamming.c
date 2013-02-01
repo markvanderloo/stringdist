@@ -4,14 +4,13 @@
 #include <R.h>
 #include <Rdefines.h>
 
-int hamming(const char *a, const char *b, int maxDistance){
-   int i=0, h=0;
-   while(a[i]){
+int hamming(int *a, int *b, int n, int maxDistance){
+   int i, h=0;
+   for(i=0; i<n; ++i){
       h += (a[i] == b[i]) ? 0 : 1;
       if ( maxDistance > 0 && maxDistance < h ){
          return -1;
       }
-      ++i;
    }
    return h;
 }
@@ -41,18 +40,17 @@ SEXP R_hm(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP maxDistance){
    for ( k=0; k<nt; ++k){
       i = k % na;
       j = k % nb;
-      if ( STRING_ELT(a,i) == NA_STRING || STRING_ELT(b,j) == NA_STRING ){
+      if ( INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER ){
          y[k] = NA_INTEGER;
          continue;         
       }
       if ( nchar_a[i] != nchar_b[j] ){
-         error("Charater strings %s and %s not of equal length",
-            CHAR(STRING_ELT(a,i)), CHAR(STRING_ELT(b,j))
-         );
+         error("Characters strings a[%d] and b[%d] have different number of characters", i, j);
       }
       y[k] = hamming(
-         CHAR(STRING_ELT(a,i)),
-         CHAR(STRING_ELT(b,j)),
+         INTEGER(VECTOR_ELT(a,i)),
+         INTEGER(VECTOR_ELT(b,j)),
+         nchar_a[i],
          maxDist
       );
    }
