@@ -155,22 +155,10 @@ static double distance(unsigned int src[],unsigned int tgt[],unsigned int x,unsi
 
 // -- interface with R 
 
-// We need to convert R's char type (1 word) to unsigned int (4 words)
-static void char2uint(unsigned int *destination, const char *source){
-   int i = 0;
-   while(source[i]){
-      destination[i] = (unsigned int) source[i];
-      ++i;
-   }
-}
-
-SEXP R_dl(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP weight, SEXP maxDistance, SEXP maxchar){
+SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
    PROTECT(a);
    PROTECT(b);
-   PROTECT(ncharA);
-   PROTECT(ncharB);
    PROTECT(maxDistance);
-   PROTECT(maxchar);
    PROTECT(weight);
    
    int i, j, k;
@@ -184,31 +172,24 @@ SEXP R_dl(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP weight, SEXP maxDistanc
    PROTECT(yy = allocVector(REALSXP, nt));
    double *y = REAL(yy);
 
-   unsigned int *aa = (unsigned int *) calloc(INTEGER(maxchar)[0], sizeof(unsigned int));
-   unsigned int *bb = (unsigned int *) calloc(INTEGER(maxchar)[0], sizeof(unsigned int));
-
    for ( k=0; k < nt; ++k ){
       i = k % na;
       j = k % nb;
-      if ( STRING_ELT(a,i) == NA_STRING || STRING_ELT(b,j) == NA_STRING){
+      if ( INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
          y[k] = NA_REAL;
          continue;
       }
-      char2uint(aa, CHAR(STRING_ELT(a,i)));
-      char2uint(bb, CHAR(STRING_ELT(b,j)));
       y[k] = distance(
-         aa,
-         bb,
-         (unsigned int)  INTEGER(ncharA)[i],
-         (unsigned int)  INTEGER(ncharB)[j],
+         INTEGER(VECTOR_ELT(a,i)),
+         INTEGER(VECTOR_ELT(b,j)),
+         length(VECTOR_ELT(a,i)),
+         length(VECTOR_ELT(b,j)),
          w,
          maxDist
       );
    }
 
-   free(aa);
-   free(bb);
-   UNPROTECT(8);
+   UNPROTECT(5);
    return yy;
 } 
 
