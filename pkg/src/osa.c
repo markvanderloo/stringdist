@@ -59,22 +59,32 @@ static int vmax(int *x, int n){
    return(m);
 }
 
-SEXP R_osa(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP weight, SEXP maxDistance){
+static int get_dp_matrix_size(SEXP a, SEXP b){
+   int max_a=0, max_b=0, t;
+   for ( int i=0; i<length(a); ++i){
+      t = length(VECTOR_ELT(a,i));
+      if ( max_a < t ) max_a = t;
+   }
+   for (int i=0; i<length(b); ++i){
+      t = length(VECTOR_ELT(b,i));
+      if ( max_b < t ) max_b = t;
+   }
+   return ((max_a + 1)*(max_b + 1));
+}
+
+
+SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
    PROTECT(a);
    PROTECT(b);
-   PROTECT(ncharA);
-   PROTECT(ncharB);
    PROTECT(weight);
    PROTECT(maxDistance);
 
-   int dsize, na = length(a), nb = length(b);
+   int na = length(a), nb = length(b);
    double *scores; 
    double *w = REAL(weight);
    double maxDist = REAL(maxDistance)[0];
 
-   // determine workspace size 
-   dsize = (vmax(INTEGER(ncharA),na)+1) * (vmax(INTEGER(ncharB),nb)+1);
-   scores = calloc(dsize, sizeof(double)); 
+   scores = calloc(get_dp_matrix_size(a,b), sizeof(double)); 
    if ( scores == NULL ){
       error("%s\n","unable to allocate enough memory for workspace");
    }
@@ -95,9 +105,9 @@ SEXP R_osa(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP weight, SEXP maxDistan
       }
       y[k] = osa(
          INTEGER(VECTOR_ELT(a,i)), 
-         INTEGER(ncharA)[i], 
+         length(VECTOR_ELT(a,i)), 
          INTEGER(VECTOR_ELT(b,j)), 
-         INTEGER(ncharB)[j], 
+         length(VECTOR_ELT(b,j)), 
          w,
          maxDist,
          scores
@@ -105,7 +115,7 @@ SEXP R_osa(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP weight, SEXP maxDistan
    }
    
    free(scores);
-   UNPROTECT(7);
+   UNPROTECT(5);
    return(yy);
 }
 
