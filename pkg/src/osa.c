@@ -49,16 +49,6 @@ static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weig
 
 //-- interface with R
 
-static int vmax(int *x, int n){
-   double m = x[0];
-   for ( int i = 1; i < n; ++i ){
-      if ( x[i] > m ){ 
-         m = x[i];
-      }
-   }
-   return(m);
-}
-
 static int get_dp_matrix_size(SEXP a, SEXP b){
    int max_a=0, max_b=0, t;
    for ( int i=0; i<length(a); ++i){
