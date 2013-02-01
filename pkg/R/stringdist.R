@@ -17,7 +17,7 @@
 #' @param maxDist Maximum string distance before calculation is stopped, \code{maxDist=0} means calculation goes on untill the distance is computed.
 #' @return A vector with string distances of size \code{max(length(a),length(b))}
 #' @export
-stringdist <- function(a, b, method=c("osa","dl","h"), weight=c(d=1,i=1,s=1,t=1), maxDist=0){
+stringdist <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i=1,s=1,t=1), maxDist=0){
    a <- as.character(a)
    b <- as.character(b)
    if (length(a) == 0 || length(b) == 0){ 
@@ -28,6 +28,7 @@ stringdist <- function(a, b, method=c("osa","dl","h"), weight=c(d=1,i=1,s=1,t=1)
    b <- lapply(enc2utf8(b),utf8ToInt)
    switch(method,
       osa = .Call('R_osa', a, b, as.double(weight), as.double(maxDist)),
+      lv  = .Call('R_lv' , a, b, as.double(weight), as.double(maxDist)),
       dl  = .Call('R_dl' , a, b, as.double(weight), as.double(maxDist)),
       h   = .Call('R_hm' , a, b, as.integer(maxDist))
    )

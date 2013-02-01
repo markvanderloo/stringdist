@@ -48,6 +48,42 @@ test_that("NA's are handled correctly",{
 
 })
 
+context("Levenstein")
+test_that("Edge cases in Levenshtein method",{
+   expect_equal(stringdist( "", "",method='lv'),0)
+   expect_equal(stringdist( "","a",method='lv'),1)
+   expect_equal(stringdist("a", "",method='lv'),1)
+   expect_equal(stringdist("a","a",method='lv'),0)
+})
+
+test_that("max distance is obeyed",{
+   expect_equal(stringdist("aa","bb",method='lv',maxDist=1),-1)
+})
+
+test_that("Shortest argument is recycled",{
+   expect_equal(stringdist(c('a','b'),'a',method='lv'),c(0,1))
+   expect_equal(stringdist('a',c('a','b'),method='lv'),c(0,1))
+})
+
+test_that("weights are handled correctly",{
+   # deletion
+   expect_equal(stringdist("ab","a", method='lv',weight=c(0.5,1,1)),0.5)
+   # insertion
+   expect_equal(stringdist("a" ,"ab",method='lv',weight=c(1,0.5,1,1)),0.5)
+   # substitution
+   expect_equal(stringdist("a" ,"b", method='lv',weight=c(1,1,0.5,1)),0.5)
+   # symmetry property in simple case
+   expect_equal(
+      stringdist("abc","ac",method='lv',weight=c(0.5,1,1,1)),
+      stringdist("ac","abc",method='lv',weight=c(1,0.5,1,1))
+   )
+})
+
+test_that("NA's are handled correctly",{
+   expect_true(is.na(stringdist(NA ,'a',method='lv')))
+   expect_true(is.na(stringdist('a',NA ,method='lv')))
+   expect_true(is.na(stringdist(NA ,NA ,method='lv')))
+})
 
 context("Damerau-Levenstein")
 test_that("Edge cases in DL method",{
