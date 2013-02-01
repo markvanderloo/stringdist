@@ -18,15 +18,10 @@ int hamming(int *a, int *b, int n, int maxDistance){
 
 // -- R interface
 
-SEXP R_hm(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP maxDistance){
+SEXP R_hm(SEXP a, SEXP b, SEXP maxDistance){
    PROTECT(a);
    PROTECT(b);
-   PROTECT(ncharA);
-   PROTECT(ncharB);
    PROTECT(maxDistance);
-
-   int *nchar_a = INTEGER(ncharA);
-   int *nchar_b = INTEGER(ncharB);
 
    int na = length(a);
    int nb = length(b);
@@ -34,7 +29,7 @@ SEXP R_hm(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP maxDistance){
    SEXP yy;
    PROTECT(yy = allocVector(INTSXP,nt));
    int *y = INTEGER(yy);
-   int i,j,k;
+   int i,j,k,nchar;
    int maxDist = INTEGER(maxDistance)[0];
 
    for ( k=0; k<nt; ++k){
@@ -44,17 +39,18 @@ SEXP R_hm(SEXP a, SEXP b, SEXP ncharA, SEXP ncharB, SEXP maxDistance){
          y[k] = NA_INTEGER;
          continue;         
       }
-      if ( nchar_a[i] != nchar_b[j] ){
+      nchar = length(VECTOR_ELT(a,i));
+      if ( nchar != length(VECTOR_ELT(b,j)) ){
          error("Characters strings a[%d] and b[%d] have different number of characters", i, j);
       }
       y[k] = hamming(
          INTEGER(VECTOR_ELT(a,i)),
          INTEGER(VECTOR_ELT(b,j)),
-         nchar_a[i],
+         nchar,
          maxDist
       );
    }
-   UNPROTECT(6);
+   UNPROTECT(4);
    return yy;
 
 }
