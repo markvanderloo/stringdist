@@ -4,7 +4,7 @@
 #include <R.h>
 #include <Rdefines.h>
 
-int hamming(int *a, int *b, int n, int maxDistance){
+int hamming(unsigned int *a, unsigned int *b, int n, int maxDistance){
    int i, h=0;
    for(i=0; i<n; ++i){
       h += (a[i] == b[i]) ? 0 : 1;
