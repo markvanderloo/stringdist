@@ -5,7 +5,7 @@
 #' @useDynLib stringdist
 {}
 
-#' Compute distance between two strings
+#' Compute distance between strings
 #'
 #' @section Details:
 #' Computes pairwise distances between two \code{character} vectors. The shortest of \code{a} and \code{b} is recycled.
@@ -33,5 +33,25 @@ stringdist <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i=1,s=1
       h   = .Call('R_hm' , a, b, as.integer(maxDist))
    )
 }
+
+#' Compute matrix of string distances 
+#'
+#' @param a character vector
+#' @param b character vector
+#' @param ... other arguments to be passed to \code{\link{stringdist}}
+#' @param ncores number of cores to use. Parallelisation is over \code{b}, so the speed gain by parallelisation is highest when \code{b} is shorter than \code{a}.
+#' @export
+stringdistmatrix <- function(a,b,...,ncores=1){
+   if (ncores==1){
+     x <- sapply(b,stringdist,a,...)
+   } else {
+   require(parallel)
+      cl <- makeCluster(ncores)
+         x <- parSapply(b,stringdist,a,...)
+      stopCluster()
+   }
+   x
+}
+
 
 

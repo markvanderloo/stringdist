@@ -12,7 +12,10 @@ through a uniform interface. So far distance functions include:
 * Restricted Damerau-Levenshtein distance (weighted);
 * Full Damerau-Levenshtein distance (weighted).
 
-Core algorithms are implemented in C, for speed.
+Workhorse functions are implemented in C. The package offers two main functions:
+
+* *stringdist*  computes pairwise distances between two input character vectors (shorter one is recycled)
+* *stringdistmatrix* computes the distance matrix between two input character vectors, optionally running in parallel.
 
 
 
