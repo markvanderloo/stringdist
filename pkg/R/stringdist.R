@@ -8,6 +8,10 @@
 #' Compute distance between strings
 #'
 #' @section Details:
+#' \code{stringdist} computes pairwise string distances between elements of \code{character} vectors \code{a} and \code{b},
+#' where the shorter argument is recycled. \code{stringdistmatrix} computes the string distance matrix with rows according to
+#' \code{a} and columns according to \code{b}.
+#'
 #' Currently, the following distance measures are supported:
 #' \tabular{ll}{
 #'    \code{osa} \tab Optimal string aligment, (restricted Damerau-Levenshtein distance).\cr
@@ -33,6 +37,7 @@
 #' @param method Method for distance calculation (see details)
 #' @param weight The penalty for deletion, insertion, substitution and transposition (where applicable).
 #' @param maxDist Maximum string distance before calculation is stopped, \code{maxDist=0} means calculation goes on untill the distance is computed.
+#'
 #' @return For \code{stringdist},  a vector with string distances of size \code{max(length(a),length(b))}.
 #'  For \code{stringdistmatrix}, a \code{length(a)xlength(b)} \code{matrix}. The returned distance is \code{-1} when \code{maxDist} is exceeded
 #'  and \code{NA} if any of \code{a} or \code{b} is \code{NA}.
