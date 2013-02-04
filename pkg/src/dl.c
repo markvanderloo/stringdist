@@ -2,13 +2,14 @@
  * https://github.com/ugexe/Text--Levenshtein--Damerau--XS/blob/master/damerau-int.c
  * 
  *
- * Changes/additions to original code:
+ * Changes/additions wrt original code:
  * - Added R.h, Rdefines.h inclusion
  * - Added R interface function
  * - Added edit weights (function is now of type double)
  * - Added corner cases for length-zero strings.
- *
- * MvdL, 2013.01.23
+ * - Replaced linked list dictionary with fixed-size struct for loop externalization.
+ * - Externalized allocation of dynamic programming matrix.
+ * 
  * mark.vanderloo@gmail.com
  */
 
@@ -19,82 +20,82 @@
 #include "utils.h"
 
 
-
-/* ugexe@cpan.org (Nick Logan)    */
-
-
-/* Our unsorted dictionary linked list.   */
+/* Our unsorted dictionary  */
 /* Note we use character ints, not chars. */
 
-struct dictionary{
-  unsigned int key;
-  unsigned int value;
-  struct dictionary* next;
-};
-typedef struct dictionary item;
 
+typedef struct {
+  unsigned int *key;
+  unsigned int *value;
+  unsigned int length;
+} dictionary;
 
-static __inline item* push(unsigned int key,item* curr){
-  item* head;
-  head = malloc(sizeof(item));   
-  head->key = key;
-  head->value = 0;
-  head->next = curr;
-  return head;
+static void reset_dictionary(dictionary *d){
+  int nbytes = sizeof(unsigned int)*d->length;
+  memset(d->key  , 0, nbytes);
+  memset(d->value, 0, nbytes);
 }
 
-
-static __inline item* find(item* head,unsigned int key){
-  item* iterator = head;
-  while(iterator){
-    if(iterator->key == key){
-      return iterator;
-    }
-    iterator = iterator->next;
+static dictionary *new_dictionary(unsigned int length){
+  dictionary *d = (dictionary *) malloc(sizeof(dictionary));
+  if ( d == NULL ){
+    return NULL;
   }
- 
-  return NULL;
+  d->key   = (unsigned int *) malloc(length*sizeof(int));
+  d->value = (unsigned int *) malloc(length*sizeof(int));
+  if ( d->key == NULL || d->value == NULL){
+    free(d->key);
+    free(d->value);
+    free(d);
+    return NULL;
+  }
+  d->length = length;
+  reset_dictionary(d);
+  return d;
 }
 
-static __inline item* uniquePush(item* head,unsigned int key){
-  item* iterator = head;
-
-  while(iterator){
-    if(iterator->key == key){
-      return head;
-    }
-    iterator = iterator->next;
-  }
- 
-  return push(key,head); 
+static void free_dictionary(dictionary *d){
+  free(d->key);
+  free(d->value);
+  free(d);
 }
 
-static void dict_free(item* head){
-  item* iterator = head;
-  while(iterator){
-    item* temp = iterator;
-    iterator = iterator->next;
-    free(temp);
+static void uniquePush(dictionary *d, unsigned int key){
+  int i=0;
+  while (d->key[i] && d->key[i] != key){
+    ++i;
   }
+  d->key[i] = key;
+}
 
-  head = NULL;
+static unsigned int which(dictionary *d, unsigned int key){
+  int i=0;
+  while( d->key[i] != key ){
+     ++i;
+  }
+  return i;
 }
 
 /* End of Dictionary Stuff */
 
 
-
- 
 /* All calculations/work are done here */
 
-static double distance(unsigned int src[],unsigned int tgt[],unsigned int x,unsigned int y,double *weight,double maxDistance){
+static double distance(
+      unsigned int *src,
+      unsigned int *tgt,
+      unsigned int x,
+      unsigned int y,
+      double *weight,
+      double maxDistance,
+      dictionary *dict,
+      double *scores
+    ){
   if ( x==0 ) return y;
   if ( y==0 ) return x;
 
-  item *head = NULL;
   unsigned int swapCount, targetCharCount,i,j;
   double delScore, insScore, subScore, swapScore;
-  double *scores = malloc( (x + 2) * (y + 2) * sizeof(double) );
   unsigned int score_ceil = x + y;
 
   /* intialize matrix start values */
@@ -102,24 +103,25 @@ static double distance(unsigned int src[],unsigned int tgt[],unsigned int x,unsi
   scores[1 * (y + 2) + 0] = score_ceil;
   scores[0 * (y + 2) + 1] = score_ceil;
   scores[1 * (y + 2) + 1] = 0;
-  head = uniquePush(uniquePush(head,src[0]),tgt[0]);
+
+  uniquePush(dict,src[0]);
+  uniquePush(dict,tgt[0]);
   /* work loops    */
   /* i = src index */
   /* j = tgt index */
   for(i=1;i<=x;i++){ 
-    head = uniquePush(head,src[i]);
+    uniquePush(dict,src[i]);
     scores[(i+1) * (y + 2) + 1] = i;
     scores[(i+1) * (y + 2) + 0] = score_ceil;
 
     swapCount = 0;
     for(j=1;j<=y;j++){
       if(i == 1) {
-          head = uniquePush(head,tgt[j]);
-          scores[1 * (y + 2) + (j + 1)] = j;
-          scores[0 * (y + 2) + (j + 1)] = score_ceil;
+        uniquePush(dict,tgt[j]);
+        scores[1 * (y + 2) + (j + 1)] = j;
+        scores[0 * (y + 2) + (j + 1)] = score_ceil;
       }
-
-      targetCharCount = find(head,tgt[j-1])->value;
+      targetCharCount = dict->value[which(dict, tgt[j-1])];
       swapScore = scores[targetCharCount * (y + 2) + swapCount] + i - targetCharCount - 2 + j - swapCount + weight[3];
 
       if(src[i-1] != tgt[j-1]){
@@ -136,60 +138,69 @@ static double distance(unsigned int src[],unsigned int tgt[],unsigned int x,unsi
     /* We will return -1 here if the */
     /* current score > maxDistance   */
     if(maxDistance != 0 && maxDistance < scores[(i+1) * (y + 2) + (y+1)]) {
-      dict_free(head);
-      free(scores);
+      reset_dictionary(dict);
       return -1;
     }
 
-    
-    find(head,src[i-1])->value = i;
+      dict->value[which(dict,src[i-1])] = i;    
   }
 
   {
   double score = scores[(x+1) * (y + 2) + (y + 1)];
-  dict_free(head);
-  free(scores);
+  reset_dictionary(dict);
   return score;
   }
 }
 
+/* End of workhorse */
+
 // -- interface with R 
 
+
 SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
-   PROTECT(a);
-   PROTECT(b);
-   PROTECT(maxDistance);
-   PROTECT(weight);
+  PROTECT(a);
+  PROTECT(b);
+  PROTECT(maxDistance);
+  PROTECT(weight);
    
-   int i, j, k;
-   int na = length(a);
-   int nb = length(b);
-   int nt = (na > nb) ? na : nb;
-   double maxDist = REAL(maxDistance)[0];
-   double *w = REAL(weight);
+  int i, j, k;
+  int na = length(a);
+  int nb = length(b);
+  int nt = (na > nb) ? na : nb;
+  double maxDist = REAL(maxDistance)[0];
+  double *w = REAL(weight);
 
-   SEXP yy; 
-   PROTECT(yy = allocVector(REALSXP, nt));
-   double *y = REAL(yy);
+  SEXP yy; 
+  PROTECT(yy = allocVector(REALSXP, nt));
+  double *y = REAL(yy);
 
-   for ( k=0; k < nt; ++k ){
-      i = k % na;
-      j = k % nb;
-      if ( INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
-         y[k] = NA_REAL;
-         continue;
-      }
-      y[k] = distance(
-         INTEGER(VECTOR_ELT(a,i)),
-         INTEGER(VECTOR_ELT(b,j)),
-         length(VECTOR_ELT(a,i)),
-         length(VECTOR_ELT(b,j)),
-         w,
-         maxDist
-      );
-   }
+  /* claim space for workhorse */
+  int max_a = max_length(a);
+  int max_b = max_length(b);
+  dictionary *dict = new_dictionary( max_length(a) + max_length(b) + 1 );
+  double *scores = (double *) malloc( (max_a + 3) * (max_b + 2) * sizeof(double) );
 
-   UNPROTECT(5);
-   return yy;
+  for ( k=0; k < nt; ++k ){
+    i = k % na;
+    j = k % nb;
+    if ( INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
+      y[k] = NA_REAL;
+      continue;
+    }
+    y[k] = distance(
+      INTEGER(VECTOR_ELT(a,i)),
+      INTEGER(VECTOR_ELT(b,j)),
+      length(VECTOR_ELT(a,i)),
+      length(VECTOR_ELT(b,j)),
+      w,
+      maxDist,
+      dict,
+      scores
+    );
+  }
+  free_dictionary(dict);
+  free(scores);
+  UNPROTECT(5);
+  return yy;
 } 
 

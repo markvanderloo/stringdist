@@ -6,6 +6,7 @@ double min3(double, double, double);
 
 double min2(double, double);
 
-int get_dp_matrix_size(SEXP, SEXP);
+unsigned int max_length(SEXP);
+
 
 #endif

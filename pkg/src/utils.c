@@ -1,6 +1,7 @@
 #include <R.h>
 #include <Rdefines.h>
 
+
 int get_dp_matrix_size(SEXP a, SEXP b){
    int max_a=0, max_b=0, t;
    for ( int i=0; i<length(a); ++i){
@@ -12,6 +13,15 @@ int get_dp_matrix_size(SEXP a, SEXP b){
       if ( max_b < t ) max_b = t;
    }
    return ((max_a + 1)*(max_b + 1));
+}
+
+unsigned int max_length(SEXP x){
+  unsigned int t=0, m;
+  for (int i=0; i<length(x); ++i){
+    m = length(VECTOR_ELT(x,i));
+    if (t < m) t = m;
+  }
+  return t;
 }
 
 double min3(double x, double y, double z){
