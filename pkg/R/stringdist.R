@@ -76,7 +76,7 @@ stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i
    }
    method <- match.arg(method)
    a <- lapply(enc2utf8(a),utf8ToInt)
-   b <- lapply(enc2utf8(b),utf8ToInt)
+   b <- lapply(enc2utf8(b),function(s) list(utf8ToInt(s)))
    if (ncores==1){
      x <- sapply(b,do_dist,a,method,weight,maxDist)
    } else {

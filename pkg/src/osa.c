@@ -75,7 +75,7 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
    
    for ( int k=0; k < nt; ++k ){
       i = k % na;
-      j = k % nb;      
+      j = k % nb;
       if (INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
          y[k] = NA_REAL;
          continue;
