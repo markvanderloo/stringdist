@@ -12,16 +12,18 @@
 #' where the shorter argument is recycled. \code{stringdistmatrix} computes the string distance matrix with rows according to
 #' \code{a} and columns according to \code{b}.
 #'
-#' Currently, the following distance measures are supported:
+#' The string distance metrics in this package are based on counting the (weighted) number of edit operations it takes
+#' to turn character \code{b} into character \code{a}. Currently, the following distance metrics are supported:
 #' \tabular{ll}{
 #'    \code{osa} \tab Optimal string aligment, (restricted Damerau-Levenshtein distance).\cr
 #'    \code{lv} \tab Levenshtein distance.\cr
 #'    \code{dl} \tab Full Damerau-Levenshtein distance.\cr
 #'    \code{h}  \tab Hamming distance (\code{a} and \code{b} must be of equal size).
 #' }
-#' The Hamming distance counts the number of character substitutions that turns \code{a} into \code{b}. The Levenshtein distance
-#' allows deletions, insertions and substitutions. The Optimal string alignment distance also allows transpositions, but each substring
-#' may be edited only once, so a character cannot be transposed twice. The Damerau-Levensthein distance alows multiple transpositions.
+#' The Hamming distance counts the number of character substitutions that turns \code{b} into \code{a} so \code{a} and \code{b}
+#' must have the same number of characters. The Levenshtein distance allows deletions, insertions and substitutions. The Optimal 
+#' String Alignment distance also allows transpositions, but each substring may be edited only once, so a character cannot be 
+#' transposed twice. The Damerau-Levensthein distance alows multiple transpositions.
 #'
 #' @section Encoding issues:
 #' Input strings are re-encoded to \code{utf8} an then to \code{integer}
@@ -32,8 +34,8 @@
 #' (\code{R}'s native \code{\link[utils]{adist}} function does this as well). See \code{\link[base]{Encoding}} for further details.
 #'
 #'
-#' @param a \code{character} vector
-#' @param b \code{character} vector
+#' @param a R object (target); will be converted by \code{as.character}.
+#' @param b R object (source); will be converted by \code{as.character}.
 #' @param method Method for distance calculation (see details)
 #' @param weight The penalty for deletion, insertion, substitution and transposition (where applicable).
 #' @param maxDist Maximum string distance before calculation is stopped, \code{maxDist=0} means calculation goes on untill the distance is computed.
@@ -41,6 +43,7 @@
 #' @return For \code{stringdist},  a vector with string distances of size \code{max(length(a),length(b))}.
 #'  For \code{stringdistmatrix}, a \code{length(a)xlength(b)} \code{matrix}. The returned distance is \code{-1} when \code{maxDist} is exceeded
 #'  and \code{NA} if any of \code{a} or \code{b} is \code{NA}.
+#' @example ../examples/stringdist.R
 #' @export
 stringdist <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i=1,s=1,t=1), maxDist=0){
    a <- as.character(a)
@@ -51,7 +54,7 @@ stringdist <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i=1,s=1
    method <- match.arg(method)
    a <- lapply(enc2utf8(a),utf8ToInt)
    b <- lapply(enc2utf8(b),utf8ToInt)
-   do_dist(a,b,method,weight,maxDist)
+   do_dist(b,a,method,weight,maxDist)
 }
 
 

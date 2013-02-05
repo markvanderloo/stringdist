@@ -27,13 +27,13 @@ test_that("Shortest argument is recycled",{
 
 test_that("weights are handled correctly",{
    # deletion
-   expect_equal(stringdist("ab","a", method='osa',weight=c(0.5,1,1,1)),0.5)
+   expect_equal(stringdist("a","ab", method='osa',weight=c(0.5,1,1,1)),0.5)
    # insertion
-   expect_equal(stringdist("a" ,"ab",method='osa',weight=c(1,0.5,1,1)),0.5)
+   expect_equal(stringdist("ab","a" ,method='osa',weight=c(1,0.5,1,1)),0.5)
    # substitution
-   expect_equal(stringdist("a" ,"b", method='osa',weight=c(1,1,0.5,1)),0.5)
+   expect_equal(stringdist("b","a" , method='osa',weight=c(1,1,0.5,1)),0.5)
    # transposition
-   expect_equal(stringdist("ac","ca",method='osa',weight=c(1,1,1,0.5)),0.5)
+   expect_equal(stringdist("ca","ac",method='osa',weight=c(1,1,1,0.5)),0.5)
    # symmetry property in simple case
    expect_equal(
       stringdist("abc","ac",method='osa',weight=c(0.5,1,1,1)),
@@ -67,11 +67,11 @@ test_that("Shortest argument is recycled",{
 
 test_that("weights are handled correctly",{
    # deletion
-   expect_equal(stringdist("ab","a", method='lv',weight=c(0.5,1,1)),0.5)
+   expect_equal(stringdist("a","ab", method='lv',weight=c(0.5,1,1)),0.5)
    # insertion
-   expect_equal(stringdist("a" ,"ab",method='lv',weight=c(1,0.5,1,1)),0.5)
+   expect_equal(stringdist("ab","a" ,method='lv',weight=c(1,0.5,1,1)),0.5)
    # substitution
-   expect_equal(stringdist("a" ,"b", method='lv',weight=c(1,1,0.5,1)),0.5)
+   expect_equal(stringdist("b","a" , method='lv',weight=c(1,1,0.5,1)),0.5)
    # symmetry property in simple case
    expect_equal(
       stringdist("abc","ac",method='lv',weight=c(0.5,1,1,1)),
@@ -104,13 +104,13 @@ test_that("Shortest argument is recycled",{
 
 test_that("weights are handled correctly",{
    # deletion
-   expect_equal(stringdist("ab","a", method='dl',weight=c(0.5,1,1,1)),0.5)
+   expect_equal(stringdist("a","ab", method='dl',weight=c(0.5,1,1,1)),0.5)
    # insertion
-   expect_equal(stringdist("a" ,"ab",method='dl',weight=c(1,0.5,1,1)),0.5)
+   expect_equal(stringdist("ab","a" ,method='dl',weight=c(1,0.5,1,1)),0.5)
    # substitution
-   expect_equal(stringdist("a" ,"b", method='dl',weight=c(1,1,0.5,1)),0.5)
+   expect_equal(stringdist("b","a" , method='dl',weight=c(1,1,0.5,1)),0.5)
    # transposition
-   expect_equal(stringdist("ac","ca",method='dl',weight=c(1,1,1,0.5)),0.5)
+   expect_equal(stringdist("ca","ac",method='dl',weight=c(1,1,1,0.5)),0.5)
    # symmetry property in simple case
    expect_equal(
       stringdist("abc","ac",method='dl',weight=c(0.5,1,1,1)),
