@@ -85,7 +85,7 @@ stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i
    } else {
       cl <- makeCluster(ncores)
          x <- parSapply(cl, b,do_dist,a,method,weight,maxDist)
-      stopCluster()
+      stopCluster(cl)
    }
    x
 }
