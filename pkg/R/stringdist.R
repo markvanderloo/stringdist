@@ -52,6 +52,7 @@
 #' \item{
 #' Many algorithms are available in pseudocode from wikipedia: http://en.wikipedia.org/wiki/Damerau-Levenshtein_distance.
 #' }
+#' }
 #'
 #'
 #'
