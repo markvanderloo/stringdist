@@ -5,6 +5,9 @@ context("General ")
 test_that("Argument parsing",{
    expect_equal(stringdist(character(0),"a"),numeric(0))
    expect_equal(stringdist("a",character(0)),numeric(0))
+   expect_error(stringdist("a","b",weight=c(-1,1,1,1)))
+   expect_error(stringdist("a","b",weight=c(1,0,1,1)))
+   expect_error(stringdist("a","b",weight=c(1,1,1,4)))
 }) 
 
 
@@ -149,5 +152,11 @@ test_that("NA's are handled correctly",{
    expect_true(is.na(stringdist(NA ,NA ,method='h')))
 })
 
-
+context("stringdistmatrix")
+test_that("dimensions work out",{
+    expect_equivalent(
+        dim(stringdistmatrix(c("aa","bb","cc"),c("aa","cc"))),
+        c(3,2)
+    )
+})
 
