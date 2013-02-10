@@ -75,24 +75,14 @@ stringdist <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i=1,s=1
     return(numeric(0))
   }
   method <- match.arg(method)
+  a <- char2int(a)
+  b <- char2int(b)
   stopifnot(
       all(is.finite(weight)),
       all(weight > 0),
       all(weight <=1)
   )
-  a <- lapply(enc2utf8(a),utf8ToInt)
-  b <- lapply(enc2utf8(b),utf8ToInt)
   do_dist(b,a,method,weight,maxDist)
-}
-
-
-do_dist <- function(a,b,method,weight,maxDist){
-  switch(method,
-    osa = .Call('R_osa', a, b, as.double(weight), as.double(maxDist)),
-    lv  = .Call('R_lv' , a, b, as.double(weight), as.double(maxDist)),
-    dl  = .Call('R_dl' , a, b, as.double(weight), as.double(maxDist)),
-    h   = .Call('R_hm' , a, b, as.integer(maxDist))
-  )
 }
 
 
@@ -111,8 +101,8 @@ stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i
       all(weight > 0),
       all(weight <=1)
   )
-  a <- lapply(enc2utf8(a),utf8ToInt)
-  b <- lapply(enc2utf8(b),function(s) list(utf8ToInt(s)))
+  a <- char2int(a)
+  b <- char2int(b)
   if (ncores==1){
     x <- sapply(b,do_dist,a,method,weight,maxDist)
   } else {
@@ -121,6 +111,31 @@ stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i
     stopCluster(cl)
   }
   x
+}
+
+
+char2int <- function(x){
+  # Under Windows, enc2utf8 has unexpected behavior for NA's
+  # see https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=15201 
+  OS <- Sys.info()['sysname']
+  if ( is.null(OS) || grep('win',tolower(OS)) ){
+    i <- !is.na(x)
+    x[i] <- enc2utf8(x[i])
+    lapply(x,utf8ToInt)
+  } else {
+    lapply(enc2utf8(x),utf8ToInt)
+  }
+}
+
+
+
+do_dist <- function(a,b,method,weight,maxDist){
+  switch(method,
+    osa = .Call('R_osa', a, b, as.double(weight), as.double(maxDist)),
+    lv  = .Call('R_lv' , a, b, as.double(weight), as.double(maxDist)),
+    dl  = .Call('R_dl' , a, b, as.double(weight), as.double(maxDist)),
+    h   = .Call('R_hm' , a, b, as.integer(maxDist))
+  )
 }
 
 
