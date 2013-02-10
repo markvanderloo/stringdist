@@ -103,7 +103,7 @@ stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i
       all(weight <=1)
   )
   a <- char2int(a)
-  b <- char2int(b)
+  b <- lapply(char2int(b),list)
   if (ncores==1){
     x <- sapply(b,do_dist,a,method,weight,maxDist)
   } else {
@@ -119,7 +119,7 @@ char2int <- function(x){
   # Under Windows, enc2utf8 has unexpected behavior for NA's
   # see https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=15201 
   OS <- Sys.info()['sysname']
-  if ( is.null(OS) || grep('win',tolower(OS)) ){
+  if ( is.null(OS) || grepl('win',tolower(OS)) ){
     i <- !is.na(x)
     x[i] <- enc2utf8(x[i])
     lapply(x,utf8ToInt)
