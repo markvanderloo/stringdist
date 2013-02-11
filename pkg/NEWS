@@ -1,4 +1,5 @@
-version 0.4.1
-- Workaround for Windows-dependent translation of utf8 NA characters
+version 0.4.2
+- Fix in error message for hamming distance
+- Workaround for system-dependent translation of utf8 NA characters
 version 0.4.0
 - First release

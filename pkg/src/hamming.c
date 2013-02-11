@@ -41,7 +41,7 @@ SEXP R_hm(SEXP a, SEXP b, SEXP maxDistance){
       }
       nchar = length(VECTOR_ELT(a,i));
       if ( nchar != length(VECTOR_ELT(b,j)) ){
-         error("Characters strings a[%d] and b[%d] have different number of characters", i, j);
+         error("Characters strings a[%d] and b[%d] have different number of characters", i+1, j+1);
       }
       y[k] = hamming(
          INTEGER(VECTOR_ELT(a,i)),
