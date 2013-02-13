@@ -87,10 +87,12 @@ stringdist <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i=1,s=1
 }
 
 
-#' @param ncores number of cores to use. Parallelisation is over \code{b}, so the speed gain by parallelisation is highest when \code{b} is shorter than \code{a}.
+#' @param ncores number of cores to use. If \code{ncores>1}, a local cluster is created using \code{\link[parallel]{makeCluster}}.
+#' Parallelisation is over \code{b}, so the speed gain by parallelisation is highest when \code{b} is shorter than \code{a}.
+#' @param cluster (optional) a custom cluster, created with \code{\link[parallel]{makeCluster}}. If \code{cluster} is not \code{NULL}, \code{ncores} is ignored.
 #' @rdname stringdist
 #' @export
-stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i=1,s=1,t=1), maxDist=0,ncores=1){
+stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, ncores=1, cluster=NULL){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -107,9 +109,14 @@ stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i
   if (ncores==1){
     x <- sapply(b,do_dist,a,method,weight,maxDist)
   } else {
-    cl <- makeCluster(ncores)
-      x <- parSapply(cl, b,do_dist,a,method,weight,maxDist)
-    stopCluster(cl)
+    if ( is.null(cluster) ){
+      cl <- makeCluster(ncores)
+    } else {
+      stopifnot(inherits(cluster, 'cluster'))
+      cl <- cluster
+    }
+    x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist)
+    if (is.null(cluster)) stopCluster(cl)
   }
   x
 }

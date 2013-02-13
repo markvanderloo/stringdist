@@ -21,6 +21,6 @@ TODO
 ----
 * distances based on ngrams
 * jaro-winkler distance
-* optionally use user-defined cluster for parallel computations
+* ~~optionally use user-defined cluster for parallel computations~~
 * small performance tweeks, like detect where |nchar(a)-nchar(b)| > maxDist or smarter distribution of jobs over clusters
 
