@@ -19,7 +19,9 @@ To my best knowledge, the latter was not available before in R. Workhorse functi
 
 TODO
 ----
-* distances based on ngrams
+* Episode distance
+* Longest common subsequence
+* distances based on q-grams
 * jaro-winkler distance
 * ~~optionally use user-defined cluster for parallel computations~~
 * small performance tweeks, like detect where |nchar(a)-nchar(b)| > maxDist or smarter distribution of jobs over clusters
