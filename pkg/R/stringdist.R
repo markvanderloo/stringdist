@@ -126,8 +126,8 @@ char2int <- function(x){
   # For some OS's enc2utf8 has unexpected behavior for NA's,
   # see https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=15201.
   # This is fixed for R >= 2.15.3.
-  i <- !is.na(x)
-  x[i] <- enc2utf8(x[i])
+  # i <- !is.na(x)
+  # x[i] <- enc2utf8(x[i])
   lapply(x,utf8ToInt)
 }
 
