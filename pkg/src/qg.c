@@ -44,6 +44,8 @@ int qgram(
       unsigned int *work
     ){
 
+  // return -1 when q is larger than one of the strings.
+  if ( q > (x >= y ? x : y) ) return -1;
   int nfill = 0;
   // store and count qgrams.
   // TODO: add workspace doubler.
@@ -54,9 +56,9 @@ int qgram(
     nfill = add_qgram(t+i, q, 1, work, nfill);
   } 
   int L1 = 0;
-  int nrows = q + 2;
-  for ( int j=0; j<nfill; j++ ){
-    L1 = L1 + abs(work[j*nrows + q] - work[j*nrows + q + 1]);
+  int ncols = q + 2;
+  for ( int j=0; j < nfill; j++ ){
+    L1 = L1 + abs(work[j*ncols + q] - work[j*ncols + q + 1]);
   }
   return L1;
 }
@@ -71,22 +73,22 @@ SEXP R_qgram(SEXP a, SEXP b, SEXP qq){
   int na = length(a);
   int nb = length(b);
   int nt = (na > nb) ? na : nb;
-  int q = *INTEGER(qq);
+  int q = INTEGER(qq)[0];
 
   SEXP yy; 
   PROTECT(yy = allocVector(REALSXP, nt));
   double *y = REAL(yy);
 
   // ask for 1M of ints
-  unsigned int *work = (unsigned int *) malloc(sizeof(unsigned int)*1024*1024);
+  unsigned int *work = (unsigned int *) calloc(sizeof(unsigned int),1024*1024);
   for ( k=0; k < nt; ++k ){
     i = k % na;
     j = k % nb;
     if (INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
-      y[k] = NA_INTEGER;
+      y[k] = NA_REAL;
       continue;
     }
-    y[k] = qgram(
+    y[k] = (double) qgram(
         INTEGER(VECTOR_ELT(a,i)),
         INTEGER(VECTOR_ELT(b,j)),
         length(VECTOR_ELT(a,i)),

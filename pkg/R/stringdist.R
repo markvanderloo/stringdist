@@ -141,11 +141,11 @@ char2int <- function(x){
 
 do_dist <- function(a,b,method,weight,maxDist,q){
   switch(method,
-    osa = .Call('R_osa', a, b, as.double(weight), as.double(maxDist)),
-    lv  = .Call('R_lv' , a, b, as.double(weight), as.double(maxDist)),
-    dl  = .Call('R_dl' , a, b, as.double(weight), as.double(maxDist)),
-    h   = .Call('R_hm' , a, b, as.integer(maxDist)),
-    qgram = .Call('R_qgram', a, b, as.integer(q))
+    osa   = .Call('R_osa'   , a, b, as.double(weight), as.double(maxDist)),
+    lv    = .Call('R_lv'    , a, b, as.double(weight), as.double(maxDist)),
+    dl    = .Call('R_dl'    , a, b, as.double(weight), as.double(maxDist)),
+    h     = .Call('R_hm'    , a, b, as.integer(maxDist)),
+    qgram = .Call('R_qgram' , a, b, as.integer(q))
   )
 }
 
