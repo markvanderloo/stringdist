@@ -98,7 +98,7 @@ stringdist <- function(a, b, method=c("osa","lv","dl","h","qgram"), weight=c(d=1
 #' @param cluster (optional) a custom cluster, created with \code{\link[parallel]{makeCluster}}. If \code{cluster} is not \code{NULL}, \code{ncores} is ignored.
 #' @rdname stringdist
 #' @export
-stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, ncores=1, cluster=NULL){
+stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h","qgram"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1, ncores=1, cluster=NULL){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -113,7 +113,7 @@ stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i
   a <- char2int(a)
   b <- lapply(char2int(b),list)
   if (ncores==1){
-    x <- sapply(b,do_dist,a,method,weight,maxDist)
+    x <- sapply(b,do_dist,a,method,weight,maxDist, q)
   } else {
     if ( is.null(cluster) ){
       cl <- makeCluster(ncores)
@@ -121,7 +121,7 @@ stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i
       stopifnot(inherits(cluster, 'cluster'))
       cl <- cluster
     }
-    x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist)
+    x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q)
     if (is.null(cluster)) stopCluster(cl)
   }
   x
