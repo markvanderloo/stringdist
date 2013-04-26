@@ -52,7 +52,11 @@
 #' \item{
 #' Many algorithms are available in pseudocode from wikipedia: http://en.wikipedia.org/wiki/Damerau-Levenshtein_distance.
 #' }
+#' \item{
+#' A good reference for qgram distances is E. Ukkonen (1992), Approximate string matching with q-grams and maximal matches. 
+#' Theoretical Computer Science, 92, 191-211.
 #' }
+#'}
 #'
 #'
 #'
@@ -62,14 +66,16 @@
 #' @param weight The penalty for deletion, insertion, substitution and transposition, in that order.  
 #'   Weights must be positive and not exceed 1. \code{weight[4]} is ignored when \code{method='lv'} and \code{weight} is
 #'   ignored completely when \code{method='h'}.
-#' @param maxDist Maximum string distance before calculation is stopped, \code{maxDist=0} means calculation goes on untill the distance is computed.
+#' @param maxDist (ignored for \code{method='qgram'}). Maximum string distance before calculation is stopped, \code{maxDist=0} 
+#'    means calculation goes on untill the distance is computed.
+#' @param q (ignored for all but \code{method='qgram'}) size of the q-gram.
 #'
 #' @return For \code{stringdist},  a vector with string distances of size \code{max(length(a),length(b))}.
 #'  For \code{stringdistmatrix}, a \code{length(a)xlength(b)} \code{matrix}. The returned distance is \code{-1} when \code{maxDist} is exceeded
 #'  and \code{NA} if any of \code{a} or \code{b} is \code{NA}.
 #' @example ../examples/stringdist.R
 #' @export
-stringdist <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i=1,s=1,t=1), maxDist=0){
+stringdist <- function(a, b, method=c("osa","lv","dl","h","qgram"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -83,7 +89,7 @@ stringdist <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i=1,s=1
       all(weight > 0),
       all(weight <=1)
   )
-  do_dist(b,a,method,weight,maxDist)
+  do_dist(b,a,method,weight,maxDist,q)
 }
 
 
@@ -133,12 +139,13 @@ char2int <- function(x){
 
 
 
-do_dist <- function(a,b,method,weight,maxDist){
+do_dist <- function(a,b,method,weight,maxDist,q){
   switch(method,
     osa = .Call('R_osa', a, b, as.double(weight), as.double(maxDist)),
     lv  = .Call('R_lv' , a, b, as.double(weight), as.double(maxDist)),
     dl  = .Call('R_dl' , a, b, as.double(weight), as.double(maxDist)),
-    h   = .Call('R_hm' , a, b, as.integer(maxDist))
+    h   = .Call('R_hm' , a, b, as.integer(maxDist)),
+    qgram = .Call('R_qgram', a, b, as.integer(q))
   )
 }
 
