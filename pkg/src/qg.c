@@ -68,12 +68,15 @@ int qgram(
 SEXP R_qgram(SEXP a, SEXP b, SEXP qq){
   PROTECT(a);
   PROTECT(b);
-   
+  int q = INTEGER(qq)[0];
+  if ( q <= 0 ){
+    UNPROTECT(2);
+    error("q must be a positive integer");
+  } 
   int i, j, k;
   int na = length(a);
   int nb = length(b);
   int nt = (na > nb) ? na : nb;
-  int q = INTEGER(qq)[0];
 
   SEXP yy; 
   PROTECT(yy = allocVector(REALSXP, nt));
