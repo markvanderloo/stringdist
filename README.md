@@ -5,12 +5,13 @@ String distance functions for R
 
 String distance functions are scattered around R, and R's packages. This package
 is a re-implementation of some common (weighted) distance functions, offered
-through a uniform interface. So far distance functions include:
+through a uniform interface. As of version 0.5.0, distance functions include:
 
 * Hamming distance; 
 * Levenshtein distance (weighted);
 * Restricted Damerau-Levenshtein distance (weighted);
-* Full Damerau-Levenshtein distance (weighted).
+* Full Damerau-Levenshtein distance (weighted);
+* Q-gram distance.
 
 To my best knowledge, the latter was not available before in R. Workhorse functions are implemented in C. The package offers two main functions:
 
