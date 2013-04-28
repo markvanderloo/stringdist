@@ -119,8 +119,20 @@ int qgram(
       workspace *work
     ){
 
-  // return -1 when q is larger than one of the strings.
-  if ( q > (x >= y ? x : y) ) return -1;
+  // return -1 when q is larger than the length of the shortest string.
+  if ( q > (x <= y ? x : y) ) return -1;
+  // rare edge cases.
+  if ( q == 0 ){
+    if ( x + y > 0 ){ // distance undefined
+      return -1;
+    } else { // x == y == 0.
+      return 0;
+    } 
+  }
+
+  if ( q == 0 && x + y > 0 ) return -1;
+  // edge case, comparing two empty strings with q=0 gives 0.
+  if ( x == 0 && y == 0 && q == 0 ) return 0;
   int nfill = 0;
   // store and count qgrams.
   for (int i=0; i < x-q+1; ++i){
@@ -144,9 +156,9 @@ SEXP R_qgram(SEXP a, SEXP b, SEXP qq){
   PROTECT(a);
   PROTECT(b);
   int q = INTEGER(qq)[0];
-  if ( q <= 0 ){
+  if ( q < 0 ){
     UNPROTECT(2);
-    error("q must be a positive integer");
+    error("q must be a nonnegative integer");
   } 
   int i, j, k;
   int na = length(a);
@@ -157,7 +169,7 @@ SEXP R_qgram(SEXP a, SEXP b, SEXP qq){
   PROTECT(yy = allocVector(REALSXP, nt));
   double *y = REAL(yy);
 
-  // Enough room to store 10k unique q-grams and counters (will be increased when necessary).
+  // Enough room to store 10k unique q-grams and counters (this is a startvalue; worspace is expanded as needed).
   workspace *work = new_workspace(10000,q+2);
   if (work == NULL){
     error("Could not allocate enough memory");

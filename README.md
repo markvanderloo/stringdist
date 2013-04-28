@@ -21,7 +21,7 @@ TODO
 ----
 * Episode distance
 * Longest common subsequence
-* distances based on q-grams
+* ~~distances based on q-grams~~ A simple implementation of the Q-gram distance is now present.
 * jaro-winkler distance
 * ~~optionally use user-defined cluster for parallel computations~~
 * small performance tweeks, like detect where |nchar(a)-nchar(b)| > maxDist or smarter distribution of jobs over clusters

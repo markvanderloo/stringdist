@@ -152,6 +152,30 @@ test_that("NA's are handled correctly",{
    expect_true(is.na(stringdist(NA ,NA ,method='h')))
 })
 
+context("Q-gram distance")
+
+test_that("Edge cases in qgram method",{
+   expect_equal(stringdist( "", "",method='qgram',q=0), 0)
+   expect_equal(stringdist( "", "",method='qgram',q=1),-1)
+   expect_equal(stringdist( "","a",method='qgram',q=1),-1)
+   expect_equal(stringdist("a", "",method='qgram',q=1),-1)
+   expect_equal(stringdist("a","a",method='qgram',q=1), 0)
+   expect_error(stringdist("aa","bb",method='qgram',q=-2))
+})
+
+
+test_that("Shortest argument is recycled",{
+   expect_equal(stringdist(c('a','b'),'a',method='qgram',q=1),c(0,2))
+   expect_equal(stringdist('a',c('a','b'),method='qgram',q=1),c(0,2))
+})
+
+test_that("NA's are handled correctly",{
+   expect_true(is.na(stringdist(NA ,'a',method='qgram')))
+   expect_true(is.na(stringdist('a',NA ,method='qgram')))
+   expect_true(is.na(stringdist(NA ,NA ,method='qgram')))
+})
+
+
 context("stringdistmatrix")
 test_that("dimensions work out",{
     expect_equivalent(
@@ -159,4 +183,5 @@ test_that("dimensions work out",{
         c(3,2)
     )
 })
+
 
