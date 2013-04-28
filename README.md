@@ -13,7 +13,8 @@ through a uniform interface. As of version 0.5.0, distance functions include:
 * Full Damerau-Levenshtein distance (weighted);
 * Q-gram distance.
 
-To my best knowledge, the latter was not available before in R. Workhorse functions are implemented in C. The package offers two main functions:
+To my best knowledge, the latter two were not available before in R. Workhorse
+functions are implemented in C. The package offers two main functions:
 
 * `stringdist`  computes pairwise distances between two input character vectors (shorter one is recycled)
 * `stringdistmatrix` computes the distance matrix between two input character vectors, optionally running in parallel.
