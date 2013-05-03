@@ -97,26 +97,25 @@ static int qgram2(
   qtree *P;
 
   for (int i=0; i < x - q + 1; ++i ){
+
     P = push(Q, s + i, q, 0);
     
-    if ( P == NULL ){
+    if ( P == NULL ){ // no memory = no joy.
       free_qtree(Q);
       return -2;
-    } else {
-      Q = P;
     }
-
+    Q = P;
   }
+
   for (int i=0; i < y - q + 1; ++i ){
-    Q = push(Q, t + i, q, 1);
+  
+    P = push(Q, t + i, q, 1);
 
     if ( P == NULL ){
       free_qtree(Q);
       return -2;
-    } else {
-      Q = P;
-    }
-
+    } 
+    Q = P;
   }
 
   getdist(Q,dist);
@@ -169,40 +168,3 @@ SEXP R_qgram2(SEXP a, SEXP b, SEXP qq){
 }
 
 
-
-
-
-/*
-
-static void qprint(qtree *Q, int q){
-  for ( int i=0; i < q; ++i ){
-    printf("%d ",Q->qgram[i]);
-  }
-    
-    printf(": s(%d) t(%d) \n",Q->n[0], Q->n[1]);
-}
-
-static void treeprint(qtree *Q, int q){
-  if ( Q == NULL ) return;
-  qprint(Q,q);
-  treeprint(Q->left, q);
-  treeprint(Q->right, q);
-}
-
-
-void main(){
-  qtree *Q = NULL;
-  int foo [] = {1,2,3};
-  int bar [] = {3,2,1};
-  Q = push(Q, foo, 3,0);
-  Q = push(Q, bar, 3,1);
-  Q = push(Q, bar, 3,0);
-  Q = push(Q, foo, 3,0);
-
-  treeprint(Q,3);
-  int d[1] = {0};
-  getdist(Q,d);
-  printf("dist : %d\n",d[0]);
-}
-
-*/
