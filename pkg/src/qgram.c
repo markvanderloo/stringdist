@@ -1,6 +1,6 @@
 /* This is a very simple implementation of the q-gram distance.
-   q-grams for strings s and t are pushed onto an unsorted list where they
-   are counted as well. 
+ * q-grams for strings s and t are pushed onto an unsorted list where they
+ * are counted as well. 
 */
 
 #include <string.h>
@@ -110,7 +110,7 @@ static int add_qgram(
 
 // Compute qgram distance using L1-distance between sparse vectors
 // This is a naive implementation, but its fast when comparing short strings.
-int qgram(
+static int qgram(
       unsigned int *s, 
       unsigned int *t, 
       unsigned int x, 

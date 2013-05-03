@@ -19,7 +19,8 @@
 #'    \code{lv} \tab Levenshtein distance.\cr
 #'    \code{dl} \tab Full Damerau-Levenshtein distance.\cr
 #'    \code{h}  \tab Hamming distance (\code{a} and \code{b} must have same nr of characters).\cr
-#'    \code{qgram} \tab \eqn{q}-gram distance.
+#'    \code{qgram} \tab \eqn{q}-gram distance, using an unsorted list to store qgrams. \cr
+#'    \code{qgram2} \tab \eqn{q}-gram distance, using a binary tree to store qgrams.
 #' }
 #' The Hamming distance counts the number of character substitutions that turns 
 #' \code{b} into \code{a} so \code{a} and \code{b} must have the same number of characters. 
@@ -83,7 +84,7 @@
 #'   ignored completely when \code{method='h'} or \code{method='qgram'}.
 #' @param maxDist (ignored for \code{method='qgram'}). Maximum string distance before calculation is stopped, \code{maxDist=0} 
 #'    means calculation goes on untill the distance is computed.
-#' @param q (ignored for all but \code{method='qgram'}) size of the \eqn{q}-gram, must be nonnegative.
+#' @param q (ignored for all but \code{method='qgram'} or \code{'qgram2'}) size of the \eqn{q}-gram, must be nonnegative.
 #'
 #' @return For \code{stringdist},  a vector with string distances of size \code{max(length(a),length(b))}.
 #'  For \code{stringdistmatrix}, a \code{length(a)xlength(b)} \code{matrix}. 
@@ -92,7 +93,7 @@
 #'  The result is \code{NA} if any of \code{a} or \code{b} is \code{NA}.
 #' @example ../examples/stringdist.R
 #' @export
-stringdist <- function(a, b, method=c("osa","lv","dl","h","qgram"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1){
+stringdist <- function(a, b, method=c("osa","lv","dl","h","qgram","qgram2"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -115,7 +116,7 @@ stringdist <- function(a, b, method=c("osa","lv","dl","h","qgram"), weight=c(d=1
 #' @param cluster (optional) a custom cluster, created with \code{\link[parallel]{makeCluster}}. If \code{cluster} is not \code{NULL}, \code{ncores} is ignored.
 #' @rdname stringdist
 #' @export
-stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h","qgram"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1, ncores=1, cluster=NULL){
+stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h","qgram","qgram2"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1, ncores=1, cluster=NULL){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -162,7 +163,8 @@ do_dist <- function(a,b,method,weight,maxDist,q){
     lv    = .Call('R_lv'    , a, b, as.double(weight), as.double(maxDist)),
     dl    = .Call('R_dl'    , a, b, as.double(weight), as.double(maxDist)),
     h     = .Call('R_hm'    , a, b, as.integer(maxDist)),
-    qgram = .Call('R_qgram' , a, b, as.integer(q))
+    qgram = .Call('R_qgram' , a, b, as.integer(q)),
+    qgram2 = .Call('R_qgram2' , a, b, as.integer(q))
   )
 }
 
