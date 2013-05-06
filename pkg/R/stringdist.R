@@ -34,7 +34,7 @@
 #'
 #' The full Damerau-Levensthein distance (\code{dl}) allows for multiple transpositions.
 #'
-#' A \eqn{q}-gram is a subsequence of \eqn{q} characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
+#' A \eqn{q}-gram is a subsequence of \eqn{q} \emph{consecutive} characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
 #' of \eqn{q}-gram occurrences in \code{a} (\code{b}), the \eqn{q}-gram distance is given by the sum over
 #' the absolute differences \eqn{|x-y|}.
 #'

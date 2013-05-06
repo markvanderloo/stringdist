@@ -39,7 +39,7 @@ static int compare(unsigned int *q1, unsigned int *q2, int q){
   compare( q1 + 1, q2 + 1, q - 1 );
 }
 
-
+/* binary tree lookup */
 static qtree *push(qtree *Q, unsigned int *qgram, unsigned int q, int location){
   int cond;  
   if( Q == NULL ){ // new qgram
@@ -62,6 +62,10 @@ static qtree *push(qtree *Q, unsigned int *qgram, unsigned int q, int location){
   }
   return Q;
 }
+
+
+
+/* The real work starts here */
 
 // get qgram-distance from tree and set all qgram-freqencies to 0.
 static void getdist(qtree *Q, int *d){
