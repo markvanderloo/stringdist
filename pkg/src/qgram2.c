@@ -9,7 +9,7 @@
 #include<R.h>
 #include<Rdefines.h>
 
-/* sorted list; dictionary of qgrams */
+/* binary tree; dictionary of qgrams */
 
 typedef struct qnode {
   unsigned int *qgram;
@@ -36,7 +36,7 @@ static int compare(unsigned int *q1, unsigned int *q2, int q){
   if (q==0) return 0;
   if (q1[0] > q2[0]) return 1;
   if (q1[0] < q2[0]) return -1;
-  compare( q1 + 1, q2 + 1, q - 1 );
+  return compare( q1 + 1, q2 + 1, q - 1 );
 }
 
 /* binary tree lookup */

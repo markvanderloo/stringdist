@@ -26,4 +26,12 @@ stringdist('abc','ca')
 stringdist('ca','abc',weight=c(0.5,1,1,1))
 stringdist('abc','ca',weight=c(0.5,1,1,1))
 
+# q-grams are based on the difference between occurrences of q consecutive characters.
+
+# since each character abc occurs in 'abc' and 'cba', the q=1 distance equals 0:
+stringdist('abc','cba',method='qgram',q=1)
+
+# since the firstr string consists of 'ab','bc' and the second of 'cb' and 'ba', the q=2 distance equals 4 (they have no q=2 grams in common):
+stringdist('abc','cba',method='qgram',q=2)
+
 
