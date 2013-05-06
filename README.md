@@ -9,9 +9,9 @@ through a uniform interface. As of version 0.5.0, distance functions include:
 
 * Hamming distance; 
 * Levenshtein distance (weighted);
-* Restricted Damerau-Levenshtein distance (weighted);
+* Restricted Damerau-Levenshtein distance (weighted, a.k.a. Optimal String Alignment);
 * Full Damerau-Levenshtein distance (weighted);
-* Q-gram distance.
+* Q-gram distance (two implementations).
 
 To my best knowledge, the latter two were not available before in R. Workhorse
 functions are implemented in C. The package offers two main functions:
@@ -23,7 +23,7 @@ TODO
 ----
 * Episode distance
 * Longest common subsequence
-* ~~distances based on q-grams~~ A simple implementation of the Q-gram distance is now present.
+* ~~distances based on q-grams~~ 
 * jaro-winkler distance
 * ~~optionally use user-defined cluster for parallel computations~~
 * small performance tweeks, like detect where |nchar(a)-nchar(b)| > maxDist or smarter distribution of jobs over clusters
