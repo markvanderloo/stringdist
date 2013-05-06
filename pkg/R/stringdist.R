@@ -18,20 +18,36 @@
 #'    \code{osa} \tab Optimal string aligment, (restricted Damerau-Levenshtein distance).\cr
 #'    \code{lv} \tab Levenshtein distance.\cr
 #'    \code{dl} \tab Full Damerau-Levenshtein distance.\cr
-#'    \code{h}  \tab Hamming distance (\code{a} and \code{b} must have same nr of characters).
+#'    \code{h}  \tab Hamming distance (\code{a} and \code{b} must have same nr of characters).\cr
+#'    \code{qgram} \tab \eqn{q}-gram distance, using an unsorted list to store qgrams. \cr
+#'    \code{qgram2} \tab \eqn{q}-gram distance, using a binary tree to store qgrams.
 #' }
-#' The Hamming distance counts the number of character substitutions that turns \code{b} into \code{a} so \code{a} and \code{b}
-#' must have the same number of characters. The Levenshtein distance allows deletions, insertions and substitutions. The Optimal 
-#' String Alignment distance also allows transpositions, but each substring may be edited only once, so a character cannot be 
-#' transposed twice. The Damerau-Levensthein distance alows multiple transpositions.
+#' The Hamming distance counts the number of character substitutions that turns 
+#' \code{b} into \code{a} so \code{a} and \code{b} must have the same number of characters. 
+#'
+#' The Levenshtein distance (\code{ld}) counts the number of deletions, insertions and substitutions necessary
+#' to turn \code{b} into \code{a}. 
+#'
+#' The Optimal String Alignment distance (\code{osa}) also 
+#' allows transposition of adjacent characters, but each substring  may be edited only once so a 
+#' character cannot be transposed twice. 
+#'
+#' The full Damerau-Levensthein distance (\code{dl}) allows for multiple transpositions.
+#'
+#' A \eqn{q}-gram is a subsequence of \eqn{q} characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
+#' of \eqn{q}-gram occurrences in \code{a} (\code{b}), the \eqn{q}-gram distance is given by the sum over
+#' the absolute differences \eqn{|x-y|}.
+#'
+#'
 #'
 #' @section Encoding issues:
 #' Input strings are re-encoded to \code{utf8} an then to \code{integer}
-#' vectors prior to the distance calculation (which works on unsigned ints). 
+#' vectors prior to the distance calculation (since the underlying \code{C}-code expects unsigned ints). 
 #' This double conversion is necessary as it seems the only way to
 #' reliably convert (possibly multibyte) characters to integers on all systems
 #' supported by \code{R}.
-#' (\code{R}'s native \code{\link[utils]{adist}} function does this as well). See \code{\link[base]{Encoding}} for further details.
+#' (\code{R}'s native \code{\link[utils]{adist}} function does this as well). 
+#' See \code{\link[base]{Encoding}} for further details.
 #'
 #' @section Paralellization:
 #' The \code{stringdistmatrix} function uses \code{\link[parallel]{makeCluster}} to generate a cluster and compute the
@@ -52,7 +68,11 @@
 #' \item{
 #' Many algorithms are available in pseudocode from wikipedia: http://en.wikipedia.org/wiki/Damerau-Levenshtein_distance.
 #' }
+#' \item{
+#' A good reference for qgram distances is E. Ukkonen (1992), Approximate string matching with q-grams and maximal matches. 
+#' Theoretical Computer Science, 92, 191-211.
 #' }
+#'}
 #'
 #'
 #'
@@ -61,15 +81,19 @@
 #' @param method Method for distance calculation (see details)
 #' @param weight The penalty for deletion, insertion, substitution and transposition, in that order.  
 #'   Weights must be positive and not exceed 1. \code{weight[4]} is ignored when \code{method='lv'} and \code{weight} is
-#'   ignored completely when \code{method='h'}.
-#' @param maxDist Maximum string distance before calculation is stopped, \code{maxDist=0} means calculation goes on untill the distance is computed.
+#'   ignored completely when \code{method='h'} or \code{method='qgram'}.
+#' @param maxDist (ignored for \code{method='qgram'}). Maximum string distance before calculation is stopped, \code{maxDist=0} 
+#'    means calculation goes on untill the distance is computed.
+#' @param q (ignored for all but \code{method='qgram'} or \code{'qgram2'}) size of the \eqn{q}-gram, must be nonnegative.
 #'
 #' @return For \code{stringdist},  a vector with string distances of size \code{max(length(a),length(b))}.
-#'  For \code{stringdistmatrix}, a \code{length(a)xlength(b)} \code{matrix}. The returned distance is \code{-1} when \code{maxDist} is exceeded
-#'  and \code{NA} if any of \code{a} or \code{b} is \code{NA}.
+#'  For \code{stringdistmatrix}, a \code{length(a)xlength(b)} \code{matrix}. 
+#'  The returned distance is \code{-1} when \code{maxDist} is exceeded (when \code{method} is not \code{qgram})
+#'  or (for \code{method='qgram'}) when \code{q} exceeds the string length of \code{a} or \code{b}.
+#'  The result is \code{NA} if any of \code{a} or \code{b} is \code{NA}.
 #' @example ../examples/stringdist.R
 #' @export
-stringdist <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i=1,s=1,t=1), maxDist=0){
+stringdist <- function(a, b, method=c("osa","lv","dl","h","qgram","qgram2"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -83,7 +107,7 @@ stringdist <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i=1,s=1
       all(weight > 0),
       all(weight <=1)
   )
-  do_dist(b,a,method,weight,maxDist)
+  do_dist(b,a,method,weight,maxDist,q)
 }
 
 
@@ -92,7 +116,7 @@ stringdist <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i=1,s=1
 #' @param cluster (optional) a custom cluster, created with \code{\link[parallel]{makeCluster}}. If \code{cluster} is not \code{NULL}, \code{ncores} is ignored.
 #' @rdname stringdist
 #' @export
-stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, ncores=1, cluster=NULL){
+stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h","qgram","qgram2"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1, ncores=1, cluster=NULL){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -107,7 +131,7 @@ stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i
   a <- char2int(a)
   b <- lapply(char2int(b),list)
   if (ncores==1){
-    x <- sapply(b,do_dist,a,method,weight,maxDist)
+    x <- sapply(b,do_dist,a,method,weight,maxDist, q)
   } else {
     if ( is.null(cluster) ){
       cl <- makeCluster(ncores)
@@ -115,7 +139,7 @@ stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h"), weight=c(d=1,i
       stopifnot(inherits(cluster, 'cluster'))
       cl <- cluster
     }
-    x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist)
+    x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q)
     if (is.null(cluster)) stopCluster(cl)
   }
   x
@@ -133,12 +157,14 @@ char2int <- function(x){
 
 
 
-do_dist <- function(a,b,method,weight,maxDist){
+do_dist <- function(a,b,method,weight,maxDist,q){
   switch(method,
-    osa = .Call('R_osa', a, b, as.double(weight), as.double(maxDist)),
-    lv  = .Call('R_lv' , a, b, as.double(weight), as.double(maxDist)),
-    dl  = .Call('R_dl' , a, b, as.double(weight), as.double(maxDist)),
-    h   = .Call('R_hm' , a, b, as.integer(maxDist))
+    osa   = .Call('R_osa'   , a, b, as.double(weight), as.double(maxDist)),
+    lv    = .Call('R_lv'    , a, b, as.double(weight), as.double(maxDist)),
+    dl    = .Call('R_dl'    , a, b, as.double(weight), as.double(maxDist)),
+    h     = .Call('R_hm'    , a, b, as.integer(maxDist)),
+    qgram = .Call('R_qgram' , a, b, as.integer(q)),
+    qgram2 = .Call('R_qgram2' , a, b, as.integer(q))
   )
 }
 
