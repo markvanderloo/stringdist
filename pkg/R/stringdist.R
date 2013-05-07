@@ -65,7 +65,7 @@
 #' The \code{stringdistmatrix} function uses \code{\link[parallel]{makeCluster}} to generate a cluster and compute the
 #' distance matrix in parallel.  As the cluster is local, the \code{ncores} parameter should not be larger than the number
 #' of cores on your machine. Use \code{\link[parallel]{detectCores}} to check the number of cores available. Alternatively,
-#' you can create a cluster by yourself, using \code{\link[[parallel]{makeCluster}} and pass that to \code{stringdistmatrix}.
+#' you can create a cluster by yourself, using \code{\link[parallel]{makeCluster}} and pass that to \code{stringdistmatrix}.
 #'
 #' @references
 #' \itemize{
@@ -82,7 +82,7 @@
 #' Many algorithms are available in pseudocode from wikipedia: http://en.wikipedia.org/wiki/Damerau-Levenshtein_distance.
 #' }
 #' \item{The code for the full Damerau-Levenshtein distance was adapted from Nick Logan's public github repository:
-#'  https://github.com/ugexe/Text--Levenshtein--Damerau--XS/blob/master/damerau-int.c
+#'  \url{https://github.com/ugexe/Text--Levenshtein--Damerau--XS/blob/master/damerau-int.c}.
 #' }
 #'
 #' \item{
