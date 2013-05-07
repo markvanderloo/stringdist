@@ -24,25 +24,31 @@
 #'    \code{qgram2} \tab \eqn{q}-gram distance, using a binary tree to store qgrams.
 #' }
 #' The Hamming distance counts the number of character substitutions that turns 
-#' \code{b} into \code{a} so \code{a} and \code{b} must have the same number of characters. 
+#' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters \code{-1} is
+#' returned.
 #'
 #' The Levenshtein distance (\code{ld}) counts the number of deletions, insertions and substitutions necessary
 #' to turn \code{b} into \code{a}. 
+#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
 #'
 #' The Optimal String Alignment distance (\code{osa}) also 
 #' allows transposition of adjacent characters, but each substring  may be edited only once so a 
 #' character cannot be transposed twice. 
+#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
 #'
 #' The full Damerau-Levensthein distance (\code{dl}) allows for multiple transpositions.
+#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
 #'
 #' The longest common substring is defined as the longest string that can be obtained by pairing characters
 #' from \code{a} and \code{b} while keeping the order of characters intact. The lcs-distance is defined as the
 #' number of unpaired characters. The distance is equivalent to the edit distance allowing only deletions and
 #' insertions, each with weight one.
+#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
 #'
 #' A \eqn{q}-gram is a subsequence of \eqn{q} \emph{consecutive} characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
 #' of \eqn{q}-gram occurrences in \code{a} (\code{b}), the \eqn{q}-gram distance is given by the sum over
 #' the absolute differences \eqn{|x-y|}.
+#' The computation is aborted when \code{q} is is larger than the length of any of the strings. In that case \code{-1}  is returned.
 #'
 #'
 #'
@@ -58,7 +64,8 @@
 #' @section Paralellization:
 #' The \code{stringdistmatrix} function uses \code{\link[parallel]{makeCluster}} to generate a cluster and compute the
 #' distance matrix in parallel.  As the cluster is local, the \code{ncores} parameter should not be larger than the number
-#' of cores on your machine. Use \code{\link[parallel]{detectCores}} to check the number of cores available. 
+#' of cores on your machine. Use \code{\link[parallel]{detectCores}} to check the number of cores available. Alternatively,
+#' you can create a cluster by yourself, using \code{\link[[parallel]{makeCluster}} and pass that to \code{stringdistmatrix}.
 #'
 #' @references
 #' \itemize{
@@ -74,6 +81,10 @@
 #' \item{
 #' Many algorithms are available in pseudocode from wikipedia: http://en.wikipedia.org/wiki/Damerau-Levenshtein_distance.
 #' }
+#' \item{The code for the full Damerau-Levenshtein distance was adapted from Nick Logan's public github repository:
+#'  https://github.com/ugexe/Text--Levenshtein--Damerau--XS/blob/master/damerau-int.c
+#' }
+#'
 #' \item{
 #' A good reference for qgram distances is E. Ukkonen (1992), Approximate string matching with q-grams and maximal matches. 
 #' Theoretical Computer Science, 92, 191-211.
@@ -93,10 +104,11 @@
 #' @param q (ignored for all but \code{method='qgram'} or \code{'qgram2'}) size of the \eqn{q}-gram, must be nonnegative.
 #'
 #' @return For \code{stringdist},  a vector with string distances of size \code{max(length(a),length(b))}.
-#'  For \code{stringdistmatrix}, a \code{length(a)xlength(b)} \code{matrix}. 
-#'  The returned distance is \code{-1} when \code{maxDist} is exceeded (when \code{method} is not \code{qgram})
-#'  or (for \code{method='qgram'}) when \code{q} exceeds the string length of \code{a} or \code{b}.
-#'  The result is \code{NA} if any of \code{a} or \code{b} is \code{NA}.
+#'  For \code{stringdistmatrix}, a \code{length(a)xlength(b)} \code{matrix}. The returned distance is
+#'  nonnegative if it can be computed, \code{NA} if any of the two argument strings is \code{NA} and \code{-1}
+#'  when it cannot be computed. See details for the meaning of \code{-1} for the various algorithms.
+#'  
+#'  
 #' @example ../examples/stringdist.R
 #' @export
 stringdist <- function(a, b, method=c("osa","lv","dl","h","lcs", "qgram","qgram2"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1){
