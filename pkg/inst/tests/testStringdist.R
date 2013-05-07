@@ -156,9 +156,12 @@ context("Hamming distance")
 
 test_that("Edge cases in DL method",{
    expect_equal(stringdist( "", "",method='h'),0)
-   expect_error(stringdist( "","a",method='h'))
-   expect_error(stringdist("a", "",method='h'))
    expect_equal(stringdist("a","a",method='h'),0)
+})
+
+test_that("Unequal string lengths",{
+  expect_equal(stringdist("aa","a",method="h"),-1)
+  expect_equal(stringdist("a","aa",method="h"),-1)
 })
 
 test_that("max distance is obeyed",{

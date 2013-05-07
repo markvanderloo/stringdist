@@ -1,5 +1,7 @@
 version 0.5.0
-- added qgram distance method, using two different algorithms
+- Hamming distance (method='h') now returns -1 for strings of unequal lengts (used to emit error).
+- added longest common substring distance (method='lcs')
+- added qgram distance method, using two different algorithms (method='qgram', 'qgram2')
 - stringdistmatrix now gains cluster argument
 
 version 0.4.2
