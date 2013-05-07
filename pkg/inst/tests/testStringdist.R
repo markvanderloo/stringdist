@@ -127,6 +127,30 @@ test_that("NA's are handled correctly",{
    expect_true(is.na(stringdist(NA ,NA ,method='dl')))
 })
 
+context("Longest Common Substring")
+test_that("Edge cases in LCS method",{
+   expect_equal(stringdist( "", "",method='lcs'),0)
+   expect_equal(stringdist( "","a",method='lcs'),1)
+   expect_equal(stringdist("a", "",method='lcs'),1)
+   expect_equal(stringdist("a","a",method='lcs'),0)
+})
+
+test_that("max distance is obeyed",{
+   expect_equal(stringdist("aa","bb",method='lcs',maxDist=1),-1)
+})
+
+test_that("Shortest argument is recycled",{
+   expect_equal(stringdist(c('a','b'),'a',method='lcs'),c(0,2))
+   expect_equal(stringdist('a',c('a','b'),method='lcs'),c(0,2))
+})
+
+
+test_that("NA's are handled correctly",{
+   expect_true(is.na(stringdist(NA ,'a',method='lcs')))
+   expect_true(is.na(stringdist('a',NA ,method='lcs')))
+   expect_true(is.na(stringdist(NA ,NA ,method='lcs')))
+})
+
 
 context("Hamming distance")
 

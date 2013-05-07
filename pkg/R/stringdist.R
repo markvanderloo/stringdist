@@ -88,7 +88,7 @@
 #' @param weight The penalty for deletion, insertion, substitution and transposition, in that order.  
 #'   Weights must be positive and not exceed 1. \code{weight[4]} is ignored when \code{method='lv'} and \code{weight} is
 #'   ignored completely when \code{method='h'}, \code{method='qgram(2)'} or \code{method='lcs'}.
-#' @param maxDist (ignored for \code{method='qgram'}). Maximum string distance before calculation is stopped, \code{maxDist=0} 
+#' @param maxDist (ignored for \code{method='qgram(2)'}). Maximum string distance before calculation is stopped, \code{maxDist=0} 
 #'    means calculation goes on untill the distance is computed.
 #' @param q (ignored for all but \code{method='qgram'} or \code{'qgram2'}) size of the \eqn{q}-gram, must be nonnegative.
 #'
