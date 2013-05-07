@@ -53,7 +53,7 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
    double *w = REAL(weight);
    double maxDist = REAL(maxDistance)[0];
 
-   scores = malloc((max_length(a) + 1) * (max_length(b) + 1) * sizeof(double)); 
+   scores = (double *) malloc((max_length(a) + 1) * (max_length(b) + 1) * sizeof(double)); 
    if ( scores == NULL ){
       error("%s\n","unable to allocate enough memory for workspace");
    }
