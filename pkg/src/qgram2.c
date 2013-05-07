@@ -141,8 +141,8 @@ SEXP R_qgram2(SEXP a, SEXP b, SEXP qq){
   int nt = (na > nb) ? na : nb;
 
   SEXP yy; 
-  PROTECT(yy = allocVector(REALSXP, nt));
-  double *y = REAL(yy);
+  PROTECT(yy = allocVector(INTSXP, nt));
+  int *y = INTEGER(yy);
 
   // set up a qtree;
   qtree *Q = NULL;
@@ -154,7 +154,7 @@ SEXP R_qgram2(SEXP a, SEXP b, SEXP qq){
       y[k] = NA_REAL;
       continue;
     }
-    y[k] = (double) qgram2(
+    y[k] = qgram2(
         INTEGER(VECTOR_ELT(a,i)),
         INTEGER(VECTOR_ELT(b,j)),
         length(VECTOR_ELT(a,i)),
