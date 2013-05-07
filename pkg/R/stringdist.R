@@ -19,6 +19,7 @@
 #'    \code{lv} \tab Levenshtein distance.\cr
 #'    \code{dl} \tab Full Damerau-Levenshtein distance.\cr
 #'    \code{h}  \tab Hamming distance (\code{a} and \code{b} must have same nr of characters).\cr
+#'    \code{lcs} \tab Longest common substring.\cr
 #'    \code{qgram} \tab \eqn{q}-gram distance, using an unsorted list to store qgrams. \cr
 #'    \code{qgram2} \tab \eqn{q}-gram distance, using a binary tree to store qgrams.
 #' }
@@ -33,6 +34,11 @@
 #' character cannot be transposed twice. 
 #'
 #' The full Damerau-Levensthein distance (\code{dl}) allows for multiple transpositions.
+#'
+#' The longest common substring is defined as the longest string that can be obtained by pairing characters
+#' from \code{a} and \code{b} while keeping the order of characters intact. The lcs-distance is defined as the
+#' number of unpaired characters. The distance is equivalent to the edit distance allowing only deletions and
+#' insertions, each with weight one.
 #'
 #' A \eqn{q}-gram is a subsequence of \eqn{q} \emph{consecutive} characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
 #' of \eqn{q}-gram occurrences in \code{a} (\code{b}), the \eqn{q}-gram distance is given by the sum over
@@ -81,7 +87,7 @@
 #' @param method Method for distance calculation (see details)
 #' @param weight The penalty for deletion, insertion, substitution and transposition, in that order.  
 #'   Weights must be positive and not exceed 1. \code{weight[4]} is ignored when \code{method='lv'} and \code{weight} is
-#'   ignored completely when \code{method='h'} or \code{method='qgram'}.
+#'   ignored completely when \code{method='h'}, \code{method='qgram(2)'} or \code{method='lcs'}.
 #' @param maxDist (ignored for \code{method='qgram'}). Maximum string distance before calculation is stopped, \code{maxDist=0} 
 #'    means calculation goes on untill the distance is computed.
 #' @param q (ignored for all but \code{method='qgram'} or \code{'qgram2'}) size of the \eqn{q}-gram, must be nonnegative.
@@ -93,7 +99,7 @@
 #'  The result is \code{NA} if any of \code{a} or \code{b} is \code{NA}.
 #' @example ../examples/stringdist.R
 #' @export
-stringdist <- function(a, b, method=c("osa","lv","dl","h","qgram","qgram2"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1){
+stringdist <- function(a, b, method=c("osa","lv","dl","h","lcs", "qgram","qgram2"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -116,7 +122,7 @@ stringdist <- function(a, b, method=c("osa","lv","dl","h","qgram","qgram2"), wei
 #' @param cluster (optional) a custom cluster, created with \code{\link[parallel]{makeCluster}}. If \code{cluster} is not \code{NULL}, \code{ncores} is ignored.
 #' @rdname stringdist
 #' @export
-stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h","qgram","qgram2"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1, ncores=1, cluster=NULL){
+stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h","lcs","qgram","qgram2"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1, ncores=1, cluster=NULL){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -159,12 +165,13 @@ char2int <- function(x){
 
 do_dist <- function(a,b,method,weight,maxDist,q){
   switch(method,
-    osa   = .Call('R_osa'   , a, b, as.double(weight), as.double(maxDist)),
-    lv    = .Call('R_lv'    , a, b, as.double(weight), as.double(maxDist)),
-    dl    = .Call('R_dl'    , a, b, as.double(weight), as.double(maxDist)),
-    h     = .Call('R_hm'    , a, b, as.integer(maxDist)),
-    qgram = .Call('R_qgram' , a, b, as.integer(q)),
-    qgram2 = .Call('R_qgram2' , a, b, as.integer(q))
+    osa     = .Call('R_osa'   , a, b, as.double(weight), as.double(maxDist)),
+    lv      = .Call('R_lv'    , a, b, as.double(weight), as.double(maxDist)),
+    dl      = .Call('R_dl'    , a, b, as.double(weight), as.double(maxDist)),
+    h       = .Call('R_hm'    , a, b, as.integer(maxDist)),
+    lcs     = .Call('R_lcs'   , a, b, as.integer(maxDist)),
+    qgram   = .Call('R_qgram' , a, b, as.integer(q)),
+    qgram2  = .Call('R_qgram2' , a, b, as.integer(q))
   )
 }
 
