@@ -78,7 +78,7 @@ static void getdist(qtree *Q, int *d){
 }
 
 
-static int qgram2(
+static int qgram_tree(
     unsigned int *s, 
     unsigned int *t, 
     unsigned int x,
@@ -127,7 +127,7 @@ static int qgram2(
 }
 
 
-SEXP R_qgram2(SEXP a, SEXP b, SEXP qq){
+SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq){
   PROTECT(a);
   PROTECT(b);
   int q = INTEGER(qq)[0];
@@ -154,7 +154,7 @@ SEXP R_qgram2(SEXP a, SEXP b, SEXP qq){
       y[k] = NA_REAL;
       continue;
     }
-    y[k] = qgram2(
+    y[k] = qgram_tree(
         INTEGER(VECTOR_ELT(a,i)),
         INTEGER(VECTOR_ELT(b,j)),
         length(VECTOR_ELT(a,i)),

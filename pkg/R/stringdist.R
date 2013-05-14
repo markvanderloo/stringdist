@@ -21,7 +21,7 @@
 #'    \code{h}  \tab Hamming distance (\code{a} and \code{b} must have same nr of characters).\cr
 #'    \code{lcs} \tab Longest common substring.\cr
 #'    \code{qgram} \tab \eqn{q}-gram distance, using an unsorted list to store qgrams. \cr
-#'    \code{qgram2} \tab \eqn{q}-gram distance, using a binary tree to store qgrams.
+#'    \code{qgram-tree} \tab \eqn{q}-gram distance, using a binary tree to store qgrams.
 #' }
 #' The Hamming distance counts the number of character substitutions that turns 
 #' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters \code{-1} is
@@ -98,10 +98,10 @@
 #' @param method Method for distance calculation (see details)
 #' @param weight The penalty for deletion, insertion, substitution and transposition, in that order.  
 #'   Weights must be positive and not exceed 1. \code{weight[4]} is ignored when \code{method='lv'} and \code{weight} is
-#'   ignored completely when \code{method='h'}, \code{method='qgram(2)'} or \code{method='lcs'}.
-#' @param maxDist (ignored for \code{method='qgram(2)'}). Maximum string distance before calculation is stopped, \code{maxDist=0} 
+#'   ignored completely when \code{method='h'}, \code{method='qgram(-tree)'} or \code{method='lcs'}.
+#' @param maxDist (ignored for \code{method='qgram(-tree)'}). Maximum string distance before calculation is stopped, \code{maxDist=0} 
 #'    means calculation goes on untill the distance is computed.
-#' @param q (ignored for all but \code{method='qgram'} or \code{'qgram2'}) size of the \eqn{q}-gram, must be nonnegative.
+#' @param q (ignored for all but \code{method='qgram'} or \code{'qgram-tree'}) size of the \eqn{q}-gram, must be nonnegative.
 #'
 #' @return For \code{stringdist},  a vector with string distances of size \code{max(length(a),length(b))}.
 #'  For \code{stringdistmatrix}, a \code{length(a)xlength(b)} \code{matrix}. The returned distance is
@@ -111,7 +111,7 @@
 #'  
 #' @example ../examples/stringdist.R
 #' @export
-stringdist <- function(a, b, method=c("osa","lv","dl","h","lcs", "qgram","qgram2"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1){
+stringdist <- function(a, b, method=c("osa","lv","dl","h","lcs", "qgram","qgram-tree"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -134,7 +134,7 @@ stringdist <- function(a, b, method=c("osa","lv","dl","h","lcs", "qgram","qgram2
 #' @param cluster (optional) a custom cluster, created with \code{\link[parallel]{makeCluster}}. If \code{cluster} is not \code{NULL}, \code{ncores} is ignored.
 #' @rdname stringdist
 #' @export
-stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h","lcs","qgram","qgram2"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1, ncores=1, cluster=NULL){
+stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h","lcs","qgram","qgram-tree"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1, ncores=1, cluster=NULL){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -182,8 +182,8 @@ do_dist <- function(a,b,method,weight,maxDist,q){
     dl      = .Call('R_dl'    , a, b, as.double(weight), as.double(maxDist)),
     h       = .Call('R_hm'    , a, b, as.integer(maxDist)),
     lcs     = .Call('R_lcs'   , a, b, as.integer(maxDist)),
-    qgram   = .Call('R_qgram' , a, b, as.integer(q)),
-    qgram2  = .Call('R_qgram2' , a, b, as.integer(q))
+    'qgram'   = .Call('R_qgram' , a, b, as.integer(q)),
+    'qgram-tree'  = .Call('R_qgram_tree' , a, b, as.integer(q))
   )
 }
 
