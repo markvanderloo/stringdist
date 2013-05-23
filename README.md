@@ -24,15 +24,25 @@ TODO
 ----
 * Episode distance
 * ~~Longest common substring~~
-* ~~distances based on q-grams~~ 
+* distances based on q-grams
+    * ~~Using unsorted list storage~~
+    * ~~Using tree storage~~
+    * Using hashed storage
 * jaro-winkler distance
 * ~~optionally use user-defined cluster for parallel computations~~
-* small performance tweeks, like detect where |nchar(a)-nchar(b)| > maxDist or smarter distribution of jobs over clusters
+* Separate R-functions giving more info on distance calculations:
+    * get q-gram counts from string
+    * get actual longest common substring
+    * get actual edits needed to go from one string to another
+* small (C-style) performance tweeks, like 
+    * detect where |nchar(a)-nchar(b)| > maxDist or smarter distribution of jobs over clusters
+    * faster recycling index calculations
 
 Could
 ----
 Perhaps in the future I'll add supporting functionality such as
-- An encoding sniffer, detecting character encodings from files (not sure if that's avaiable in R already)
-- Some string normalizing functionality
-- ...
+
+* An encoding sniffer, detecting character encodings from files (not sure if that's available in R already)
+* Some string normalizing functionality
+* ...
 
