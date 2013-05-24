@@ -39,7 +39,7 @@ static int compare(unsigned int *q1, unsigned int *q2, int q){
   return compare( q1 + 1, q2 + 1, q - 1 );
 }
 
-/* binary tree lookup */
+/* push qgram into binary tree */
 static qtree *push(qtree *Q, unsigned int *qgram, unsigned int q, int location){
   int cond;  
   if( Q == NULL ){ // new qgram
@@ -63,6 +63,20 @@ static qtree *push(qtree *Q, unsigned int *qgram, unsigned int q, int location){
   return Q;
 }
 
+/* push qgrams of a string into binary tree */
+static qtree *push_string(unsigned int *str, int strlen, unsigned int q, qtree *Q, int location){
+  qtree *P;
+  for ( int i=0; i < strlen - q + 1; ++i ){
+    P = push(Q, str + i, q, location);
+    if ( P == NULL ){ 
+      free_qtree(Q);
+      return NULL;
+    }
+    Q = P;
+  }
+  return Q;
+}
+
 
 
 /* The real work starts here */
@@ -77,7 +91,12 @@ static void getdist(qtree *Q, int *d){
   getdist(Q->right,d);
 }
 
-
+/*Get qgram distances 
+ * return values:
+ *  >=0 : qgram distance
+ * -1   : infinite distance
+ * -2   : Not enough memory
+ */
 static int qgram_tree(
     unsigned int *s, 
     unsigned int *t, 
@@ -98,29 +117,11 @@ static int qgram_tree(
   }
 
   int dist[1] = {0};
-  qtree *P;
 
-  for (int i=0; i < x - q + 1; ++i ){
-
-    P = push(Q, s + i, q, 0);
-    
-    if ( P == NULL ){ // no memory = no joy.
-      free_qtree(Q);
-      return -2;
-    }
-    Q = P;
-  }
-
-  for (int i=0; i < y - q + 1; ++i ){
-  
-    P = push(Q, t + i, q, 1);
-
-    if ( P == NULL ){
-      free_qtree(Q);
-      return -2;
-    } 
-    Q = P;
-  }
+  Q = push_string(s, x, q, Q, 0);
+  if (Q == NULL) return -2;
+  Q = push_string(t, y, q, Q, 1);
+  if (Q == NULL) return -2;
 
   getdist(Q,dist);
   return dist[0];
@@ -170,5 +171,30 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq){
   UNPROTECT(3);
   return yy;
 }
+
+/*
+SEXP R_get_qgrams(SEXP a, SEXP qq){
+  PROTECT(a);
+  PROTECT(qq);
+  
+  int q = INTEGER(qq)[0];
+  int x;
+  // set up a tree 
+  qtree *Q = NULL;
+  qtree P;
+  
+  for (int i=0; i < x - q + 1; ++i ){
+
+    P = push(Q, s + i, q, 0);
+    
+    if ( P == NULL ){ // no memory = no joy.
+      free_qtree(Q);
+      error("Could not alocate enough memory");
+    }
+    Q = P;
+  }
+
+}
+*/
 
 
