@@ -174,51 +174,5 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq){
   return yy;
 }
 
-void count_qtree(qtree *Q, int *n){
-  if ( Q == NULL ) return ;
-  n[0]++;
-  count_qtree(Q->left, n);
-  count_qtree(Q->right, n);
-}
-
-
-
-SEXP R_get_qgrams(SEXP a, SEXP qq){
-  PROTECT(a);
-  PROTECT(qq);
-  
-  int q = INTEGER(qq)[0];
-  if ( q < 0 ){
-    error("q must be a nonnegative integer");
-  }
-  int n = length(a);
-  // set up a tree, push all qgrams of strings in a into tree. 
-  qtree *Q = NULL;
-  for ( int i=0; i<n; ++i){
-    if (INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER){
-      continue;
-    }
-    Q = push_string(
-      INTEGER(VECTOR_ELT(a,i)),
-      length(VECTOR_ELT(a,i)),
-      q, Q, 0
-   );
-   if (Q == NULL){
-    error("Could not allocate enough memory");
-   }
-  }
-  // pick q-grams from the tree
-  int nqgrams[1] = {0};
-  count_qtree(Q,nqgrams);
-  // this 1d-vector represents a nqgrams X (q+1) array
-  // where the first q colums represent qgrams and the q+1st colum
-  // the number of qgrams.
-  SEXP yy;
-  PROTECT(yy = allocVector(INTSXP, nqgrams*(q+1));
-  list_qgrams(Q, INTEGER(yy), 0);
-  free_qtree(Q);
-  UNPROTECT(3);
-  return(yy);
-}
 
 
