@@ -81,7 +81,9 @@ static qtree *push_string(unsigned int *str, int strlen, unsigned int q, qtree *
 
 /* The real work starts here */
 
-// get qgram-distance from tree and set all qgram-freqencies to 0.
+/* get qgram-distance from tree and set all qgram-freqencies 
+ * to 0 (so the tree can be reused).
+ */
 static void getdist(qtree *Q, int *d){
   if (Q == NULL) return;
   d[0] = d[0] + abs(Q->n[0] - Q->n[1]);
@@ -127,7 +129,7 @@ static int qgram_tree(
   return dist[0];
 }
 
-
+/* R interface */
 SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq){
   PROTECT(a);
   PROTECT(b);
@@ -164,7 +166,7 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq){
         Q
     );
     if (y[k] == -2){
-      error("Could not alocate enough memory");
+      error("Could not allocate enough memory");
     }
   }
   free_qtree(Q);
@@ -172,29 +174,51 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq){
   return yy;
 }
 
-/*
+void count_qtree(qtree *Q, int *n){
+  if ( Q == NULL ) return ;
+  n[0]++;
+  count_qtree(Q->left, n);
+  count_qtree(Q->right, n);
+}
+
+
+
 SEXP R_get_qgrams(SEXP a, SEXP qq){
   PROTECT(a);
   PROTECT(qq);
   
   int q = INTEGER(qq)[0];
-  int x;
-  // set up a tree 
-  qtree *Q = NULL;
-  qtree P;
-  
-  for (int i=0; i < x - q + 1; ++i ){
-
-    P = push(Q, s + i, q, 0);
-    
-    if ( P == NULL ){ // no memory = no joy.
-      free_qtree(Q);
-      error("Could not alocate enough memory");
-    }
-    Q = P;
+  if ( q < 0 ){
+    error("q must be a nonnegative integer");
   }
-
+  int n = length(a);
+  // set up a tree, push all qgrams of strings in a into tree. 
+  qtree *Q = NULL;
+  for ( int i=0; i<n; ++i){
+    if (INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER){
+      continue;
+    }
+    Q = push_string(
+      INTEGER(VECTOR_ELT(a,i)),
+      length(VECTOR_ELT(a,i)),
+      q, Q, 0
+   );
+   if (Q == NULL){
+    error("Could not allocate enough memory");
+   }
+  }
+  // pick q-grams from the tree
+  int nqgrams[1] = {0};
+  count_qtree(Q,nqgrams);
+  // this 1d-vector represents a nqgrams X (q+1) array
+  // where the first q colums represent qgrams and the q+1st colum
+  // the number of qgrams.
+  SEXP yy;
+  PROTECT(yy = allocVector(INTSXP, nqgrams*(q+1));
+  list_qgrams(Q, INTEGER(yy), 0);
+  free_qtree(Q);
+  UNPROTECT(3);
+  return(yy);
 }
-*/
 
 
