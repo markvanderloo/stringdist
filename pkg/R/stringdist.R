@@ -170,7 +170,7 @@ char2int <- function(x){
   # This is fixed for R >= 2.15.3.
   # i <- !is.na(x)
   # x[i] <- enc2utf8(x[i])
-  lapply(x,utf8ToInt)
+  lapply(enc2utf8(x),utf8ToInt)
 }
 
 

@@ -18,13 +18,16 @@
 #' @export
 get_qgrams <- function(x, q ){
   x <- as.character(x)
+  q <- as.integer(q)
+
   v <- .Call("R_get_qgrams", char2int(x), as.integer(q))
+  if ( is.null(v) ) return( table(integer(0)) )
+
   A <- array(attr(v,"qgrams"),dim=c(q,length(v)))
   qgrams <- apply(A,2,intToUtf8)
   attr(v,"qgrams") <- NULL
-  v <- array(v,dim=c(length(v)),dimnames=list(qgrams))
-  class(v) <- c('table')
-  v
+  names(v) <- qgrams
+  as.table(v)
 }
 
 

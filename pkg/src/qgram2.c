@@ -129,7 +129,7 @@ static int qgram_tree(
   return dist[0];
 }
 
-/* R interface */
+/* R interface to qgram distance */
 SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq){
   PROTECT(a);
   PROTECT(b);
@@ -174,6 +174,9 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq){
   return yy;
 }
 
+
+/* R interface to qgram tabulator */
+
 static void count_qtree(qtree *Q, int *n){
   if (Q == NULL ) return ;
   n[0]++;
@@ -190,12 +193,20 @@ static void get_counts(qtree *Q, int q, int *qgrams, int *count, int *index){
   get_counts(Q->right,q,qgrams, count, index);
 }
 
+/* TODO:
+ * 
+ * - Detect memory allocation failure.
+ */
 SEXP R_get_qgrams(SEXP a, SEXP qq){
   PROTECT(a);
   PROTECT(qq);
 
   int q = INTEGER(qq)[0];
   int n = length(a);
+  if ( q == 0 ){
+    return R_NilValue;
+  }
+
   if ( q < 0 ){
     UNPROTECT(2);
     error("q must be a nonnegative integer");
@@ -203,7 +214,7 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
   // set up a tree
   qtree *Q = NULL;
   for ( int i=0; i < n; ++i ){
-    if ( INTEGER(VECTOR_ELT(a,i)) == NA_INTEGER ){
+    if ( INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER ){
       continue ;
     }
     Q = push_string(
