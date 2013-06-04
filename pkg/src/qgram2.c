@@ -19,7 +19,7 @@ typedef struct qnode {
 } qtree;
 
 static void free_qtree(qtree *Q){
-  if (Q==NULL) return;
+  if ( Q == NULL ) return;
   free_qtree(Q->left);
   free_qtree(Q->right);
   free(Q->qgram);
@@ -172,6 +172,62 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq){
   free_qtree(Q);
   UNPROTECT(3);
   return yy;
+}
+
+static void count_qtree(qtree *Q, int *n){
+  if (Q == NULL ) return ;
+  n[0]++;
+  count_qtree(Q->left,n);
+  count_qtree(Q->right,n);
+}
+
+static void get_counts(qtree *Q, int q, int *qgrams, int *count, int *index){
+  if ( Q == NULL ) return ;
+  memcpy(qgrams + q*index[0], Q->qgram, sizeof(int) * q);
+  count[index[0]] = Q->n[0];
+  ++index[0];
+  get_counts(Q->left, q, qgrams, count, index);
+  get_counts(Q->right,q,qgrams, count, index);
+}
+
+SEXP R_get_qgrams(SEXP a, SEXP qq){
+  PROTECT(a);
+  PROTECT(qq);
+
+  int q = INTEGER(qq)[0];
+  int n = length(a);
+  if ( q < 0 ){
+    UNPROTECT(2);
+    error("q must be a nonnegative integer");
+  }
+  // set up a tree
+  qtree *Q = NULL;
+  for ( int i=0; i < n; ++i ){
+    Q = push_string(
+      INTEGER(VECTOR_ELT(a,i)),
+      length(VECTOR_ELT(a,i)),
+      q, Q, 0 
+    );
+  }
+  // pick and delete the tree
+
+  int nqgram[1] = {0};
+  int index[1] = {0};  
+  
+  count_qtree(Q,nqgram);  
+
+  SEXP qgrams, qcount;
+  PROTECT(qgrams = allocVector(INTSXP, q*nqgram[0]));
+  PROTECT(qcount = allocVector(INTSXP, nqgram[0]));
+
+  get_counts(Q, q, INTEGER(qgrams), INTEGER(qcount),index);
+
+  setAttrib(qcount, install("qgrams"), qgrams);
+
+  free_qtree(Q);
+  UNPROTECT(4);
+
+  return(qcount);
 }
 
 
