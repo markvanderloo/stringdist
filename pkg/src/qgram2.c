@@ -203,6 +203,9 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
   // set up a tree
   qtree *Q = NULL;
   for ( int i=0; i < n; ++i ){
+    if ( INTEGER(VECTOR_ELT(a,i)) == NA_INTEGER ){
+      continue ;
+    }
     Q = push_string(
       INTEGER(VECTOR_ELT(a,i)),
       length(VECTOR_ELT(a,i)),
@@ -221,9 +224,9 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
   PROTECT(qcount = allocVector(INTSXP, nqgram[0]));
 
   get_counts(Q, q, INTEGER(qgrams), INTEGER(qcount),index);
-
+  
   setAttrib(qcount, install("qgrams"), qgrams);
-
+  
   free_qtree(Q);
   UNPROTECT(4);
 
