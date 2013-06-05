@@ -203,7 +203,8 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
 
   int q = INTEGER(qq)[0];
   int n = length(a);
-  if ( q == 0 ){
+  if ( q < 0 ){
+    UNPROTECT(2);
     return R_NilValue;
   }
 
@@ -214,7 +215,10 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
   // set up a tree
   qtree *Q = NULL;
   for ( int i=0; i < n; ++i ){
-    if ( INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER ){
+    if ( INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER 
+        || q > length(VECTOR_ELT(a,i)) 
+        || ( q == 0 && length(VECTOR_ELT(a,i)) > 0 )
+      ){
       continue ;
     }
     Q = push_string(

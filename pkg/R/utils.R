@@ -20,8 +20,8 @@ qgrams <- function(x, q ){
   x <- as.character(x)
   q <- as.integer(q)
 
-  v <- .Call("R_get_qgrams", char2int(x), as.integer(q))
-  if ( is.null(v) ) return( table(integer(0)) )
+  v <- .Call("R_get_qgrams", char2int(x), q)
+  if ( is.null(v) || length(v) == 0 ) return( table(integer(0)) )
 
   A <- array(attr(v,"qgrams"),dim=c(q,length(v)))
   qgrams <- apply(A,2,intToUtf8)
