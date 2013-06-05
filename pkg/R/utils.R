@@ -14,9 +14,9 @@
 #'
 #' @seealso \code{\link{stringdist}}. 
 #'
-#' @example ../examples/get_qgrams.R
+#' @example ../examples/qgrams.R
 #' @export
-get_qgrams <- function(x, q ){
+qgrams <- function(x, q ){
   x <- as.character(x)
   q <- as.integer(q)
 
