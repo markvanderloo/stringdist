@@ -9,9 +9,23 @@
  * - Simplified from restricted DL pseudocode at http://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance
  * - Extended with custom weights and maxDistance
  */
-static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weight, double maxDistance, double *scores){
-   if (na == 0) return(nb);
-   if (nb == 0) return(na);
+static double lv(unsigned int *a, int na, unsigned int *b, int nb, double *weight, double maxDistance, double *scores){
+  if (na == 0){
+    if ( maxDistance > 0 && maxDistance < nb ){
+      return -1;
+    } else {
+      return (double) nb;
+    }
+  }
+  if (na == 0){
+    if (maxDistance > 0 && maxDistance < nb){
+      return -1;
+    } else {
+      return (double) nb;
+    }
+  }
+  
+ 
    int i, j;
    int I = na+1, J = nb+1;
    double sub, colmin;
@@ -74,7 +88,7 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
          y[k] = NA_REAL;
          continue;
       }
-      y[k] = osa(
+      y[k] = lv(
          INTEGER(VECTOR_ELT(a,i)), 
          length(VECTOR_ELT(a,i)), 
          INTEGER(VECTOR_ELT(b,j)), 

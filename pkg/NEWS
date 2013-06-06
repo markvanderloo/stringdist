@@ -1,5 +1,6 @@
 version 0.5.0
-- edge case in lv/osa/dl methods: distance returned in stead of -1 when length(a) == 0, maxDist < length(b).
+- faster edge case handling in osa method.
+- edge case in lv/osa/dl methods: distance returned length(b) in stead of -1 when length(a) == 0, maxDist < length(b).
 - bugfix in lv/osa/dl method: maxDist returned when length(a) > maxDist > 0 (thanks to Daniel Reckhard).
 - Hamming distance (method='h') now returns -1 for strings of unequal lengts (used to emit error).
 - added longest common substring distance (method='lcs').

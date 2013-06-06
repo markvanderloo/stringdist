@@ -10,9 +10,24 @@
  * - Extended with custom weights and maxDistance
  */
 static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weight, double maxDistance, double *scores){
-   int i, j;
-   int I = na+1, J = nb+1;
-   double sub, tran, colmin;
+  if (na == 0){
+    if ( maxDistance > 0 && maxDistance < nb ){
+      return -1;
+    } else {
+      return (double) nb;
+    }
+  }
+  if (na == 0){
+    if (maxDistance > 0 && maxDistance < nb){
+      return -1;
+    } else {
+      return (double) nb;
+    }
+  }
+
+  int i, j;
+  int I = na+1, J = nb+1;
+  double sub, tran, colmin;
 
    for ( i = 0; i < I; ++i ){
       scores[i] = i;

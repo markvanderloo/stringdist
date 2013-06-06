@@ -91,8 +91,21 @@ static double distance(
       dictionary *dict,
       double *scores
     ){
-  if ( x==0 ) return y;
-  if ( y==0 ) return x;
+
+  if (x == 0){
+    if ( maxDistance > 0 && maxDistance < y ){
+      return -1;
+    } else {
+      return (double) y;
+    }
+  }
+  if (y == 0){
+    if (maxDistance > 0 && maxDistance < x){
+      return -1;
+    } else {
+      return (double) x;
+    }
+  }
 
   unsigned int swapCount, targetCharCount,i,j;
   double delScore, insScore, subScore, swapScore;
