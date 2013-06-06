@@ -21,6 +21,12 @@ test_that("Edge cases in OSA method",{
 
 test_that("max distance is obeyed",{
    expect_equal(stringdist("aa","bb",method='osa',maxDist=1),-1)
+   expect_equal(stringdist("aa","bb",method='dl',maxDist=1),-1)
+   expect_equal(stringdist("aa","bb",method='lv',maxDist=1),-1)
+   # Thanks to Daniel Deckhard
+   expect_equal(stringdist("abc","abc",method='osa',maxDist=1), 0)
+   expect_equal(stringdist("abc","abc",method='dl',maxDist=1), 0)
+   expect_equal(stringdist("abc","abc",method='lv',maxDist=1), 0)
 })
 
 test_that("Shortest argument is recycled",{

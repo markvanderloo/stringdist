@@ -97,7 +97,7 @@ static double distance(
   unsigned int swapCount, targetCharCount,i,j;
   double delScore, insScore, subScore, swapScore;
   unsigned int score_ceil = x + y;
-
+  double colmin;
   /* intialize matrix start values */
   scores[0] = score_ceil;  
   scores[1 * (y + 2) + 0] = score_ceil;
@@ -113,8 +113,8 @@ static double distance(
     uniquePush(dict,src[i]);
     scores[(i+1) * (y + 2) + 1] = i;
     scores[(i+1) * (y + 2) + 0] = score_ceil;
-
     swapCount = 0;
+    colmin = (double) x + y + 1;
     for(j=1;j<=y;j++){
       if(i == 1) {
         uniquePush(dict,tgt[j]);
@@ -133,11 +133,12 @@ static double distance(
         swapCount = j;
         scores[(i+1) * (y + 2) + (j + 1)] = min2(scores[i * (y + 2) + j], swapScore);
       } 
+      colmin = min2(colmin,scores[(i+1)*(y+2) + (j+1)]);
     }
-
     /* We will return -1 here if the */
-    /* current score > maxDistance   */
-    if(maxDistance != 0 && maxDistance < scores[(i+1) * (y + 2) + (y+1)]) {
+    /* current minimum > maxDistance   */
+    if(maxDistance > 0 && maxDistance < colmin) {
+
       reset_dictionary(dict);
       return -1;
     }
