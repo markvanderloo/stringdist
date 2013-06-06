@@ -147,6 +147,9 @@ test_that("Edge cases in LCS method",{
 
 test_that("max distance is obeyed",{
    expect_equal(stringdist("aa","bb",method='lcs',maxDist=1),-1)
+   expect_equal(stringdist("abc","abc",method='lcs',maxDist=1), 0)
+   expect_equal(stringdist("","abc",method='lcs',maxDist=1), -1)
+   expect_equal(stringdist("abc","",method='lcs',maxDist=1), -1)
 })
 
 test_that("Shortest argument is recycled",{

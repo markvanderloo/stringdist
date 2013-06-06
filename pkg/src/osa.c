@@ -17,11 +17,11 @@ static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weig
       return (double) nb;
     }
   }
-  if (na == 0){
-    if (maxDistance > 0 && maxDistance < nb){
+  if (nb == 0){
+    if (maxDistance > 0 && maxDistance < na){
       return -1;
     } else {
-      return (double) nb;
+      return (double) na;
     }
   }
 

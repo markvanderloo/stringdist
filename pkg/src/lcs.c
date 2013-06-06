@@ -8,33 +8,49 @@
  * - basically edit distance, only allowing insertions and substitutions, at the cost of 1.
  */
 static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDistance, int *scores){
-   int i, j;
-   int I = na+1, J = nb+1;
+  if (na == 0){
+    if ( maxDistance > 0 && maxDistance < nb ){
+      return -1;
+    } else {
+      return (double) nb;
+    }
+  }
+  if (nb == 0){
+    if (maxDistance > 0 && maxDistance < na){
+      return -1;
+    } else {
+      return (double) na;
+    }
+  }
 
-   for ( i = 0; i < I; ++i ){
-      scores[i] = i;
-   }
-   for ( j = 1; j < J; ++j ){
-      scores[I*j] = j;
-   }
+  int i, j;
+  int I = na+1, J = nb+1;
+  int mincol;
+  for ( i = 0; i < I; ++i ){
+    scores[i] = i;
+  }
+  for ( j = 1; j < J; ++j ){
+    scores[I*j] = j;
+  }
 
-   for ( i = 1; i <= na; ++i ){
-      for ( j = 1; j <= nb; ++j ){
-
-         if ( a[i-1] == b[j-1] ){ // equality, copy previous score
-            scores[i + I*j] = scores[i-1 + I*(j-1)];
-         } else {
-          scores[i + I*j] = min2(
-            scores[i-1 + I*j    ] + 1 ,     // deletion
-            scores[i   + I*(j-1)] + 1       // insertion
-          );
-         }
-         if ( maxDistance > 0 && scores[i + I*j] > maxDistance ){
-            return -1;
-         }
+  for ( i = 1; i <= na; ++i ){
+    mincol = na + nb + 1;
+    for ( j = 1; j <= nb; ++j ){
+      if ( a[i-1] == b[j-1] ){ // equality, copy previous score
+        scores[i + I*j] = scores[i-1 + I*(j-1)];
+      } else {
+        scores[i + I*j] = min2(
+          scores[i-1 + I*j    ] + 1 ,     // deletion
+          scores[i   + I*(j-1)] + 1       // insertion
+        );
       }
-   }
-   return(scores[I*J-1]);
+      mincol = min2(mincol,scores[i+I*j]);
+    }
+    if ( maxDistance > 0 && mincol > maxDistance ){
+      return -1;
+    }
+  }
+  return(scores[I*J-1]);
 }
 
 //-- interface with R
