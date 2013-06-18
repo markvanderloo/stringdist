@@ -12,7 +12,7 @@ through a uniform interface. As of version 0.5.0, distance functions include:
 * Restricted Damerau-Levenshtein distance (weighted, a.k.a. Optimal String Alignment);
 * Full Damerau-Levenshtein distance (weighted);
 * Longest Common Substring distance;
-* Q-gram distance (two implementations).
+* Q-gram distance (two implementations; currently one is exposed).
 
 To my best knowledge, the latter three were not available before in R. Workhorse
 functions are implemented in C. The package offers two main functions:

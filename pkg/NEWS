@@ -1,11 +1,12 @@
 version 0.5.0
+- added qgram counting function 'qgrams'
 - faster edge case handling in osa method.
 - edge case in lv/osa/dl methods: distance returned length(b) in stead of -1 when length(a) == 0, maxDist < length(b).
 - bugfix in lv/osa/dl method: maxDist returned when length(a) > maxDist > 0 (thanks to Daniel Reckhard).
 - Hamming distance (method='h') now returns -1 for strings of unequal lengts (used to emit error).
 - added longest common substring distance (method='lcs').
-- added qgram distance method, using two different algorithms (method='qgram-ul', 'qgram-tree').
-- stringdistmatrix now gains cluster argument.
+- added qgram distance method.
+- stringdistmatrix gains cluster argument.
 
 version 0.4.2
 - Fix in error message for hamming distance
