@@ -215,31 +215,11 @@ test_that("NA's are handled correctly",{
    expect_true(is.na(stringdist(NA ,NA ,method='qgram')))
 })
 
-test_that("Edge cases in qgram-tree method",{
-   expect_equal(stringdist( "", "",method='qgram-tree',q=0), 0)
-   expect_equal(stringdist( "", "",method='qgram-tree',q=1),-1)
-   expect_equal(stringdist( "","a",method='qgram-tree',q=1),-1)
-   expect_equal(stringdist("a", "",method='qgram-tree',q=1),-1)
-   expect_equal(stringdist("a","a",method='qgram-tree',q=1), 0)
-   expect_error(stringdist("aa","bb",method='qgram-tree',q=-2))
-})
-
-
-test_that("Shortest argument is recycled in qgram-tree",{
-   expect_equal(stringdist(c('a','b'),'a',method='qgram-tree',q=1),c(0,2))
-   expect_equal(stringdist('a',c('a','b'),method='qgram-tree',q=1),c(0,2))
-})
-
-test_that("NA's are handled correctly in qgram-tree",{
-   expect_true(is.na(stringdist(NA ,'a',method='qgram-tree')))
-   expect_true(is.na(stringdist('a',NA ,method='qgram-tree')))
-   expect_true(is.na(stringdist(NA ,NA ,method='qgram-tree')))
-})
 
 test_that("binary tree is cleaned up properly in qgram-tree",{
 # explanation: the binary tree storing unique q-grams and q-gram counts is re-used when looping
 # over string pairs. (this is not the case with the unsorted lookup table in 'qgram')
-  d <- stringdist('abcde',c('edcba','edcba'),method='qgram-tree',q=2)
+  d <- stringdist('abcde',c('edcba','edcba'),method='qgram',q=2)
   expect_equal(d[1],d[2])
 })
 

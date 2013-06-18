@@ -9,30 +9,29 @@
 #'
 #' @section Details:
 #' \code{stringdist} computes pairwise string distances between elements of \code{character} vectors \code{a} and \code{b},
-#' where the shorter argument is recycled. \code{stringdistmatrix} computes the string distance matrix with rows according to
+#' where the vector with less elements is recycled. \code{stringdistmatrix} computes the string distance matrix with rows according to
 #' \code{a} and columns according to \code{b}.
 #'
-#' The string distance metrics in this package are based on counting the (weighted) number of edit operations it takes
-#' to turn character \code{b} into character \code{a}. Currently, the following distance metrics are supported:
+#' 
+#' Currently, the following distance metrics are supported:
 #' \tabular{ll}{
 #'    \code{osa} \tab Optimal string aligment, (restricted Damerau-Levenshtein distance).\cr
 #'    \code{lv} \tab Levenshtein distance.\cr
 #'    \code{dl} \tab Full Damerau-Levenshtein distance.\cr
 #'    \code{h}  \tab Hamming distance (\code{a} and \code{b} must have same nr of characters).\cr
 #'    \code{lcs} \tab Longest common substring.\cr
-#'    \code{qgram} \tab \eqn{q}-gram distance, using an unsorted list to store qgrams. \cr
-#'    \code{qgram-tree} \tab \eqn{q}-gram distance, using a binary tree to store qgrams.
+#'    \code{qgram} \tab \eqn{q}-gram distance. 
 #' }
 #' The Hamming distance counts the number of character substitutions that turns 
 #' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters \code{-1} is
 #' returned.
 #'
 #' The Levenshtein distance (\code{ld}) counts the number of deletions, insertions and substitutions necessary
-#' to turn \code{b} into \code{a}. 
+#' to turn \code{b} into \code{a}. This method is equivalent to \code{R}'s native \code{adist} function.
 #' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
 #'
-#' The Optimal String Alignment distance (\code{osa}) also 
-#' allows transposition of adjacent characters, but each substring  may be edited only once so a 
+#' The Optimal String Alignment distance (\code{osa}) is like the Levenshtein distance but also 
+#' allows transposition of adjacent characters. Here, each substring  may be edited only once so a 
 #' character cannot be transposed twice. 
 #' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
 #'
@@ -47,7 +46,7 @@
 #'
 #' A \eqn{q}-gram is a subsequence of \eqn{q} \emph{consecutive} characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
 #' of \eqn{q}-gram occurrences in \code{a} (\code{b}), the \eqn{q}-gram distance is given by the sum over
-#' the absolute differences \eqn{|x-y|}.
+#' the absolute differences \eqn{|x_i-y_i|}.
 #' The computation is aborted when \code{q} is is larger than the length of any of the strings. In that case \code{-1}  is returned.
 #'
 #'
@@ -98,10 +97,10 @@
 #' @param method Method for distance calculation (see details)
 #' @param weight The penalty for deletion, insertion, substitution and transposition, in that order.  
 #'   Weights must be positive and not exceed 1. \code{weight[4]} is ignored when \code{method='lv'} and \code{weight} is
-#'   ignored completely when \code{method='h'}, \code{method='qgram(-tree)'} or \code{method='lcs'}.
-#' @param maxDist (ignored for \code{method='qgram(-tree)'}). Maximum string distance before calculation is stopped, \code{maxDist=0} 
-#'    means calculation goes on untill the distance is computed.
-#' @param q (ignored for all but \code{method='qgram'} or \code{'qgram-tree'}) size of the \eqn{q}-gram, must be nonnegative.
+#'   ignored completely when \code{method='h'}, \code{method='qgram'} or \code{method='lcs'}.
+#' @param maxDist  Maximum string distance before calculation is stopped, \code{maxDist=0} 
+#'    means calculation goes on untill the distance is computed. Ignored for \code{method='qgram'}.
+#' @param q  size of the \eqn{q}-gram, must be nonnegative. Ignored for all but \code{method='qgram'}.
 #'
 #' @return For \code{stringdist},  a vector with string distances of size \code{max(length(a),length(b))}.
 #'  For \code{stringdistmatrix}, a \code{length(a)xlength(b)} \code{matrix}. The returned distance is
@@ -111,7 +110,7 @@
 #'  
 #' @example ../examples/stringdist.R
 #' @export
-stringdist <- function(a, b, method=c("osa","lv","dl","h","lcs", "qgram","qgram-tree"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1){
+stringdist <- function(a, b, method=c("osa","lv","dl","h","lcs", "qgram"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -134,7 +133,7 @@ stringdist <- function(a, b, method=c("osa","lv","dl","h","lcs", "qgram","qgram-
 #' @param cluster (optional) a custom cluster, created with \code{\link[parallel]{makeCluster}}. If \code{cluster} is not \code{NULL}, \code{ncores} is ignored.
 #' @rdname stringdist
 #' @export
-stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h","lcs","qgram","qgram-tree"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1, ncores=1, cluster=NULL){
+stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h","lcs","qgram"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1, ncores=1, cluster=NULL){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -182,8 +181,7 @@ do_dist <- function(a,b,method,weight,maxDist,q){
     dl      = .Call('R_dl'    , a, b, as.double(weight), as.double(maxDist)),
     h       = .Call('R_hm'    , a, b, as.integer(maxDist)),
     lcs     = .Call('R_lcs'   , a, b, as.integer(maxDist)),
-    'qgram'   = .Call('R_qgram' , a, b, as.integer(q)),
-    'qgram-tree'  = .Call('R_qgram_tree' , a, b, as.integer(q))
+    qgram   = .Call('R_qgram_tree' , a, b, as.integer(q))
   )
 }
 
