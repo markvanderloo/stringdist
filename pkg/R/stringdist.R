@@ -26,7 +26,7 @@
 #' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters \code{-1} is
 #' returned.
 #'
-#' The Levenshtein distance (\code{ld}) counts the number of deletions, insertions and substitutions necessary
+#' The Levenshtein distance (\code{lv}) counts the number of deletions, insertions and substitutions necessary
 #' to turn \code{b} into \code{a}. This method is equivalent to \code{R}'s native \code{adist} function.
 #' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
 #'
@@ -94,7 +94,7 @@
 #'
 #' @param a R object (target); will be converted by \code{as.character}.
 #' @param b R object (source); will be converted by \code{as.character}.
-#' @param method Method for distance calculation (see details)
+#' @param method Method for distance calculation. The default is \code{"osa"} (see details).
 #' @param weight The penalty for deletion, insertion, substitution and transposition, in that order.  
 #'   Weights must be positive and not exceed 1. \code{weight[4]} is ignored when \code{method='lv'} and \code{weight} is
 #'   ignored completely when \code{method='h'}, \code{method='qgram'} or \code{method='lcs'}.
@@ -129,7 +129,7 @@ stringdist <- function(a, b, method=c("osa","lv","dl","h","lcs", "qgram"), weigh
 
 
 #' @param ncores number of cores to use. If \code{ncores>1}, a local cluster is created using \code{\link[parallel]{makeCluster}}.
-#' Parallelisation is over \code{b}, so the speed gain by parallelisation is highest when \code{b} is shorter than \code{a}.
+#' Parallelisation is over \code{b}, so the speed gain by parallelisation is highest when \code{b} has less elements than \code{a}.
 #' @param cluster (optional) a custom cluster, created with \code{\link[parallel]{makeCluster}}. If \code{cluster} is not \code{NULL}, \code{ncores} is ignored.
 #' @rdname stringdist
 #' @export

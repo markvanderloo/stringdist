@@ -4,9 +4,16 @@
 #' The input is converted to \code{character}. Each element is converted to \code{integer} via \code{utf8} 
 #' as in \code{\link{stringdist}}, prior to passing the data to the underlying routine. The \code{names} of the output 
 #' table (i.e. the qgrams) are encoded in \code{utf8}.
-#'
-#'
-#'
+#' 
+#' Elements of \code{x} with less than \code{q} characters are skipped. Using \code{q=0} 
+#' therefore counts the number of empty strings \code{""} in \code{x}.
+#' 
+#' 
+#' 
+#' 
+#' 
+#' 
+#' 
 #' @param x character vector
 #' @param q size of q-gram, must be non-negative.
 #'

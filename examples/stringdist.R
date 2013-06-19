@@ -42,9 +42,9 @@ stringdist('ab','ba',method="lcs")
 stringdist('survey','surgery',method="lcs")
 
 
-# q-grams are based on the difference between occurrences of q consecutive characters.
-#
-# since each character abc occurs in 'abc' and 'cba', the q=1 distance equals 0:
+# q-grams are based on the difference between occurrences of q consecutive characters
+# in string a and string b.
+# Since each character abc occurs in 'abc' and 'cba', the q=1 distance equals 0:
 stringdist('abc','cba',method='qgram',q=1)
 
 # since the first string consists of 'ab','bc' and the second 
