@@ -72,7 +72,7 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP maxDistance){
 
    // output vector
    int nt = (na > nb) ? na : nb;   
-   int i,j,k;
+   int i,j;
    SEXP yy;
    PROTECT(yy = allocVector(INTSXP, nt));
    int *y = INTEGER(yy);   
@@ -85,9 +85,9 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP maxDistance){
          continue;
       }
       y[k] = lcs(
-         INTEGER(VECTOR_ELT(a,i)), 
+        (unsigned int *) INTEGER(VECTOR_ELT(a,i)), 
          length(VECTOR_ELT(a,i)), 
-         INTEGER(VECTOR_ELT(b,j)), 
+        (unsigned int *) INTEGER(VECTOR_ELT(b,j)), 
          length(VECTOR_ELT(b,j)), 
          maxDist,
          scores

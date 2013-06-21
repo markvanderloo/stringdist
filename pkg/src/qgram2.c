@@ -158,8 +158,8 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq){
       continue;
     }
     y[k] = qgram_tree(
-        INTEGER(VECTOR_ELT(a,i)),
-        INTEGER(VECTOR_ELT(b,j)),
+       (unsigned int *) INTEGER(VECTOR_ELT(a,i)),
+       (unsigned int *) INTEGER(VECTOR_ELT(b,j)),
         length(VECTOR_ELT(a,i)),
         length(VECTOR_ELT(b,j)),
         q,
@@ -222,7 +222,7 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
       continue ;
     }
     Q = push_string(
-      INTEGER(VECTOR_ELT(a,i)),
+      (unsigned int *) INTEGER(VECTOR_ELT(a,i)),
       length(VECTOR_ELT(a,i)),
       q, Q, 0 
     );

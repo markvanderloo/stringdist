@@ -47,6 +47,8 @@ static int double_workspace(workspace *ws){
   return 1;
 }
 
+
+/* currently this is dead code
 static void print_workspace(workspace *ws){
   for ( int i=0; i<ws->nrec; ++i){
     for (int j=0; j<ws->recsize; ++j ){
@@ -55,7 +57,7 @@ static void print_workspace(workspace *ws){
     Rprintf("\n");
   }
 }
-
+*/
 static void reset_workspace(workspace *ws){
   memset(ws->A, 0, sizeof(int) * ws->nrec * ws->recsize);
 }
@@ -64,7 +66,7 @@ static void reset_workspace(workspace *ws){
 
 static int qgram_equals(unsigned int *x, unsigned int *y, int q){
   int i = 0;
-  while ( i < q & x[i] == y[i] ) ++i;
+  while ( (i < q) & (x[i] == y[i]) ) ++i;
   return ( i == q ) ? 1 : 0;
 }
 
@@ -81,7 +83,7 @@ static int add_qgram(
   int i_pos = 0;
 
   // Find out if qgram already exists in workspace
-  while ( i < nfilled & !qgram_equals(s, work->A + i_pos, q) ){
+  while ( (i < nfilled) & !qgram_equals(s, work->A + i_pos, q) ){
       ++i;
       i_pos += q + 2;
   }
@@ -182,8 +184,8 @@ SEXP R_qgram(SEXP a, SEXP b, SEXP qq){
       continue;
     }
     y[k] = qgram(
-        INTEGER(VECTOR_ELT(a,i)),
-        INTEGER(VECTOR_ELT(b,j)),
+        (unsigned int *) INTEGER(VECTOR_ELT(a,i)),
+        (unsigned int *) INTEGER(VECTOR_ELT(b,j)),
         length(VECTOR_ELT(a,i)),
         length(VECTOR_ELT(b,j)),
         q,

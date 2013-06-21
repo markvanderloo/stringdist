@@ -202,8 +202,8 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
       continue;
     }
     y[k] = distance(
-      INTEGER(VECTOR_ELT(a,i)),
-      INTEGER(VECTOR_ELT(b,j)),
+     (unsigned int *) INTEGER(VECTOR_ELT(a,i)),
+     (unsigned int *) INTEGER(VECTOR_ELT(b,j)),
       length(VECTOR_ELT(a,i)),
       length(VECTOR_ELT(b,j)),
       w,

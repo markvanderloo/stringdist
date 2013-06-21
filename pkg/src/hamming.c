@@ -45,8 +45,8 @@ SEXP R_hm(SEXP a, SEXP b, SEXP maxDistance){
       continue;
     }
     y[k] = hamming(
-      INTEGER(VECTOR_ELT(a,i)),
-      INTEGER(VECTOR_ELT(b,j)),
+      (unsigned int *) INTEGER(VECTOR_ELT(a,i)),
+      (unsigned int *) INTEGER(VECTOR_ELT(b,j)),
       nchar,
       maxDist
     );
