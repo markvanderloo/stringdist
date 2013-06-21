@@ -15,6 +15,7 @@
 
 /* ugexe@cpan.org (Nick Logan)    */
 
+#define USE_RINTERNALS
 #include <R.h>
 #include <Rdefines.h>
 #include "utils.h"

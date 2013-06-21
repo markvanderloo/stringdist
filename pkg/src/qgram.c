@@ -3,6 +3,7 @@
  * are counted as well. 
 */
 
+#define USE_RINTERNALS
 #include <string.h>
 #include <R.h>
 #include <Rdefines.h>
