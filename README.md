@@ -29,6 +29,7 @@ TODO
     * ~~Using tree storage~~
     * Using hashed storage
     * Option to add _q-1_ pre- and or postfixes
+* jaro distance
 * jaro-winkler distance
 * ~~optionally use user-defined cluster for parallel computations~~
 * Separate R-functions giving more info on distance calculations:
