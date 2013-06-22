@@ -1,3 +1,6 @@
+version 0.5.1
+- added Jaro distance
+
 version 0.5.0
 - added qgram counting function 'qgrams'
 - faster edge case handling in osa method.

@@ -20,7 +20,8 @@
 #'    \code{dl} \tab Full Damerau-Levenshtein distance.\cr
 #'    \code{h}  \tab Hamming distance (\code{a} and \code{b} must have same nr of characters).\cr
 #'    \code{lcs} \tab Longest common substring.\cr
-#'    \code{qgram} \tab \eqn{q}-gram distance. 
+#'    \code{qgram} \tab \eqn{q}-gram distance. \cr
+#'    \code{jaro} \tab Jaro-distance.
 #' }
 #' The Hamming distance counts the number of character substitutions that turns 
 #' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters \code{-1} is
@@ -49,7 +50,7 @@
 #' the absolute differences \eqn{|x_i-y_i|}.
 #' The computation is aborted when \code{q} is is larger than the length of any of the strings. In that case \code{-1}  is returned.
 #'
-#'
+#' The Jaro-distance blablabla.
 #'
 #' @section Encoding issues:
 #' Input strings are re-encoded to \code{utf8} an then to \code{integer}
@@ -110,7 +111,7 @@
 #'  
 #' @example ../examples/stringdist.R
 #' @export
-stringdist <- function(a, b, method=c("osa","lv","dl","h","lcs", "qgram"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1){
+stringdist <- function(a, b, method=c("osa","lv","dl","h","lcs", "qgram", "jaro"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -133,7 +134,7 @@ stringdist <- function(a, b, method=c("osa","lv","dl","h","lcs", "qgram"), weigh
 #' @param cluster (optional) a custom cluster, created with \code{\link[parallel]{makeCluster}}. If \code{cluster} is not \code{NULL}, \code{ncores} is ignored.
 #' @rdname stringdist
 #' @export
-stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h","lcs","qgram"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1, ncores=1, cluster=NULL){
+stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h","lcs","qgram", "jaro"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1, ncores=1, cluster=NULL){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -181,7 +182,8 @@ do_dist <- function(a,b,method,weight,maxDist,q){
     dl      = .Call('R_dl'    , a, b, as.double(weight), as.double(maxDist)),
     h       = .Call('R_hm'    , a, b, as.integer(maxDist)),
     lcs     = .Call('R_lcs'   , a, b, as.integer(maxDist)),
-    qgram   = .Call('R_qgram_tree' , a, b, as.integer(q))
+    qgram   = .Call('R_qgram_tree' , a, b, as.integer(q)),
+    jaro    = .Call('R_jaro', a, b)
   )
 }
 
