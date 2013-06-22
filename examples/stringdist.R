@@ -51,4 +51,14 @@ stringdist('abc','cba',method='qgram',q=1)
 # of 'cb' and 'ba', the q=2 distance equals 4 (they have no q=2 grams in common):
 stringdist('abc','cba',method='qgram',q=2)
 
+# Wikipedia has the following example of the Jaro-distance. 
+stringdist('MARTHA','MATHRA',method='jaro')
+# Note that stringdist gives a  _distance_ where wikipedia gives the corresponding 
+# _similarity measure_. To get the wikipedia result:
+1 - stringdist('MARTHA','MATHRA',method='jaro')
+
+
+
+
+
 

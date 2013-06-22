@@ -5,7 +5,7 @@ String distance functions for R
 
 String distance functions are scattered around R, and R's packages. This package
 is a re-implementation of some common (weighted) distance functions, offered
-through a uniform interface. As of version 0.5.0, distance functions include:
+through a uniform interface. As of version 0.5.1, distance functions include:
 
 * Hamming distance; 
 * Levenshtein distance (weighted);
@@ -13,6 +13,8 @@ through a uniform interface. As of version 0.5.0, distance functions include:
 * Full Damerau-Levenshtein distance (weighted);
 * Longest Common Substring distance;
 * Q-gram distance (two implementations; currently one is exposed).
+* Jaro distance
+
 
 To my best knowledge, the latter three were not available before in R. Workhorse
 functions are implemented in C. The package offers two main functions:
@@ -29,7 +31,7 @@ TODO
     * ~~Using tree storage~~
     * Using hashed storage
     * Option to add _q-1_ pre- and or postfixes
-* jaro distance
+* ~~jaro distance~~
 * jaro-winkler distance
 * ~~optionally use user-defined cluster for parallel computations~~
 * Separate R-functions giving more info on distance calculations:
@@ -37,7 +39,7 @@ TODO
     * get actual longest common substring
     * get actual edits needed to go from one string to another
 * small (C-style) performance tweeks, like 
-    * detect where |nchar(a)-nchar(b)| > maxDist or smarter distribution of jobs over clusters
+    * ~~detect where |nchar(a)-nchar(b)| > maxDist or smarter distribution of jobs over clusters~~
     * faster recycling index calculations
 
 Could

@@ -23,34 +23,46 @@
 #'    \code{qgram} \tab \eqn{q}-gram distance. \cr
 #'    \code{jaro} \tab Jaro-distance.
 #' }
-#' The Hamming distance counts the number of character substitutions that turns 
+#' The \bold{Hamming distance} counts the number of character substitutions that turns 
 #' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters \code{-1} is
 #' returned.
 #'
-#' The Levenshtein distance (\code{lv}) counts the number of deletions, insertions and substitutions necessary
+#' The \bold{Levenshtein distance} (\code{lv}) counts the number of deletions, insertions and substitutions necessary
 #' to turn \code{b} into \code{a}. This method is equivalent to \code{R}'s native \code{adist} function.
 #' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
 #'
-#' The Optimal String Alignment distance (\code{osa}) is like the Levenshtein distance but also 
+#' The \bold{Optimal String Alignment distance} (\code{osa}) is like the Levenshtein distance but also 
 #' allows transposition of adjacent characters. Here, each substring  may be edited only once so a 
 #' character cannot be transposed twice. 
 #' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
 #'
-#' The full Damerau-Levensthein distance (\code{dl}) allows for multiple transpositions.
+#' The \bold{full Damerau-Levensthein distance} (\code{dl}) allows for multiple transpositions.
 #' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
 #'
-#' The longest common substring is defined as the longest string that can be obtained by pairing characters
+#' The \bold{longest common substring} is defined as the longest string that can be obtained by pairing characters
 #' from \code{a} and \code{b} while keeping the order of characters intact. The lcs-distance is defined as the
 #' number of unpaired characters. The distance is equivalent to the edit distance allowing only deletions and
 #' insertions, each with weight one.
 #' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
 #'
-#' A \eqn{q}-gram is a subsequence of \eqn{q} \emph{consecutive} characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
+#' A \bold{\eqn{q}-gram} is a subsequence of \eqn{q} \emph{consecutive} characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
 #' of \eqn{q}-gram occurrences in \code{a} (\code{b}), the \eqn{q}-gram distance is given by the sum over
 #' the absolute differences \eqn{|x_i-y_i|}.
 #' The computation is aborted when \code{q} is is larger than the length of any of the strings. In that case \code{-1}  is returned.
 #'
-#' The Jaro-distance blablabla.
+#' The \bold{Jaro distance} is a number between 0 (exact match) and 1 (completely dissimilar) measuring dissimilarity between strings.
+#' It is defined to be 0 when both strings have length 0, and 1 when  there are no character matches between \code{a} and \code{b}. 
+#' Otherwise, the Jaro distance is defined as \eqn{1-(1/3)(m/|a| + m/|b| + (m-t)/m)}. Here,\eqn{|a|} indicates the number of
+#' characters in \code{a} (after conversion to integers), \eqn{m} is the number of 
+#' character matches and \eqn{t} the number of transpositions of matching characters.
+#' A character \eqn{c} of \code{a} \emph{matches} a character from \code{b} when
+#' \eqn{c} occurs in \code{b}, and the index of \eqn{c} in \code{a} differs less than \eqn{max(|a|,|b|)/2 -1} (where we use integer division).
+#' Two matching characters are transposed when they are matched but they occur in different order in string \code{a} and \code{b}.
+#'  
+#'  
+#'  
+#'  
+#'
 #'
 #' @section Encoding issues:
 #' Input strings are re-encoded to \code{utf8} an then to \code{integer}
