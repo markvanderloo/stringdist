@@ -49,7 +49,7 @@ static int match_int(unsigned int a, unsigned int *b, int *guard, int width){
  * work : workspace, minimally of length max(x,y)
  *
  */
-double jaro( unsigned int *a, 
+static double jaro( unsigned int *a, 
              unsigned int *b,
              int x,
              int y,
@@ -67,7 +67,6 @@ double jaro( unsigned int *a,
     y = x;
     x = z;
   }
-//printf("(x,y): (%d,%d)\n",x,y);
   
   // edge case
   if ( x==0 && y == 0 ) return 0;
@@ -95,9 +94,7 @@ double jaro( unsigned int *a,
       t += (J + left < jmax ) ? 1 : 0; 
       jmax = max(jmax, J + left);
     }
-// printf("Left = %2d right = %2d J = %2d, J+LEFT: %2d \n",left,right,J, J+left);
   }
-// printf("M = %d, m=%g, t=%g\n",M, m, t);
   double d;
   if ( m < 1 ){
     d = 1.0;
@@ -153,7 +150,6 @@ SEXP R_jaro(SEXP a, SEXP b){
     } else {
       y[k] = jaro(s, t, length_a, length_b, work);
     }
-    //memset(work, 0 , sizeof(int) * max_char);
   }
 
   
@@ -165,32 +161,6 @@ SEXP R_jaro(SEXP a, SEXP b){
 
 
 
-
-
-
-
-/*
-
-#include <stdlib.h>
-#include <stdio.h>
-void main(){
-  unsigned int a1[6] = {4,23,1,25,14,5};       // DWAYNE
-  unsigned int b1[5] = {4,21,1,14,5};          // DUANE
-  unsigned int a2[8] = {4,9,3,11,19,15,14,24}; // DICKSONX
-  unsigned int b2[5] = {4,9,24,15,14};         // DIXON
-  unsigned int a3[6] = {13,1,18,20,8,1};       // MARTHA
-  unsigned int b3[6] = {13,1,18,8,20,1};       // MARHTA
-  unsigned int a4[5] = {1,1,16,10,5};       // MARTHA
-  unsigned int b4[1] = {1};       // MARHTA
-  int *work = (int *) calloc(sizeof(int),200);
-  printf("distance DWAYNE vs DUANE: %g\n", 1-jaro(a1,b1,6,5,work) );
-  printf("distance DICKSONX vs DIXON: %g\n", 1-jaro(a2,b2,8,5,work) );
-  printf("distance MARTHA vs MARHTA: %g\n", 1-jaro(a3,b3,6,6,work) );
-  printf("distance AAPJE vs  A: %g\n",1-jaro(a4,b4,5,1,work));
-  printf("distance A vs  AAPJE: %g\n",1-jaro(b4,a4,1,5,work));
-  free(work);
-}
-*/
 
 
 
