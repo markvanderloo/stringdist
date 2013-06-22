@@ -32,7 +32,7 @@ TODO
 * jaro-winkler distance
 * ~~optionally use user-defined cluster for parallel computations~~
 * Separate R-functions giving more info on distance calculations:
-    * get q-gram counts from string
+    * ~~get q-gram counts from string~~
     * get actual longest common substring
     * get actual edits needed to go from one string to another
 * small (C-style) performance tweeks, like 

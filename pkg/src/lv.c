@@ -1,4 +1,5 @@
 
+#define USE_RINTERNALS
 #include <stdlib.h>
 #include <R.h>
 #include <Rdefines.h>
@@ -76,7 +77,7 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
 
    // output vector
    int nt = (na > nb) ? na : nb;   
-   int i,j,k;
+   int i,j;
    SEXP yy;
    PROTECT(yy = allocVector(REALSXP, nt));
    double *y = REAL(yy);   
@@ -89,9 +90,9 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
          continue;
       }
       y[k] = lv(
-         INTEGER(VECTOR_ELT(a,i)), 
+       (unsigned int *) INTEGER(VECTOR_ELT(a,i)), 
          length(VECTOR_ELT(a,i)), 
-         INTEGER(VECTOR_ELT(b,j)), 
+       (unsigned int *) INTEGER(VECTOR_ELT(b,j)), 
          length(VECTOR_ELT(b,j)), 
          w,
          maxDist,
