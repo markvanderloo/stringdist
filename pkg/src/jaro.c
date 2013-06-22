@@ -1,10 +1,8 @@
 
-
 #include <R.h>
 #include <Rdefines.h>
 #include "utils.h"
 #include <string.h>
-
 
 static inline int max(int x, int y){
   int m = (x < y) ? y : x;
@@ -49,27 +47,26 @@ static int match_int(unsigned int a, unsigned int *b, int *guard, int width){
  * work : workspace, minimally of length max(x,y)
  *
  */
-static double jaro( unsigned int *a, 
+static double jaro(
+             unsigned int *a, 
              unsigned int *b,
              int x,
              int y,
              int *work
         ){
 
+  // edge case
+  if ( x == 0 && y == 0 ) return 0;
+
   // swap arguments if necessary, so we always loop over the shortest string
   if ( x > y ){
-    unsigned int *c;
-    int z;
-    c = b;
+    unsigned int *c = b;
+    int z = y;
     b = a;
     a = c;
-    z = y;
     y = x;
     x = z;
   }
-  
-  // edge case
-  if ( x==0 && y == 0 ) return 0;
 
   // max transposition distance
   int M = max(max(x,y)/2 - 1,0);
@@ -106,9 +103,7 @@ static double jaro( unsigned int *a,
 }
 
 
-
-/* R interface                                                           */
-
+/*----------- R interface ------------------------------------------------*/
 
 SEXP R_jaro(SEXP a, SEXP b){
   PROTECT(a);
@@ -152,11 +147,9 @@ SEXP R_jaro(SEXP a, SEXP b){
     }
   }
 
-  
   UNPROTECT(3);
   free(work);
   return yy;
-
 }
 
 
