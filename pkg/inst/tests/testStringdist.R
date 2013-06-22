@@ -247,6 +247,12 @@ test_that("Extended examples work",{
     round(1-stringdist("duane","dwayne",method='jaro'),3),
     0.822
   )
+  # out-of range matches
+  expect_equal(
+    round(1 - stringdist("crate","trace",metho='jaro'),8),
+    round((3/5 + 3/5 + (3-0)/3)/3,8)
+  )
+
   # Other cases
   # 4 matches, no transpositions, short first string with non-matching character.
   expect_equal(stringdist("axiou","aaeeiioouu",method='jaro'),1-(4/5+4/10 + 4/4)/3);
