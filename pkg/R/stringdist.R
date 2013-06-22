@@ -101,6 +101,12 @@
 #' A good reference for qgram distances is E. Ukkonen (1992), Approximate string matching with q-grams and maximal matches. 
 #' Theoretical Computer Science, 92, 191-211.
 #' }
+#'
+#' \item{The Jaro distance used here is as described on the Wikipedia page. Unfortunately, there seems to be no single
+#'  definition for the Jaro distance in literature. For example Cohen, Ravikumar and Fienberg (Proceeedings of IIWEB03, Vol 47, 2003)
+#'  report a different matching window for characters in strings \code{a} and \code{b}. 
+#' }
+#'
 #'}
 #'
 #'
