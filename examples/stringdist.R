@@ -52,10 +52,16 @@ stringdist('abc','cba',method='qgram',q=1)
 stringdist('abc','cba',method='qgram',q=2)
 
 # Wikipedia has the following example of the Jaro-distance. 
-stringdist('MARTHA','MATHRA',method='jaro')
+stringdist('MARTHA','MATHRA',method='jw')
 # Note that stringdist gives a  _distance_ where wikipedia gives the corresponding 
 # _similarity measure_. To get the wikipedia result:
-1 - stringdist('MARTHA','MATHRA',method='jaro')
+1 - stringdist('MARTHA','MATHRA',method='jw')
+
+# The corresponding Jaro-Winkler distance can be computed by setting p=0.1
+stringdist('MARTHA','MATHRA',method='jw',p=0.1)
+# or, as a similarity measure
+1 - stringdist('MARTHA','MATHRA',method='jw',p=0.1)
+
 
 
 

@@ -1,5 +1,5 @@
 version 0.5.1
-- added Jaro distance
+- added Jaro and Jaro-Winkler distances
 
 version 0.5.0
 - added qgram counting function 'qgrams'

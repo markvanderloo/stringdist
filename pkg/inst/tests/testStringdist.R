@@ -227,59 +227,75 @@ test_that("binary tree is cleaned up properly in qgram-tree",{
 context("Jaro")
 test_that("basic examples and edge cases work",{
   # strings of length 1
-  expect_equal(stringdist("a","a",method='jaro'),0);
-  expect_equal(stringdist("a","b",method='jaro'),1);
-  expect_equal(stringdist("a","",method='jaro'), 1);
-  expect_equal(stringdist("","",method='jaro'), 0);
+  expect_equal(stringdist("a","a",method='jw'),0);
+  expect_equal(stringdist("a","b",method='jw'),1);
+  expect_equal(stringdist("a","",method='jw'), 1);
+  expect_equal(stringdist("","",method='jw'), 0);
 })
 
 test_that("Extended examples work",{
   # cases from wikipedia
   expect_equal(
-    round(1-stringdist("martha","marhta",method='jaro'),3),
+    round(1-stringdist("martha","marhta",method='jw'),3),
     0.944
   )
   expect_equal(
-    round(1-stringdist("dixon","dicksonx",method='jaro'),3),
+    round(1-stringdist("dixon","dicksonx",method='jw'),3),
     0.767
   )
   expect_equal(
-    round(1-stringdist("duane","dwayne",method='jaro'),3),
+    round(1-stringdist("duane","dwayne",method='jw'),3),
     0.822
   )
   # out-of range matches
   expect_equal(
-    round(1 - stringdist("crate","trace",metho='jaro'),8),
+    round(1 - stringdist("crate","trace",metho='jw'),8),
     round((3/5 + 3/5 + (3-0)/3)/3,8)
   )
 
   # Other cases
   # 4 matches, no transpositions, short first string with non-matching character.
-  expect_equal(stringdist("axiou","aaeeiioouu",method='jaro'),1-(4/5+4/10 + 4/4)/3);
+  expect_equal(stringdist("axiou","aaeeiioouu",method='jw'),1-(4/5+4/10 + 4/4)/3);
   # non-matching characters in both strings
-  expect_equal(stringdist("abcdeu","abxde",method='jaro'),1-(4/6+4/5+4/4)/3);
+  expect_equal(stringdist("abcdeu","abxde",method='jw'),1-(4/6+4/5+4/4)/3);
 })
 
 test_that("distance is symmetric",{
   expect_equal(
-    round(stringdist("martha","marhta",method='jaro'),8),
-    round(stringdist("marhta","martha",method='jaro'),8)
+    round(stringdist("martha","marhta",method='jw'),8),
+    round(stringdist("marhta","martha",method='jw'),8)
   )
   expect_equal(
-    round(stringdist("dicksonx","dixon",method='jaro'),8),
-    round(stringdist("dixon","dicksonx",method='jaro'),8)
+    round(stringdist("dicksonx","dixon",method='jw'),8),
+    round(stringdist("dixon","dicksonx",method='jw'),8)
   )
 })
 
 test_that("Shortest argument is recycled",{
-   expect_equal(stringdist(c('a','b'),'a',method='jaro'),c(0,1))
-   expect_equal(stringdist('a',c('a','b'),method='jaro'),c(0,1))
+   expect_equal(stringdist(c('a','b'),'a',method='jw'),c(0,1))
+   expect_equal(stringdist('a',c('a','b'),method='jw'),c(0,1))
 })
 
 test_that("NA's are handled correctly",{
-   expect_true(is.na(stringdist(NA ,'a',method='jaro')))
-   expect_true(is.na(stringdist('a',NA ,method='jaro')))
-   expect_true(is.na(stringdist(NA ,NA ,method='jaro')))
+   expect_true(is.na(stringdist(NA ,'a',method='jw')))
+   expect_true(is.na(stringdist('a',NA ,method='jw')))
+   expect_true(is.na(stringdist(NA ,NA ,method='jw')))
+})
+
+context("Jaro-Winkler")
+test_that("wikipedia examples",{
+  expect_equal(
+    round(stringdist("martha","marhta",method="jw",p=0.1),3),
+    1-0.961
+  )
+  expect_equal(
+    round(stringdist("dwayne","duane",method="jw",p=0.1),3),
+    round(1-0.84,3)
+  )
+  expect_equal(
+    round(stringdist("dixon","dicksonx",method="jw",p=0.1),3),
+    round(1-0.813,3)
+  )
 })
 
 

@@ -1,7 +1,7 @@
 stringdist
 ==========
 
-String distance functions for R
+String distance functions for R 
 
 String distance functions are scattered around R, and R's packages. This package
 is a re-implementation of some common (weighted) distance functions, offered
@@ -13,14 +13,36 @@ through a uniform interface. As of version 0.5.1, distance functions include:
 * Full Damerau-Levenshtein distance (weighted);
 * Longest Common Substring distance;
 * Q-gram distance (two implementations; currently one is exposed).
-* Jaro distance
+* Jaro and Jaro-Winker distance
 
 
-To my best knowledge, the latter three were not available before in R. Workhorse
+To my best knowledge, the latter four were not available before in R. Workhorse
 functions are implemented in C. The package offers two main functions:
 
 * `stringdist`  computes pairwise distances between two input character vectors (shorter one is recycled)
 * `stringdistmatrix` computes the distance matrix between two input character vectors, optionally running in parallel.
+
+Besides that the function `qgrams` tabulates the qgrams in a `charcter` vector.
+
+Installation
+------------
+To install the latest release from CRAN, open an R terminal and type
+
+`install.packages('stringdist')`
+
+To obtain the package from source code open a `bash` terminal (or `git bash` if you work under Windows
+with `msysgit`) and type
+
+```
+$> git clone https://github.com/markvanderloo/stringdist.git
+$> cd stringdist
+$> bash ./build.bash
+$> R CMD INSTALL output/stringdist_*.tar.gz
+```
+
+Warning: the github version can change any time and may not even build properly. As most
+of the code is written in `C`, the development version may crash your `R`-session.
+
 
 TODO
 ----
@@ -32,7 +54,7 @@ TODO
     * Using hashed storage
     * Option to add _q-1_ pre- and or postfixes
 * ~~jaro distance~~
-* jaro-winkler distance
+* ~~jaro-winkler distance~~
 * ~~optionally use user-defined cluster for parallel computations~~
 * Separate R-functions giving more info on distance calculations:
     * ~~get q-gram counts from string~~

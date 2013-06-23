@@ -102,10 +102,21 @@ static double jaro(
   return d;
 }
 
+// Winkler's l-factor (nr of matching characters at beginning of the string).
+static double get_l(unsigned int *a, unsigned int *b, int n){
+  int i;
+  double l;
+  while ( a[i] == b[i] && i < n ){ 
+    i++;
+  }
+  l = (double) i;
+  return l;
+}
+
 
 /*----------- R interface ------------------------------------------------*/
 
-SEXP R_jaro(SEXP a, SEXP b){
+SEXP R_jaro_winkler(SEXP a, SEXP b, SEXP p){
   PROTECT(a);
   PROTECT(b);
 
@@ -119,7 +130,7 @@ SEXP R_jaro(SEXP a, SEXP b){
   int nt = max(na,nb);
   
   int *s, *t;
-  int length_a, length_b;
+  int length_s, length_t;
 
   // workspace for worker function
   int *work = (int *) calloc( sizeof(int), max_char );
@@ -130,30 +141,35 @@ SEXP R_jaro(SEXP a, SEXP b){
   double *y = REAL(yy);
 
   // compute distances, skipping NA's
-  int i,j;
+  int i,j,l,n;
+  double pp = REAL(p)[0];
   for ( int k=0; k < nt; ++k ){
     i = k % na;
     j = k % nb;
 
-    length_a = length(VECTOR_ELT(a,i));
-    length_b = length(VECTOR_ELT(b,j));
-    s = INTEGER(VECTOR_ELT(a,i));
-    t = INTEGER(VECTOR_ELT(b,j));
+    length_s = length(VECTOR_ELT(a,i));
+    length_t = length(VECTOR_ELT(b,j));
+    s = (unsigned int *) INTEGER(VECTOR_ELT(a,i));
+    t = (unsigned int *) INTEGER(VECTOR_ELT(b,j));
     if ( s[0] == NA_INTEGER || t[0] == NA_INTEGER){
       y[k] = NA_REAL;
       continue;
-    } else {
-      y[k] = jaro(s, t, length_a, length_b, work);
+    } else { // jaro distance
+      y[k] = jaro(s, t, length_s, length_t, work);
+    } 
+    // Winkler's penalty factor
+    if ( pp > 0 && y[k] != NA_REAL && y[k] > 0 ){
+      n = min(min(length_s,length_t),4);
+      y[k] =  y[k] - get_l(s,t,n)*pp*y[k]; 
+
     }
   }
+    
 
   UNPROTECT(3);
   free(work);
   return yy;
 }
-
-
-
 
 
 

@@ -21,7 +21,7 @@
 #'    \code{h}  \tab Hamming distance (\code{a} and \code{b} must have same nr of characters).\cr
 #'    \code{lcs} \tab Longest common substring.\cr
 #'    \code{qgram} \tab \eqn{q}-gram distance. \cr
-#'    \code{jaro} \tab Jaro-distance.
+#'    \code{jw} \tab Jaro-Winker distance.
 #' }
 #' The \bold{Hamming distance} counts the number of character substitutions that turns 
 #' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters \code{-1} is
@@ -50,7 +50,8 @@
 #' the absolute differences \eqn{|x_i-y_i|}.
 #' The computation is aborted when \code{q} is is larger than the length of any of the strings. In that case \code{-1}  is returned.
 #'
-#' The \bold{Jaro distance} is a number between 0 (exact match) and 1 (completely dissimilar) measuring dissimilarity between strings.
+#' The \bold{Jaro distance} (\code{method=jw}, \code{p=0}), is a number between 0 (exact match) and 1 (completely dissimilar) measuring 
+#' dissimilarity between strings.
 #' It is defined to be 0 when both strings have length 0, and 1 when  there are no character matches between \code{a} and \code{b}. 
 #' Otherwise, the Jaro distance is defined as \eqn{1-(1/3)(m/|a| + m/|b| + (m-t)/m)}. Here,\eqn{|a|} indicates the number of
 #' characters in \code{a} (after conversion to integers), \eqn{m} is the number of 
@@ -59,10 +60,10 @@
 #' \eqn{c} occurs in \code{b}, and the index of \eqn{c} in \code{a} differs less than \eqn{max(|a|,|b|)/2 -1} (where we use integer division).
 #' Two matching characters are transposed when they are matched but they occur in different order in string \code{a} and \code{b}.
 #'  
-#'  
-#'  
-#'  
-#'
+#' The \bold{Jaro-Winkler distance} (\code{method=jw}, \code{0<p<=0.25}) adds a correction term to the Jaro-distance. It is defined as \eqn{d - l*p*d}, where
+#' \eqn{d} is the Jaro-distance. Here,  \eqn{l} is obtained by counting, from the start of the input strings, after how many
+#' characters the first character mismatch between the two strings occurs, with a maximum of four. The factor \eqn{p}
+#' is a penalty factor, which in the work of Winkler is often chosen \eqn{0.1}.
 #'
 #' @section Encoding issues:
 #' Input strings are re-encoded to \code{utf8} an then to \code{integer}
@@ -102,7 +103,8 @@
 #' Theoretical Computer Science, 92, 191-211.
 #' }
 #'
-#' \item{The Jaro distance used here is as described on the Wikipedia page. Unfortunately, there seems to be no single
+#' \item{Wikipedia \code{\link{http://en.wikipedia.org/wiki/Jaro\%E2\%80\%93Winkler_distance}} describes the Jaro-Winker
+#' distance used in this package. Unfortunately, there seems to be no single
 #'  definition for the Jaro distance in literature. For example Cohen, Ravikumar and Fienberg (Proceeedings of IIWEB03, Vol 47, 2003)
 #'  report a different matching window for characters in strings \code{a} and \code{b}. 
 #' }
@@ -118,8 +120,16 @@
 #'   Weights must be positive and not exceed 1. \code{weight[4]} is ignored when \code{method='lv'} and \code{weight} is
 #'   ignored completely when \code{method='h'}, \code{method='qgram'} or \code{method='lcs'}.
 #' @param maxDist  Maximum string distance before calculation is stopped, \code{maxDist=0} 
-#'    means calculation goes on untill the distance is computed. Ignored for \code{method='qgram'}.
+#'    means calculation goes on untill the distance is computed. Ignored for \code{method='qgram'} and
+#'    \code{method='jw'}.
 #' @param q  size of the \eqn{q}-gram, must be nonnegative. Ignored for all but \code{method='qgram'}.
+#' @param p penalty factor for Jaro-Winkler distance. If \code{p=0} (default), the Jaro-distance is returned.
+#'  Ignored for all methods except \code{'jw'}.
+#'
+#'
+#'
+#'
+#'
 #'
 #' @return For \code{stringdist},  a vector with string distances of size \code{max(length(a),length(b))}.
 #'  For \code{stringdistmatrix}, a \code{length(a)xlength(b)} \code{matrix}. The returned distance is
@@ -129,7 +139,11 @@
 #'  
 #' @example ../examples/stringdist.R
 #' @export
-stringdist <- function(a, b, method=c("osa","lv","dl","h","lcs", "qgram", "jaro"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1){
+stringdist <- function(a, b, 
+  method=c("osa","lv","dl","h","lcs", "qgram", "jw"), 
+  weight=c(d=1,i=1,s=1,t=1), 
+  maxDist=0, q=1, p=0
+){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -141,18 +155,31 @@ stringdist <- function(a, b, method=c("osa","lv","dl","h","lcs", "qgram", "jaro"
   stopifnot(
       all(is.finite(weight)),
       all(weight > 0),
-      all(weight <=1)
+      all(weight <=1),
+      p <= 0.25,
+      p >= 0
   )
-  do_dist(b,a,method,weight,maxDist,q)
+  do_dist(b,a,method,weight,maxDist,q,p)
 }
 
 
-#' @param ncores number of cores to use. If \code{ncores>1}, a local cluster is created using \code{\link[parallel]{makeCluster}}.
-#' Parallelisation is over \code{b}, so the speed gain by parallelisation is highest when \code{b} has less elements than \code{a}.
-#' @param cluster (optional) a custom cluster, created with \code{\link[parallel]{makeCluster}}. If \code{cluster} is not \code{NULL}, \code{ncores} is ignored.
+#' @param ncores number of cores to use. If \code{ncores>1}, a local cluster is
+#' created using \code{\link[parallel]{makeCluster}}. Parallelisation is over \code{b}, so 
+#' the speed gain by parallelisation is highest when \code{b} has less elements than \code{a}.
+#' @param cluster (optional) a custom cluster, created with
+#' \code{\link[parallel]{makeCluster}}. If \code{cluster} is not \code{NULL},
+#' \code{ncores} is ignored.
+#'
+#'
+#'
 #' @rdname stringdist
 #' @export
-stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h","lcs","qgram", "jaro"), weight=c(d=1,i=1,s=1,t=1), maxDist=0, q=1, ncores=1, cluster=NULL){
+stringdistmatrix <- function(a, b, 
+  method=c("osa","lv","dl","h","lcs","qgram", "jw"), 
+  weight=c(d=1,i=1,s=1,t=1), 
+  maxDist=0, q=1, p=0,
+  ncores=1, cluster=NULL
+){
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
@@ -162,7 +189,9 @@ stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h","lcs","qgram", "
   stopifnot(
       all(is.finite(weight)),
       all(weight > 0),
-      all(weight <=1)
+      all(weight <=1),
+      p <= 0.25,
+      p >= 0
   )
   a <- char2int(a)
   b <- lapply(char2int(b),list)
@@ -175,7 +204,7 @@ stringdistmatrix <- function(a, b, method=c("osa","lv","dl","h","lcs","qgram", "
       stopifnot(inherits(cluster, 'cluster'))
       cl <- cluster
     }
-    x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q)
+    x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q, p)
     if (is.null(cluster)) stopCluster(cl)
   }
   x
@@ -193,7 +222,7 @@ char2int <- function(x){
 
 
 
-do_dist <- function(a,b,method,weight,maxDist,q){
+do_dist <- function(a, b, method, weight, maxDist, q, p){
   switch(method,
     osa     = .Call('R_osa'   , a, b, as.double(weight), as.double(maxDist)),
     lv      = .Call('R_lv'    , a, b, as.double(weight), as.double(maxDist)),
@@ -201,7 +230,7 @@ do_dist <- function(a,b,method,weight,maxDist,q){
     h       = .Call('R_hm'    , a, b, as.integer(maxDist)),
     lcs     = .Call('R_lcs'   , a, b, as.integer(maxDist)),
     qgram   = .Call('R_qgram_tree' , a, b, as.integer(q)),
-    jaro    = .Call('R_jaro', a, b)
+    jw      = .Call('R_jaro_winkler', a, b, as.double(p))
   )
 }
 
