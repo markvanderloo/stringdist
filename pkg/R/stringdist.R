@@ -103,7 +103,7 @@
 #' Theoretical Computer Science, 92, 191-211.
 #' }
 #'
-#' \item{Wikipedia \code{\link{http://en.wikipedia.org/wiki/Jaro\%E2\%80\%93Winkler_distance}} describes the Jaro-Winker
+#' \item{Wikipedia \code{http://en.wikipedia.org/wiki/Jaro\%E2\%80\%93Winkler_distance} describes the Jaro-Winker
 #' distance used in this package. Unfortunately, there seems to be no single
 #'  definition for the Jaro distance in literature. For example Cohen, Ravikumar and Fienberg (Proceeedings of IIWEB03, Vol 47, 2003)
 #'  report a different matching window for characters in strings \code{a} and \code{b}. 
@@ -123,8 +123,8 @@
 #'    means calculation goes on untill the distance is computed. Ignored for \code{method='qgram'} and
 #'    \code{method='jw'}.
 #' @param q  size of the \eqn{q}-gram, must be nonnegative. Ignored for all but \code{method='qgram'}.
-#' @param p penalty factor for Jaro-Winkler distance. If \code{p=0} (default), the Jaro-distance is returned.
-#'  Ignored for all methods except \code{'jw'}.
+#' @param p penalty factor for Jaro-Winkler distance. The valid range for \code{p} is \code{0<= p <= 0.25}. 
+#'  If \code{p=0} (default), the Jaro-distance is returned. Ignored for all methods except \code{'jw'}.
 #'
 #'
 #'
