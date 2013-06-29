@@ -23,15 +23,14 @@ qgrams <- function(...,q=1L){
   L <- lapply(list(...), as.character)
 
   if ( is.null(names(L)) ){
-    nms <- paste("V",1:length(L),sep="")
+    names(L) <- paste("V",1:length(L),sep="")
   } else {
     I <- names(L) == "";
     names(L)[I] = paste("V",which(I),sep="")
   }
   L <- lapply(L,char2int)
-
+  
   v <- .Call("R_get_qgrams",L,as.integer(q))
-
   # get qgram labels
   A <- array(attr(v,"qgrams"),dim=c(1,length(v)))
   if ( q == 0 ){
@@ -41,16 +40,14 @@ qgrams <- function(...,q=1L){
     attr(v,"qgrams") <- NULL
     A <- array(Q,dim=c(q, length(v)/length(L)))
     qgrams = apply(A,2,intToUtf8)
-    
   }
-  A <- array(v,
+  array(v,
     dim=c(length(L), length(qgrams)),
     dimnames = list(
     names(L),
     qgrams
    ) 
   )
-  as.table(A)
 }
 
 
