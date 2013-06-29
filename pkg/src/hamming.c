@@ -4,6 +4,7 @@
 #define USE_RINTERNALS
 #include <R.h>
 #include <Rdefines.h>
+#include "utils.h"
 
 int hamming(unsigned int *a, unsigned int *b, int n, int maxDistance){
    int i, h=0;
@@ -30,12 +31,10 @@ SEXP R_hm(SEXP a, SEXP b, SEXP maxDistance){
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP,nt));
   int *y = INTEGER(yy);
-  int i,j,k,nchar;
+  int i=0, j=0, k=0, nchar;
   int maxDist = INTEGER(maxDistance)[0];
 
   for ( k=0; k<nt; ++k){
-    i = k % na;
-    j = k % nb;
     if ( INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER ){
       y[k] = NA_INTEGER;
       continue;         
@@ -51,6 +50,8 @@ SEXP R_hm(SEXP a, SEXP b, SEXP maxDistance){
       nchar,
       maxDist
     );
+    i = RECYCLE(i+1,na);
+    j = RECYCLE(j+1,nb);
   }
   UNPROTECT(4);
   return yy;

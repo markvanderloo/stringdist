@@ -178,7 +178,7 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   PROTECT(maxDistance);
   PROTECT(weight);
    
-  int i, j, k;
+  int i=0, j=0, k=0;
   int na = length(a);
   int nb = length(b);
   int nt = (na > nb) ? na : nb;
@@ -196,8 +196,6 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   double *scores = (double *) malloc( (max_a + 3) * (max_b + 2) * sizeof(double) );
 
   for ( k=0; k < nt; ++k ){
-    i = k % na;
-    j = k % nb;
     if ( INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
       y[k] = NA_REAL;
       continue;
@@ -212,6 +210,8 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
       dict,
       scores
     );
+    i = RECYCLE(i+1,na);
+    j = RECYCLE(j+1,nb);
   }
   free_dictionary(dict);
   free(scores);

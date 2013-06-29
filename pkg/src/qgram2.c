@@ -4,12 +4,11 @@
  */
 
 //#define USE_RINTERNALS
-#include<stdlib.h>
-#include<string.h>
-#include<stdio.h>
-#include<R.h>
-#include<Rdefines.h>
-
+#include <stdlib.h>
+#include <string.h>
+#include <R.h>
+#include <Rdefines.h>
+#include "utils.h"
 /* binary tree; dictionary of qgrams */
 
 typedef struct qnode {
@@ -200,7 +199,7 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance){
     error("unkown distance function");
   } 
 
-  int i, j, k;
+  int i=0, j=0;
   int na = length(a);
   int nb = length(b);
   int nt = (na > nb) ? na : nb;
@@ -212,9 +211,7 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance){
   // set up a qtree;
   qtree *Q = NULL;
 
-  for ( k=0; k < nt; ++k ){
-    i = k % na;
-    j = k % nb;
+  for ( int k=0; k < nt; ++k ){
     if (INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
       y[k] = NA_REAL;
       continue;
@@ -231,6 +228,8 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance){
     if (y[k] == -2){
       error("Could not allocate enough memory");
     }
+    i = RECYCLE(i+1,na);
+    j = RECYCLE(j+1,nb);
   }
   free_qtree(Q);
   UNPROTECT(5);

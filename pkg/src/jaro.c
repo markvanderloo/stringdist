@@ -141,12 +141,9 @@ SEXP R_jaro_winkler(SEXP a, SEXP b, SEXP p){
   double *y = REAL(yy);
 
   // compute distances, skipping NA's
-  int i,j,l,n;
+  int i=0,j=0,l,n;
   double pp = REAL(p)[0];
   for ( int k=0; k < nt; ++k ){
-    i = k % na;
-    j = k % nb;
-
     length_s = length(VECTOR_ELT(a,i));
     length_t = length(VECTOR_ELT(b,j));
     s = (unsigned int *) INTEGER(VECTOR_ELT(a,i));
@@ -163,6 +160,8 @@ SEXP R_jaro_winkler(SEXP a, SEXP b, SEXP p){
       y[k] =  y[k] - get_l(s,t,n)*pp*y[k]; 
 
     }
+    i = RECYCLE(i+1,na);
+    j = RECYCLE(j+1,nb);
   }
     
 

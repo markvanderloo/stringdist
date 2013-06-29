@@ -7,7 +7,7 @@
 #include <string.h>
 #include <R.h>
 #include <Rdefines.h>
-
+#include "utils.h"
 
 /* Some workspace stuff */
 typedef struct{
@@ -163,7 +163,7 @@ SEXP R_qgram(SEXP a, SEXP b, SEXP qq){
     UNPROTECT(2);
     error("q must be a nonnegative integer");
   } 
-  int i, j, k;
+  int i=0, j=0;
   int na = length(a);
   int nb = length(b);
   int nt = (na > nb) ? na : nb;
@@ -177,9 +177,7 @@ SEXP R_qgram(SEXP a, SEXP b, SEXP qq){
   if (work == NULL){
     error("Could not allocate enough memory");
   }
-  for ( k=0; k < nt; ++k ){
-    i = k % na;
-    j = k % nb;
+  for ( int k=0; k < nt; ++k ){
     if (INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
       y[k] = NA_REAL;
       continue;
@@ -192,6 +190,8 @@ SEXP R_qgram(SEXP a, SEXP b, SEXP qq){
         q,
         work
     );
+    i = RECYCLE(i+1,na);
+    j = RECYCLE(j+1,nb);
   }
   free(work);
   UNPROTECT(3);

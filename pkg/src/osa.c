@@ -87,14 +87,12 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
 
    // output vector
    int nt = (na > nb) ? na : nb;   
-   int i,j;
+   int i=0, j=0;
    SEXP yy;
    PROTECT(yy = allocVector(REALSXP, nt));
    double *y = REAL(yy);   
    
    for ( int k=0; k < nt; ++k ){
-      i = k % na;
-      j = k % nb;
       if (INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
          y[k] = NA_REAL;
          continue;
@@ -108,6 +106,8 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
          maxDist,
          scores
       );
+      i = RECYCLE(i+1,na);
+      j = RECYCLE(j+1,nb);
    }
    
    free(scores);
