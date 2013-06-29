@@ -3,6 +3,8 @@ stringdist
 
 String distance functions for R 
 
+Current CRAN version: 0.5.0
+
 String distance functions are scattered around R, and R's packages. This package
 is a re-implementation of some common (weighted) distance functions, offered
 through a uniform interface. As of version 0.5.1, distance functions include:
@@ -53,6 +55,9 @@ TODO
     * ~~Using tree storage~~
     * Using hashed storage
     * Option to add _q-1_ pre- and or postfixes
+* Jaccard similarity (exposed as a distance)
+* cosine similarity (idem)
+* Tanimoto coefficient (idem)
 * ~~jaro distance~~
 * ~~jaro-winkler distance~~
 * ~~optionally use user-defined cluster for parallel computations~~
@@ -66,9 +71,10 @@ TODO
 
 Could
 ----
-Perhaps in the future I'll add supporting functionality such as
 
-* An encoding sniffer, detecting character encodings from files (not sure if that's available in R already)
-* Some string normalizing functionality
-* ...
+* Perhaps in the future I'll add supporting functionality such as
+    * An encoding sniffer, detecting character encodings from files (not sure if that's available in R already)
+    * Some string normalizing functionality
+    * ...
+* Put paralellisation under the hood with openMP
 

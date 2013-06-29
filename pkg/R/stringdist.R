@@ -18,10 +18,12 @@
 #'    \code{osa} \tab Optimal string aligment, (restricted Damerau-Levenshtein distance).\cr
 #'    \code{lv} \tab Levenshtein distance.\cr
 #'    \code{dl} \tab Full Damerau-Levenshtein distance.\cr
-#'    \code{h}  \tab Hamming distance (\code{a} and \code{b} must have same nr of characters).\cr
+#'    \code{hamming}  \tab Hamming distance (\code{a} and \code{b} must have same nr of characters).\cr
 #'    \code{lcs} \tab Longest common substring.\cr
 #'    \code{qgram} \tab \eqn{q}-gram distance. \cr
-#'    \code{jw} \tab Jaro-Winker distance.
+#'    \code{cosine} \tab cosine distance between \eqn{q}-gram counts \cr
+#'    \code{jaccard} \tab Jaccard distance between \eqn{q}-gram counts \cr
+#'    \code{jw} \tab Jaro, or Jaro-Winker distance.
 #' }
 #' The \bold{Hamming distance} counts the number of character substitutions that turns 
 #' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters \code{-1} is
@@ -140,7 +142,7 @@
 #' @example ../examples/stringdist.R
 #' @export
 stringdist <- function(a, b, 
-  method=c("osa","lv","dl","h","lcs", "qgram", "jw"), 
+  method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard", "jw"), 
   weight=c(d=1,i=1,s=1,t=1), 
   maxDist=0, q=1, p=0
 ){
@@ -175,7 +177,7 @@ stringdist <- function(a, b,
 #' @rdname stringdist
 #' @export
 stringdistmatrix <- function(a, b, 
-  method=c("osa","lv","dl","h","lcs","qgram", "jw"), 
+  method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw"), 
   weight=c(d=1,i=1,s=1,t=1), 
   maxDist=0, q=1, p=0,
   ncores=1, cluster=NULL
@@ -227,9 +229,11 @@ do_dist <- function(a, b, method, weight, maxDist, q, p){
     osa     = .Call('R_osa'   , a, b, as.double(weight), as.double(maxDist)),
     lv      = .Call('R_lv'    , a, b, as.double(weight), as.double(maxDist)),
     dl      = .Call('R_dl'    , a, b, as.double(weight), as.double(maxDist)),
-    h       = .Call('R_hm'    , a, b, as.integer(maxDist)),
+    hamming = .Call('R_hm'    , a, b, as.integer(maxDist)),
     lcs     = .Call('R_lcs'   , a, b, as.integer(maxDist)),
-    qgram   = .Call('R_qgram_tree' , a, b, as.integer(q)),
+    qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L),
+    cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L),
+    jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L),
     jw      = .Call('R_jaro_winkler', a, b, as.double(p))
   )
 }

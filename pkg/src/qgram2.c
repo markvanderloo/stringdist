@@ -3,7 +3,7 @@
  * of stringdist (which loops over string pairs).
  */
 
-#define USE_RINTERNALS
+//#define USE_RINTERNALS
 #include<stdlib.h>
 #include<string.h>
 #include<stdio.h>
@@ -85,14 +85,51 @@ static qtree *push_string(unsigned int *str, int strlen, unsigned int q, qtree *
 /* get qgram-distance from tree and set all qgram-freqencies 
  * to 0 (so the tree can be reused).
  */
-static void getdist(qtree *Q, int *d){
+static void getdist(qtree *Q, double *d){
   if (Q == NULL) return;
-  d[0] = d[0] + abs(Q->n[0] - Q->n[1]);
+  d[0] += (double) abs(Q->n[0] - Q->n[1]);
   Q->n[0] = 0;
   Q->n[1] = 0;
   getdist(Q->left, d);
   getdist(Q->right,d);
 }
+
+/* get x.y,||x||and ||y|| for cosine distance from the tree and set all qgram-freqencies 
+ * to 0 so the tree van be reused.
+ */
+static void getcosine(qtree *Q, double *d){
+  if ( Q == NULL ) return;
+  // inner product
+  d[0] += (double) Q->n[0] * Q->n[1];
+  // norm of v(s,q)
+  d[1] += (double) Q->n[0]*Q->n[0];
+  d[2] += (double) Q->n[1]*Q->n[1];
+  // clean up and continue
+  Q->n[0] = 0;
+  Q->n[1] = 0;
+  getcosine(Q->left,d);
+  getcosine(Q->right,d);
+}
+
+/* get jaccard distance from the tree and set all qgram-freqencies 
+ * to 0 so the tree van be reused.
+ */
+static void getjaccard(qtree *Q, double *d){
+  if ( Q == NULL ) return;
+  // numerator: |x A y|
+  if ( Q->n[0] > 0 && Q->n[1] > 0){
+    ++d[0];
+  } 
+  // denominator: |x V y|
+  ++d[1];
+  // clean up and continue
+  Q->n[0] = 0;
+  Q->n[1] = 0;
+  getjaccard(Q->left,d);
+  getjaccard(Q->right,d);
+}
+
+
 
 /*Get qgram distances 
  * return values:
@@ -100,13 +137,14 @@ static void getdist(qtree *Q, int *d){
  * -1   : infinite distance
  * -2   : Not enough memory
  */
-static int qgram_tree(
+static double qgram_tree(
     unsigned int *s, 
     unsigned int *t, 
     unsigned int x,
     unsigned int y,
     unsigned int q, 
-    qtree *Q
+    qtree *Q,
+    int distance
   ){
   // return -1 when q is larger than the length of the shortest string.
   if ( q > (x <= y ? x : y) ) return -1;
@@ -119,34 +157,57 @@ static int qgram_tree(
     } 
   }
 
-  int dist[1] = {0};
+  double dist[3] = {0,0,0};
 
   Q = push_string(s, x, q, Q, 0);
   if (Q == NULL) return -2;
   Q = push_string(t, y, q, Q, 1);
   if (Q == NULL) return -2;
 
-  getdist(Q,dist);
+  switch ( distance ){
+    case 0:
+      getdist(Q,dist);
+      break;
+    case 1:
+      getcosine(Q, dist);
+      dist[0] = 1.0 - dist[0]/(sqrt(dist[1]) * sqrt(dist[2]));
+      break;
+    case 2:
+      getjaccard(Q,dist);
+      dist[0] = 1.0 - dist[0]/dist[1];
+      break;
+    default:
+      break;
+  }
   return dist[0];
 }
 
 /* R interface to qgram distance */
-SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq){
+SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance){
   PROTECT(a);
   PROTECT(b);
+  PROTECT(qq);
+  PROTECT(distance);
   int q = INTEGER(qq)[0];
   if ( q < 0 ){
-    UNPROTECT(2);
+    UNPROTECT(4);
     error("q must be a nonnegative integer");
+  }
+  // choose distance function
+  int dist = INTEGER(distance)[0];
+  if ( dist < 0 || dist > 2 ){
+    UNPROTECT(4);
+    error("unkown distance function");
   } 
+
   int i, j, k;
   int na = length(a);
   int nb = length(b);
   int nt = (na > nb) ? na : nb;
 
   SEXP yy; 
-  PROTECT(yy = allocVector(INTSXP, nt));
-  int *y = INTEGER(yy);
+  PROTECT(yy = allocVector(REALSXP, nt));
+  double *y = REAL(yy);
 
   // set up a qtree;
   qtree *Q = NULL;
@@ -164,14 +225,15 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq){
         length(VECTOR_ELT(a,i)),
         length(VECTOR_ELT(b,j)),
         q,
-        Q
+        Q,
+        dist
     );
     if (y[k] == -2){
       error("Could not allocate enough memory");
     }
   }
   free_qtree(Q);
-  UNPROTECT(3);
+  UNPROTECT(5);
   return yy;
 }
 
