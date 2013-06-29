@@ -48,9 +48,14 @@
 #' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
 #'
 #' A \bold{\eqn{q}-gram} is a subsequence of \eqn{q} \emph{consecutive} characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
-#' of \eqn{q}-gram occurrences in \code{a} (\code{b}), the \eqn{q}-gram distance is given by the sum over
+#' of \eqn{q}-gram occurrences in \code{a} (\code{b}), the \bold{\eqn{q}-gram distance} is given by the sum over
 #' the absolute differences \eqn{|x_i-y_i|}.
 #' The computation is aborted when \code{q} is is larger than the length of any of the strings. In that case \code{-1}  is returned.
+#'
+#' The \bold{cosine distance} is computed as \eqn{1-x\cdot y/(\|x\|\|y\|)}, where \eqn{x} and \eqn{y} were defined above.
+#' 
+#' Let \eqn{X} be the set of unique \eqn{q}-grams in \code{a} and \eqn{Y} the set of unique \eqn{q}-grams in \code{b}. 
+#' The \bold{Jaccard distance} is given by \eqn{1-|X\cap Y|/|X\cup Y|}.
 #'
 #' The \bold{Jaro distance} (\code{method=jw}, \code{p=0}), is a number between 0 (exact match) and 1 (completely dissimilar) measuring 
 #' dissimilarity between strings.
@@ -120,7 +125,7 @@
 #' @param method Method for distance calculation. The default is \code{"osa"} (see details).
 #' @param weight The penalty for deletion, insertion, substitution and transposition, in that order.  
 #'   Weights must be positive and not exceed 1. \code{weight[4]} is ignored when \code{method='lv'} and \code{weight} is
-#'   ignored completely when \code{method='h'}, \code{method='qgram'} or \code{method='lcs'}.
+#'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'} or \code{'lcs'}.
 #' @param maxDist  Maximum string distance before calculation is stopped, \code{maxDist=0} 
 #'    means calculation goes on untill the distance is computed. Ignored for \code{method='qgram'} and
 #'    \code{method='jw'}.

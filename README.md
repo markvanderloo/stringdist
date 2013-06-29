@@ -7,18 +7,20 @@ Current CRAN version: 0.5.0
 
 String distance functions are scattered around R, and R's packages. This package
 is a re-implementation of some common (weighted) distance functions, offered
-through a uniform interface. As of version 0.5.1, distance functions include:
+through a uniform interface. As of version >=0.5.1, distance functions include:
 
 * Hamming distance; 
 * Levenshtein distance (weighted);
 * Restricted Damerau-Levenshtein distance (weighted, a.k.a. Optimal String Alignment);
 * Full Damerau-Levenshtein distance (weighted);
 * Longest Common Substring distance;
-* Q-gram distance (two implementations; currently one is exposed).
-* Jaro and Jaro-Winker distance
+* Q-gram distance (two implementations using different q-gram storage solutions; currently one is exposed).
+* cosine distance for q-gram count vectors (= 1-cosine similarity)
+* Jaccard distance for q-gram count vectors (= 1-Jaccard similarity)
+* Jaro, and Jaro-Winker distance
 
 
-To my best knowledge, the latter four were not available before in R. Workhorse
+To my best knowledge, the latter six were not available before in R. Workhorse
 functions are implemented in C. The package offers two main functions:
 
 * `stringdist`  computes pairwise distances between two input character vectors (shorter one is recycled)
@@ -55,9 +57,9 @@ TODO
     * ~~Using tree storage~~
     * Using hashed storage
     * Option to add _q-1_ pre- and or postfixes
-* Jaccard similarity (exposed as a distance)
-* cosine similarity (idem)
-* Tanimoto coefficient (idem)
+* ~~Jaccard similarity (exposed as a distance)~~
+* ~~cosine similarity (idem)~~
+* Tanimoto coefficient -> will be example of `qgrams` usage
 * ~~jaro distance~~
 * ~~jaro-winkler distance~~
 * ~~optionally use user-defined cluster for parallel computations~~

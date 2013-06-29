@@ -1,6 +1,7 @@
 
 library(testthat)
 
+### -------------------------------------------------------------
 context("General ")
 test_that("Argument parsing",{
    expect_equal(stringdist(character(0),"a"),numeric(0))
@@ -11,6 +12,7 @@ test_that("Argument parsing",{
 }) 
 
 
+### -------------------------------------------------------------
 context("Optimal String Alignment")
 test_that("Edge cases in OSA method",{
    expect_equal(stringdist( "", "",method='osa'),0)
@@ -55,6 +57,7 @@ test_that("NA's are handled correctly",{
 
 })
 
+### -------------------------------------------------------------
 context("Levenstein")
 test_that("Edge cases in Levenshtein method",{
    expect_equal(stringdist( "", "",method='lv'),0)
@@ -95,6 +98,7 @@ test_that("NA's are handled correctly",{
    expect_true(is.na(stringdist(NA ,NA ,method='lv')))
 })
 
+### -------------------------------------------------------------
 context("Damerau-Levenstein")
 test_that("Edge cases in DL method",{
    expect_equal(stringdist( "", "",method='dl'),0)
@@ -137,6 +141,7 @@ test_that("NA's are handled correctly",{
    expect_true(is.na(stringdist(NA ,NA ,method='dl')))
 })
 
+### -------------------------------------------------------------
 context("Longest Common Substring")
 test_that("Edge cases in LCS method",{
    expect_equal(stringdist( "", "",method='lcs'),0)
@@ -165,8 +170,8 @@ test_that("NA's are handled correctly",{
 })
 
 
+### -------------------------------------------------------------
 context("Hamming distance")
-
 test_that("Edge cases in DL method",{
    expect_equal(stringdist( "", "",method='h'),0)
    expect_equal(stringdist("a","a",method='h'),0)
@@ -192,6 +197,9 @@ test_that("NA's are handled correctly",{
    expect_true(is.na(stringdist(NA ,NA ,method='h')))
 })
 
+
+
+### -------------------------------------------------------------
 context("Q-gram distance")
 
 test_that("Edge cases in qgram method",{
@@ -223,7 +231,35 @@ test_that("binary tree is cleaned up properly in qgram-tree",{
   expect_equal(d[1],d[2])
 })
 
+### -------------------------------------------------------------
+context("cosine distance") 
+# basic engine is q-gram so we need limited testing
+test_that("cosine distance computes correctly",{
+  expect_equal(
+    round(stringdist("aaa","abc",method="cosine",q=1),8),
+    round(1-1/sqrt(3),8)
+  )
+  expect_equal(
+    round(stringdist("aaa","abc",method="cosine",q=2),8),
+    1.0
+  )
+})
 
+context("Jaccard distance")
+# basic engine is q-gram so we need limited testing
+test_that("Jaccard distance computes correctly",{
+  expect_equal(
+    round(stringdist("aaa","abc",method="jaccard",q=1),8),
+    round(1-1/3,8)
+  )
+  expect_equal(
+    round(stringdist("aaa","abc",method="jaccard",q=2),8),
+    1.0
+  )
+})
+
+
+### -------------------------------------------------------------
 context("Jaro")
 test_that("basic examples and edge cases work",{
   # strings of length 1
@@ -282,6 +318,7 @@ test_that("NA's are handled correctly",{
    expect_true(is.na(stringdist(NA ,NA ,method='jw')))
 })
 
+### -------------------------------------------------------------
 context("Jaro-Winkler")
 test_that("wikipedia examples",{
   expect_equal(
