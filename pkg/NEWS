@@ -2,6 +2,7 @@ version 0.5.1
 - added cosine distance
 - added Jaccard distance
 - added Jaro and Jaro-Winkler distances
+- small performance tweeks
 
 version 0.5.0
 - added qgram counting function 'qgrams'

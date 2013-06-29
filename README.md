@@ -69,7 +69,7 @@ TODO
     * get actual edits needed to go from one string to another
 * small (C-style) performance tweeks, like 
     * ~~detect where |nchar(a)-nchar(b)| > maxDist or smarter distribution of jobs over clusters~~
-    * faster recycling index calculations
+    * ~~faster recycling index calculations~~
 
 Could
 ----

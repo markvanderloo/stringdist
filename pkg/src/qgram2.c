@@ -12,8 +12,12 @@
 /* binary tree; dictionary of qgrams */
 
 typedef struct qnode {
+  // the payload q-gram
   unsigned int *qgram;
-  unsigned int n[2]; // nr of occurrences of qgram in s and t
+  // vector of q-gram counts 
+  // (double to prevent int overload 
+  // when calulating distances)
+  double *n; 
   struct qnode *left;
   struct qnode *right;
 } qtree;
@@ -23,6 +27,7 @@ static void free_qtree(qtree *Q){
   free_qtree(Q->left);
   free_qtree(Q->right);
   free(Q->qgram);
+  free(Q->n);
   free(Q);
 }
 
@@ -39,35 +44,48 @@ static int compare(unsigned int *q1, unsigned int *q2, int q){
   return compare( q1 + 1, q2 + 1, q - 1 );
 }
 
-/* push qgram into binary tree */
-static qtree *push(qtree *Q, unsigned int *qgram, unsigned int q, int location){
+/* push qgram into binary tree
+ * 
+ * qtree : see above
+ * qgram : see above
+ * q     : the 'q' in q-gram
+ * iLoc  : To wich count location does this q-gram contribute?
+ * nLoc  : how many locations are there?
+ */
+static qtree *push(qtree *Q, unsigned int *qgram, unsigned int q, int iLoc, int nLoc ){
   int cond;  
   if( Q == NULL ){ // new qgram
     Q = (qtree *) malloc(sizeof(qtree));
     if ( Q == NULL ) return NULL;
+    // TODO: combine to a single malloc
     Q->qgram = (unsigned int *) malloc(sizeof(int) * q);
-    if (Q == NULL ) return(NULL);
-    Q->n[0] = 0;
-    Q->n[1] = 0;
-    Q->n[location]++;
+    if (Q->qgram == NULL ) return NULL;
+
+    Q->n = (double *) malloc(sizeof(double) * nLoc);
+    if (Q->n == NULL) return NULL;
+    for (int i=0; i<nLoc; ++i) Q->n[i] = 0.0;
+    // END TODO 
+
+    Q->n[iLoc]++;
     memcpy(Q->qgram, qgram, sizeof(int) * q);
     Q->left = NULL;
     Q->right= NULL;
+
   } else if ( ( cond = compare(qgram, Q->qgram, q) ) == 1)  { // qgram larger than the stored qgram
-    Q->left = push(Q->left, qgram, q, location);
+    Q->left = push(Q->left, qgram, q, iLoc, nLoc);
   } else if ( cond == -1 ){ // qgram smaller than the stored qgram
-    Q->right = push(Q->right, qgram, q, location);
+    Q->right = push(Q->right, qgram, q, iLoc, nLoc);
   } else { // qgram equal to stored qgram
-    Q->n[location] += 1;
+    Q->n[iLoc] += 1;
   }
   return Q;
 }
 
 /* push qgrams of a string into binary tree */
-static qtree *push_string(unsigned int *str, int strlen, unsigned int q, qtree *Q, int location){
+static qtree *push_string(unsigned int *str, int strlen, unsigned int q, qtree *Q, int iLoc, int nLoc){
   qtree *P;
   for ( int i=0; i < strlen - q + 1; ++i ){
-    P = push(Q, str + i, q, location);
+    P = push(Q, str + i, q, iLoc, nLoc);
     if ( P == NULL ){ 
       free_qtree(Q);
       return NULL;
@@ -158,9 +176,9 @@ static double qgram_tree(
 
   double dist[3] = {0,0,0};
 
-  Q = push_string(s, x, q, Q, 0);
+  Q = push_string(s, x, q, Q, 0, 2);
   if (Q == NULL) return -2;
-  Q = push_string(t, y, q, Q, 1);
+  Q = push_string(t, y, q, Q, 1, 2);
   if (Q == NULL) return -2;
 
   switch ( distance ){
@@ -246,13 +264,13 @@ static void count_qtree(qtree *Q, int *n){
   count_qtree(Q->right,n);
 }
 
-static void get_counts(qtree *Q, int q, int *qgrams, int *count, int *index){
+static void get_counts( qtree *Q, int q, int *qgrams, int nLoc, int *index, double *count ){
   if ( Q == NULL ) return ;
   memcpy(qgrams + q*index[0], Q->qgram, sizeof(int) * q);
-  count[index[0]] = Q->n[0];
+  memcpy(count + nLoc*index[0], Q->n, sizeof(double) * nLoc);
   ++index[0];
-  get_counts(Q->left, q, qgrams, count, index);
-  get_counts(Q->right,q,qgrams, count, index);
+  get_counts(Q->left, q, qgrams, nLoc, index, count);
+  get_counts(Q->right,q, qgrams, nLoc, index, count);
 }
 
 /* TODO:
@@ -264,43 +282,49 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
   PROTECT(qq);
 
   int q = INTEGER(qq)[0];
-  int n = length(a);
-  if ( q < 0 ){
-    UNPROTECT(2);
-    return R_NilValue;
-  }
 
   if ( q < 0 ){
     UNPROTECT(2);
     error("q must be a nonnegative integer");
   }
-  // set up a tree
+
+  // set up a tree; push all the qgrams.
   qtree *Q = NULL;
-  for ( int i=0; i < n; ++i ){
-    if ( INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER 
-        || q > length(VECTOR_ELT(a,i)) 
-        || ( q == 0 && length(VECTOR_ELT(a,i)) > 0 )
-      ){
-      continue ;
+
+  SEXP strlist;
+  int nstr, nchar, nLoc = length(a);
+  unsigned int *str;
+  
+  for ( int iLoc = 0; iLoc < nLoc; ++iLoc ){
+    strlist = VECTOR_ELT(a, iLoc);
+    nstr    = length(strlist);
+
+    for ( int i=0; i < nstr; ++i ){
+      str   = (unsigned int *) INTEGER(VECTOR_ELT(strlist,i));
+      nchar = length(VECTOR_ELT(strlist,i));
+      if ( str[0] == NA_INTEGER 
+          || q > nchar
+          || ( q == 0 && nchar > 0 )
+        ){
+        continue ;
+      }
+      Q = push_string(str, nchar, q, Q, iLoc, nLoc);
     }
-    Q = push_string(
-      (unsigned int *) INTEGER(VECTOR_ELT(a,i)),
-      length(VECTOR_ELT(a,i)),
-      q, Q, 0 
-    );
   }
   // pick and delete the tree
 
   int nqgram[1] = {0};
-  int index[1] = {0};  
-  
+
+  // helper variable for get_counts 
+  int index[1] = {0};
+
   count_qtree(Q,nqgram);  
 
   SEXP qgrams, qcount;
   PROTECT(qgrams = allocVector(INTSXP, q*nqgram[0]));
-  PROTECT(qcount = allocVector(INTSXP, nqgram[0]));
+  PROTECT(qcount = allocVector(REALSXP, nLoc*nqgram[0]));
 
-  get_counts(Q, q, INTEGER(qgrams), INTEGER(qcount),index);
+  get_counts(Q, q, INTEGER(qgrams), nLoc, index, REAL(qcount));
   
   setAttrib(qcount, install("qgrams"), qgrams);
   
