@@ -156,6 +156,9 @@ stringdist <- function(a, b,
   if (length(a) == 0 || length(b) == 0){ 
     return(numeric(0))
   }
+  if ( max(length(a),length(b)) %% min(length(a),length(b)) != 0 ){
+    warning(RECYCLEWARNING)
+  }
   method <- match.arg(method)
   a <- char2int(a)
   b <- char2int(b)
@@ -191,6 +194,9 @@ stringdistmatrix <- function(a, b,
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
    return(numeric(0))
+  }
+  if ( max(length(a),length(b)) %% min(length(a),length(b)) != 0 ){
+    warning(RECYCLEWARNING)
   }
   method <- match.arg(method)
   stopifnot(

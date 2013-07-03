@@ -3,7 +3,7 @@
  * of stringdist (which loops over string pairs).
  */
 
-//#define USE_RINTERNALS
+#define USE_RINTERNALS
 #include <stdlib.h>
 #include <string.h>
 #include <R.h>

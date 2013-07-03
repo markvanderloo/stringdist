@@ -1,5 +1,5 @@
 version 0.6.0
-- BREAKING: qgrams now accepts arbitrary number of arguments. Outputs array, not table
+- qgrams now accepts arbitrary number of arguments. Outputs array, not table
 - added cosine distance
 - added Jaccard distance
 - added Jaro and Jaro-Winkler distances
