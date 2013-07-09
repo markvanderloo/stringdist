@@ -20,7 +20,7 @@ static inline int min(int x, int y){
  * Parameter 'guard; indicates which elements of b have been matched before to avoid
  * matching two instances of the same character to the same position in b (which we treat read-only).
  */
-static int match_int(unsigned int a, unsigned int *b, int *guard, int width){
+static int match_int(int a, int *b, int *guard, int width){
 
   int i = 0;
   while ( 
@@ -40,16 +40,16 @@ static int match_int(unsigned int a, unsigned int *b, int *guard, int width){
 
 /* jaro distance (see http://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance).
  *
- * a    : string (in uint rep)
- * b    : string (in uint rep)
+ * a    : string (in int rep)
+ * b    : string (in int rep)
  * x    : length of a (in uints)
  * y    : length of b (in uints)
  * work : workspace, minimally of length max(x,y)
  *
  */
 static double jaro(
-             unsigned int *a, 
-             unsigned int *b,
+             int *a, 
+             int *b,
              int x,
              int y,
              int *work
@@ -60,7 +60,7 @@ static double jaro(
 
   // swap arguments if necessary, so we always loop over the shortest string
   if ( x > y ){
-    unsigned int *c = b;
+    int *c = b;
     int z = y;
     b = a;
     a = c;
@@ -103,8 +103,8 @@ static double jaro(
 }
 
 // Winkler's l-factor (nr of matching characters at beginning of the string).
-static double get_l(unsigned int *a, unsigned int *b, int n){
-  int i;
+static double get_l(int *a, int *b, int n){
+  int i=0;
   double l;
   while ( a[i] == b[i] && i < n ){ 
     i++;
@@ -141,13 +141,13 @@ SEXP R_jaro_winkler(SEXP a, SEXP b, SEXP p){
   double *y = REAL(yy);
 
   // compute distances, skipping NA's
-  int i=0,j=0,l,n;
+  int i=0,j=0,n;
   double pp = REAL(p)[0];
   for ( int k=0; k < nt; ++k ){
     length_s = length(VECTOR_ELT(a,i));
     length_t = length(VECTOR_ELT(b,j));
-    s = (unsigned int *) INTEGER(VECTOR_ELT(a,i));
-    t = (unsigned int *) INTEGER(VECTOR_ELT(b,j));
+    s = INTEGER(VECTOR_ELT(a,i));
+    t = INTEGER(VECTOR_ELT(b,j));
     if ( s[0] == NA_INTEGER || t[0] == NA_INTEGER){
       y[k] = NA_REAL;
       continue;

@@ -1,4 +1,5 @@
 version 0.6.0
+- BREAKING CHANGE: output -1 is replaced by Inf for all distance methods.
 - qgrams now accepts arbitrary number of arguments. Outputs array, not table
 - added cosine distance
 - added Jaccard distance
