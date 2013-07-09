@@ -26,31 +26,31 @@
 #'    \code{jw} \tab Jaro, or Jaro-Winker distance.
 #' }
 #' The \bold{Hamming distance} counts the number of character substitutions that turns 
-#' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters \code{-1} is
+#' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters \code{Inf} is
 #' returned.
 #'
 #' The \bold{Levenshtein distance} (\code{lv}) counts the number of deletions, insertions and substitutions necessary
 #' to turn \code{b} into \code{a}. This method is equivalent to \code{R}'s native \code{adist} function.
-#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
+#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{Inf}  is returned.
 #'
 #' The \bold{Optimal String Alignment distance} (\code{osa}) is like the Levenshtein distance but also 
 #' allows transposition of adjacent characters. Here, each substring  may be edited only once so a 
 #' character cannot be transposed twice. 
-#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
+#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{Inf}  is returned.
 #'
 #' The \bold{full Damerau-Levensthein distance} (\code{dl}) allows for multiple transpositions.
-#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
+#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{Inf}  is returned.
 #'
 #' The \bold{longest common substring} is defined as the longest string that can be obtained by pairing characters
 #' from \code{a} and \code{b} while keeping the order of characters intact. The lcs-distance is defined as the
 #' number of unpaired characters. The distance is equivalent to the edit distance allowing only deletions and
 #' insertions, each with weight one.
-#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{-1}  is returned.
+#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{Inf}  is returned.
 #'
 #' A \bold{\eqn{q}-gram} is a subsequence of \eqn{q} \emph{consecutive} characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
 #' of \eqn{q}-gram occurrences in \code{a} (\code{b}), the \bold{\eqn{q}-gram distance} is given by the sum over
 #' the absolute differences \eqn{|x_i-y_i|}.
-#' The computation is aborted when \code{q} is is larger than the length of any of the strings. In that case \code{-1}  is returned.
+#' The computation is aborted when \code{q} is is larger than the length of any of the strings. In that case \code{Inf}  is returned.
 #'
 #' The \bold{cosine distance} is computed as \eqn{1-x\cdot y/(\|x\|\|y\|)}, where \eqn{x} and \eqn{y} were defined above.
 #' 
@@ -140,8 +140,8 @@
 #'
 #' @return For \code{stringdist},  a vector with string distances of size \code{max(length(a),length(b))}.
 #'  For \code{stringdistmatrix}, a \code{length(a)xlength(b)} \code{matrix}. The returned distance is
-#'  nonnegative if it can be computed, \code{NA} if any of the two argument strings is \code{NA} and \code{-1}
-#'  when it cannot be computed. See details for the meaning of \code{-1} for the various algorithms.
+#'  nonnegative if it can be computed, \code{NA} if any of the two argument strings is \code{NA} and \code{Inf}
+#'  when it cannot be computed or \code{maxDist} is exceeded. See details for the meaning of \code{Inf} for the various algorithms.
 #'  
 #'  
 #' @example ../examples/stringdist.R
