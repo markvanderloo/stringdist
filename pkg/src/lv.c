@@ -96,6 +96,7 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
          maxDist,
          scores
       );
+      if (y[k] < 0 ) y[k] = R_PosInf;
       i = RECYCLE(i+1,na);
       j = RECYCLE(j+1,nb);
    }

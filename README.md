@@ -28,6 +28,22 @@ functions are implemented in C. The package offers two main functions:
 
 Besides that the function `qgrams` tabulates the qgrams in a `charcter` vector.
 
+NOTE TO USERS
+-------------
+Up until now, `stringdist` returned `-1` to indicate that either
+
+* `maxDist` is exceeded, or
+* the distance is undefined between two input strings
+
+*From version `>=0.6`, this will be replaced by `Inf`.* The main reason:
+
+* This allows easier comparison using `<` and `<=`
+
+The old convention stemmed from the fact that some distances (e.g. q-gram, hamming) are strictly
+integers. I'm abandoning this expressing all distances as `double` (R `numeric`) which allows me
+to use `Inf`.
+
+
 Installation
 ------------
 To install the latest release from CRAN, open an R terminal and type

@@ -22,11 +22,11 @@ test_that("Edge cases in OSA method",{
 })
 
 test_that("max distance is obeyed",{
-   expect_equal(stringdist("aa","bb",method='osa',maxDist=1),-1)
+   expect_equal(stringdist("aa","bb",method='osa',maxDist=1), Inf)
    # Thanks to Daniel Deckhard pointing to this bug
    expect_equal(stringdist("abc","abc",method='osa',maxDist=1), 0)
-   expect_equal(stringdist("","abc",method='osa',maxDist=1), -1)
-   expect_equal(stringdist("abc","",method='osa',maxDist=2), -1)
+   expect_equal(stringdist("","abc",method='osa',maxDist=1), Inf)
+   expect_equal(stringdist("abc","",method='osa',maxDist=2), Inf)
 })
 
 test_that("Shortest argument is recycled",{
@@ -67,10 +67,10 @@ test_that("Edge cases in Levenshtein method",{
 })
 
 test_that("max distance is obeyed",{
-   expect_equal(stringdist("aa","bb",method='lv',maxDist=1),-1)
+   expect_equal(stringdist("aa","bb",method='lv',maxDist=1), Inf)
    expect_equal(stringdist("abc","abc",method='lv',maxDist=1), 0)
-   expect_equal(stringdist("","abc",method='lv',maxDist=1), -1)
-   expect_equal(stringdist("abc","",method='lv',maxDist=2), -1)
+   expect_equal(stringdist("","abc",method='lv',maxDist=1), Inf)
+   expect_equal(stringdist("abc","",method='lv',maxDist=2), Inf)
 })
 
 test_that("Shortest argument is recycled",{
@@ -108,10 +108,10 @@ test_that("Edge cases in DL method",{
 })
 
 test_that("max distance is obeyed",{
-   expect_equal(stringdist("aa","bb",method='dl',maxDist=1),-1)
+   expect_equal(stringdist("aa","bb",method='dl',maxDist=1),Inf)
    expect_equal(stringdist("abc","abc",method='dl',maxDist=1), 0)
-   expect_equal(stringdist("","abc",method='dl',maxDist=2), -1)
-   expect_equal(stringdist("abc","",method='dl',maxDist=2), -1)
+   expect_equal(stringdist("","abc",method='dl',maxDist=2), Inf)
+   expect_equal(stringdist("abc","",method='dl',maxDist=2), Inf)
 })
 
 test_that("Shortest argument is recycled",{
@@ -151,10 +151,10 @@ test_that("Edge cases in LCS method",{
 })
 
 test_that("max distance is obeyed",{
-   expect_equal(stringdist("aa","bb",method='lcs',maxDist=1),-1)
+   expect_equal(stringdist("aa","bb",method='lcs',maxDist=1),Inf)
    expect_equal(stringdist("abc","abc",method='lcs',maxDist=1), 0)
-   expect_equal(stringdist("","abc",method='lcs',maxDist=1), -1)
-   expect_equal(stringdist("abc","",method='lcs',maxDist=1), -1)
+   expect_equal(stringdist("","abc",method='lcs',maxDist=1), Inf)
+   expect_equal(stringdist("abc","",method='lcs',maxDist=1), Inf)
 })
 
 test_that("Shortest argument is recycled",{
@@ -178,12 +178,12 @@ test_that("Edge cases in DL method",{
 })
 
 test_that("Unequal string lengths",{
-  expect_equal(stringdist("aa","a",method="h"),-1)
-  expect_equal(stringdist("a","aa",method="h"),-1)
+  expect_equal(stringdist("aa","a",method="h"),Inf)
+  expect_equal(stringdist("a","aa",method="h"),Inf)
 })
 
 test_that("max distance is obeyed",{
-   expect_equal(stringdist("aa","bb",method='h',maxDist=1),-1)
+   expect_equal(stringdist("aa","bb",method='h',maxDist=1),Inf)
 })
 
 test_that("Shortest argument is recycled",{
@@ -204,9 +204,9 @@ context("Q-gram distance")
 
 test_that("Edge cases in qgram method",{
    expect_equal(stringdist( "", "",method='qgram',q=0), 0)
-   expect_equal(stringdist( "", "",method='qgram',q=1),-1)
-   expect_equal(stringdist( "","a",method='qgram',q=1),-1)
-   expect_equal(stringdist("a", "",method='qgram',q=1),-1)
+   expect_equal(stringdist( "", "",method='qgram',q=1),Inf)
+   expect_equal(stringdist( "","a",method='qgram',q=1),Inf)
+   expect_equal(stringdist("a", "",method='qgram',q=1),Inf)
    expect_equal(stringdist("a","a",method='qgram',q=1), 0)
    expect_error(stringdist("aa","bb",method='qgram',q=-2))
 })

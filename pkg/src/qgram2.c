@@ -164,22 +164,22 @@ static double qgram_tree(
     int distance
   ){
   // return -1 when q is larger than the length of the shortest string.
-  if ( q > (x <= y ? x : y) ) return -1;
+  if ( q > (x <= y ? x : y) ) return -1.0;
   // rare edge cases.
   if ( q == 0 ){
     if ( x + y > 0 ){ // distance undefined
-      return -1;
+      return -1.0;
     } else { // x == y == 0.
-      return 0;
+      return 0.0;
     } 
   }
 
   double dist[3] = {0,0,0};
 
   Q = push_string(s, x, q, Q, 0, 2);
-  if (Q == NULL) return -2;
+  if (Q == NULL) return -2.0;
   Q = push_string(t, y, q, Q, 1, 2);
-  if (Q == NULL) return -2;
+  if (Q == NULL) return -2.0;
 
   switch ( distance ){
     case 0:
@@ -243,8 +243,11 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance){
         Q,
         dist
     );
-    if (y[k] == -2){
+    if (y[k] == -2.0){
       error("Could not allocate enough memory");
+    }
+    if (y[k] == -1.0){
+      y[k] = R_PosInf;
     }
     i = RECYCLE(i+1,na);
     j = RECYCLE(j+1,nb);

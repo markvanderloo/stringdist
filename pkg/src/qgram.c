@@ -169,8 +169,8 @@ SEXP R_qgram(SEXP a, SEXP b, SEXP qq){
   int nt = (na > nb) ? na : nb;
 
   SEXP yy; 
-  PROTECT(yy = allocVector(INTSXP, nt));
-  int *y = INTEGER(yy);
+  PROTECT(yy = allocVector(REALSXP, nt));
+  double *y = REAL(yy);
 
   // Enough room to store 10k unique q-grams and counters (this is a startvalue; worspace is expanded as needed).
   workspace *work = new_workspace(10000,q+2);
@@ -190,6 +190,7 @@ SEXP R_qgram(SEXP a, SEXP b, SEXP qq){
         q,
         work
     );
+    if (y[k] < 0 ) y[k] = R_PosInf;
     i = RECYCLE(i+1,na);
     j = RECYCLE(j+1,nb);
   }

@@ -8,17 +8,17 @@
 /* Longest common substring
  * - basically edit distance, only allowing insertions and substitutions, at the cost of 1.
  */
-static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDistance, int *scores){
+static double lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDistance, int *scores){
   if (na == 0){
     if ( maxDistance > 0 && maxDistance < nb ){
-      return -1;
+      return -1.0;
     } else {
       return (double) nb;
     }
   }
   if (nb == 0){
     if (maxDistance > 0 && maxDistance < na){
-      return -1;
+      return -1.0;
     } else {
       return (double) na;
     }
@@ -51,7 +51,8 @@ static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDistance
       return -1;
     }
   }
-  return(scores[I*J-1]);
+  double dist = (double) scores[I*J-1];
+  return dist;
 }
 
 //-- interface with R
@@ -75,8 +76,8 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP maxDistance){
    int nt = (na > nb) ? na : nb;   
    int i=0, j=0;
    SEXP yy;
-   PROTECT(yy = allocVector(INTSXP, nt));
-   int *y = INTEGER(yy);   
+   PROTECT(yy = allocVector(REALSXP, nt));
+   double *y = REAL(yy);   
    
    for ( int k=0; k < nt; ++k ){
       if (INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
@@ -91,6 +92,7 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP maxDistance){
          maxDist,
          scores
       );
+      if (y[k] < 0 ) y[k] = R_PosInf;
       i = RECYCLE(i+1,na);
       j = RECYCLE(j+1,nb);
    }
