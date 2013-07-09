@@ -30,7 +30,7 @@ Besides that the function `qgrams` tabulates the qgrams in a `charcter` vector.
 
 NOTE TO USERS: BREAKING UPDATE
 -------------
-Up until now, `stringdist` returned `-1` to indicate that either
+Up to version `<=0.5`, `stringdist` returned `-1` to indicate that either
 
 * `maxDist` is exceeded, or
 * the distance is undefined between two input strings
@@ -75,14 +75,10 @@ TODO
     * Option to add _q-1_ pre- and or postfixes
 * ~~Jaccard similarity (exposed as a distance)~~
 * ~~cosine similarity (idem)~~
-* Tanimoto coefficient -> will be example of `qgrams` usage
 * ~~jaro distance~~
 * ~~jaro-winkler distance~~
 * ~~optionally use user-defined cluster for parallel computations~~
-* Separate R-functions giving more info on distance calculations:
-    * ~~get q-gram counts from string~~
-    * get actual longest common substring
-    * get actual edits needed to go from one string to another
+* ~~get q-gram counts from string~~
 * small (C-style) performance tweeks, like 
     * ~~detect where |nchar(a)-nchar(b)| > maxDist or smarter distribution of jobs over clusters~~
     * ~~faster recycling index calculations~~
@@ -95,4 +91,11 @@ Could
     * Some string normalizing functionality
     * ...
 * Put paralellisation under the hood with openMP
+
+Won't
+------
+
+* get actual longest common substring (Can't see the use case)
+* get actual edits needed to go from one string to another (idem)
+* Tanimoto coefficient -> nice example of `qgrams` usage
 
