@@ -28,7 +28,7 @@ functions are implemented in C. The package offers two main functions:
 
 Besides that the function `qgrams` tabulates the qgrams in a `charcter` vector.
 
-NOTE TO USERS
+NOTE TO USERS: BREAKING UPDATE
 -------------
 Up until now, `stringdist` returned `-1` to indicate that either
 
