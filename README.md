@@ -66,6 +66,7 @@ of the code is written in `C`, the development version may crash your `R`-sessio
 
 TODO
 ----
+* Approximate matching equivalent of R's `match` function
 * Episode distance
 * ~~Longest common substring~~
 * distances based on q-grams
