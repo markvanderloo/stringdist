@@ -66,7 +66,7 @@ static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weig
    return(scores[I*J-1]);
 }
 
-//-- interface with R
+//-- Distance function interface with R
 
 
 SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
@@ -82,7 +82,7 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
 
    scores = (double *) malloc( (max_length(a) + 1) * (max_length(b) + 1) * sizeof(double)); 
    if ( scores == NULL ){
-      error("%s\n","unable to allocate enough memory for workspace");
+      error("%s\n","unable to allocate enough memory");
    }
 
    // output vector
@@ -116,5 +116,59 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
    return(yy);
 }
 
+
+//-- Match function interface with R
+
+SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP weight, SEXP maxDistance){
+  PROTECT(x);
+  PROTECT(table);
+  PROTECT(nomatch);
+  PROTECT(weight);
+  PROTECT(maxDistance);
+
+  int nx = length(x), ntable = length(table);
+  int no_match = INTEGER(nomatch)[0];
+  double *scores; 
+  double *w = REAL(weight);
+  double maxDist = REAL(maxDistance)[0];
+
+  scores = (double *) malloc( (max_length(x) + 1) * (max_length(table) + 1) * sizeof(double)); 
+  if ( scores == NULL ){
+     error("%s\n","unable to allocate enough memory");
+  }
+
+  // output vector
+  SEXP yy;
+  PROTECT(yy = allocVector(INTSXP, nx));
+  int *y = INTEGER(yy);
+   
+  // helping variables
+  double d, d1 = R_PosInf;
+  int index;
+  for ( int i=0; i<nx; i++){
+    index = no_match;
+    for ( int j=0; j<ntable; j++){
+      d = osa(
+        (unsigned int *) INTEGER(VECTOR_ELT(x,i)), 
+        length(VECTOR_ELT(x,i)), 
+        (unsigned int *) INTEGER(VECTOR_ELT(table,j)), 
+        length(VECTOR_ELT(table,j)), 
+        w,
+        maxDist,
+        scores
+      );
+      if ( d > 0 && d < d1){ 
+        index = j;
+        d1 = d;
+      }
+    }
+    y[i] = index;
+  }  
+
+   
+  free(scores);
+  UNPROTECT(5);
+  return(yy);
+}
 
 
