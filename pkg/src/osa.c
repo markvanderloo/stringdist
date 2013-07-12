@@ -1,5 +1,5 @@
 
-#define USE_RINTERNALS
+//#define USE_RINTERNALS
 #include <stdlib.h>
 #include <R.h>
 #include <Rdefines.h>
@@ -119,10 +119,11 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
 
 //-- Match function interface with R
 
-SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP weight, SEXP maxDistance){
+SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEXP maxDistance){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
+  PROTECT(matchNA);
   PROTECT(weight);
   PROTECT(maxDistance);
 
@@ -134,6 +135,12 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP weight, SEXP maxDistance
   double *w = REAL(weight);
   double maxDist = REAL(maxDistance)[0];
 
+  // determine behaviour for NA matching.
+  // -- like match(NA,NA) (yields 1)
+  int na_match = 0; 
+  // -- like stringdist(NA,NA) (yields NA, hence no_match)
+  if (!INTEGER(matchNA)[0]) na_match = no_match;
+
   scores = (double *) malloc( (max_length(x) + 1) * (max_length(table) + 1) * sizeof(double)); 
   if ( scores == NULL ){
      error("%s\n","unable to allocate enough memory");
@@ -143,23 +150,39 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP weight, SEXP maxDistance
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
-   
-  // helping variables
+  int *X, *T;
+
+
   double d, d1 = R_PosInf;
-  int index;
+  int index, xNA, tNA;
+
   for ( int i=0; i<nx; i++){
     index = no_match;
+
+    X = INTEGER(VECTOR_ELT(x,i));
+    xNA = (X[0] == NA_INTEGER);
+
     for ( int j=0; j<ntable; j++){
-      d = osa(
-        (unsigned int *) INTEGER(VECTOR_ELT(x,i)), 
-        length(VECTOR_ELT(x,i)), 
-        (unsigned int *) INTEGER(VECTOR_ELT(table,j)), 
-        length(VECTOR_ELT(table,j)), 
-        w,
-        maxDist,
-        scores
-      );
-      if ( d > 0 && d < d1){ 
+
+      T = INTEGER(VECTOR_ELT(table,j));
+      tNA = (T[0] == NA_INTEGER);
+
+      if ( !xNA && !tNA ){ // both are char (usual case)
+        d = osa(
+          (unsigned int *) X, 
+          length(VECTOR_ELT(x,i)), 
+          (unsigned int *) T, 
+          length(VECTOR_ELT(table,j)), 
+          w,
+          maxDist,
+          scores
+        );
+      } else if (xNA != tNA) {  // one of them NA
+        d = no_match;
+      } else {  // both are NA
+        d = na_match;
+      }
+      if ( d > -1 && d < d1){ 
         index = j;
         d1 = d;
       }
@@ -168,7 +191,7 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP weight, SEXP maxDistance
   }  
 
   free(scores);
-  UNPROTECT(6);
+  UNPROTECT(7);
   return(yy);
 }
 
