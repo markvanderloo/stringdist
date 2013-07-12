@@ -128,6 +128,8 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP weight, SEXP maxDistance
 
   int nx = length(x), ntable = length(table);
   int no_match = INTEGER(nomatch)[0];
+  // index to 0-base
+  if (no_match != NA_INTEGER ) --no_match;
   double *scores; 
   double *w = REAL(weight);
   double maxDist = REAL(maxDistance)[0];
@@ -162,12 +164,11 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP weight, SEXP maxDistance
         d1 = d;
       }
     }
-    y[i] = index;
+    y[i] = index == NA_INTEGER ? index : 1 + index;
   }  
 
-   
   free(scores);
-  UNPROTECT(5);
+  UNPROTECT(6);
   return(yy);
 }
 
