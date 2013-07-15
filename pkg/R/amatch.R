@@ -27,10 +27,10 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE,
   )
   if (maxDist==Inf) maxDist <- 0L;
   switch(method,
-    osa     = .Call('R_match_osa'   , x, table,as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),
+    osa     = .Call('R_match_osa'   , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),
 #    lv      = .Call('R_lv'    , a, b, as.double(weight), as.double(maxDist)),
-    dl     = .Call('R_match_dl'   , x, table,as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),
-#    hamming = .Call('R_hm'    , a, b, as.integer(maxDist)),
+    dl      = .Call('R_match_dl'   , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),
+    hamming = .Call('R_match_hm'   , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist))
 #    lcs     = .Call('R_lcs'   , a, b, as.integer(maxDist)),
 #    qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L),
 #    cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L),

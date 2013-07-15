@@ -9,6 +9,8 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="osa"), 1L)
   expect_equal(amatch(NA,NA, method="osa",matchNA=FALSE), NA_integer_)
   expect_equal(amatch(NA,NA, method="osa",matchNA=FALSE, nomatch=0L), 0L)
+  expect_equal(amatch(NA,NA, method="osa",matchNA=FALSE, nomatch=7L), 7L)
+  expect_equal(amatch("aa","bb", method="osa",maxDist=1), NA_integer_)
   expect_equal(amatch("aa","bb", method="osa",maxDist=1), NA_integer_)
 })
 
@@ -23,7 +25,27 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="dl"), 1L)
   expect_equal(amatch(NA,NA, method="dl",matchNA=FALSE), NA_integer_)
   expect_equal(amatch(NA,NA, method="dl",matchNA=FALSE,nomatch=0L), 0L)
+  expect_equal(amatch(NA,NA, method="dl",matchNA=FALSE,nomatch=7L), 7L)
+  expect_equal(amatch("aa","bb", method="dl",maxDist=1), NA_integer_)
   expect_equal(amatch("aa","bb", method="dl",maxDist=1), NA_integer_)
 })
+
+context("amatch: Hamming")
+
+print(amatch("aa",c("ba","bb"),method="hamming") ) 
+test_that("simple test and multiple edge cases",{
+  expect_equal(amatch("aa", c("ba","bb"), method="hamming"), 1L)
+  expect_equal(amatch(NA,c(NA,NA),method="hamming"),1L)
+  expect_equal(amatch("","", method="hamming"), 1L)
+  expect_equal(amatch(NA,"a", method="hamming"), NA_integer_)
+  expect_equal(amatch(NA,"a", method="hamming",nomatch=0L), 0L)
+  expect_equal(amatch(NA,NA, method="hamming"), 1L)
+  expect_equal(amatch(NA,NA, method="hamming",matchNA=FALSE), NA_integer_)
+  expect_equal(amatch(NA,NA, method="hamming",matchNA=FALSE,nomatch=0L), 0L)
+  expect_equal(amatch(NA,NA, method="hamming",matchNA=FALSE,nomatch=7L), 7L)
+  expect_equal(amatch("aa","bb", method="hamming",maxDist=1), NA_integer_)
+})
+
+
 
 
