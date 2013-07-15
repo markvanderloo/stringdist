@@ -294,5 +294,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
     y[i] = index;
   }  
   UNPROTECT(7);
+  free_dictionary(dict);
+  free(scores);
   return(yy);
 }

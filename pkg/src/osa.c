@@ -117,6 +117,7 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
 }
 
 
+
 //-- Match function interface with R
 
 SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEXP maxDistance){
@@ -129,19 +130,14 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SE
 
   int nx = length(x), ntable = length(table);
   int no_match = INTEGER(nomatch)[0];
-  // index to 0-base
-  if (no_match != NA_INTEGER ) --no_match;
-  double *scores; 
+  int match_na = INTEGER(matchNA)[0];
   double *w = REAL(weight);
   double maxDist = REAL(maxDistance)[0];
-
-  // determine behaviour for NA matching.
-  // -- like match(NA,NA) (yields 1)
-  int na_match = 0; 
-  // -- like stringdist(NA,NA) (yields NA, hence no_match)
-  if (!INTEGER(matchNA)[0]) na_match = no_match;
-
-  scores = (double *) malloc( (max_length(x) + 1) * (max_length(table) + 1) * sizeof(double)); 
+  
+  /* claim space for workhorse */
+  int max_x = max_length(x);
+  int max_table = max_length(table);
+  double *scores = (double *) malloc( (max_x + 3) * (max_table + 2) * sizeof(double) );
   if ( scores == NULL ){
      error("%s\n","unable to allocate enough memory");
   }
@@ -153,7 +149,7 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SE
   int *X, *T;
 
 
-  double d, d1 = R_PosInf;
+  double d = R_PosInf, d1 = R_PosInf;
   int index, xNA, tNA;
 
   for ( int i=0; i<nx; i++){
@@ -167,7 +163,7 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SE
       T = INTEGER(VECTOR_ELT(table,j));
       tNA = (T[0] == NA_INTEGER);
 
-      if ( !xNA && !tNA ){ // both are char (usual case)
+      if ( !xNA && !tNA ){        // both are char (usual case)
         d = osa(
           (unsigned int *) X, 
           length(VECTOR_ELT(x,i)), 
@@ -177,21 +173,20 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SE
           maxDist,
           scores
         );
-      } else if (xNA != tNA) {  // one of them NA
-        d = no_match;
-      } else {  // both are NA
-        d = na_match;
-      }
-      if ( d > -1 && d < d1){ 
-        index = j;
-        d1 = d;
+        if ( d > -1 && d < d1){ 
+          index = j + 1;
+          d1 = d;
+        }
+      } else if ( xNA && tNA ) {  // both are NA
+        index = match_na ? j + 1 : no_match;
+        break;
       }
     }
-    y[i] = index == NA_INTEGER ? index : 1 + index;
+    
+    y[i] = index;
   }  
-
-  free(scores);
   UNPROTECT(7);
+  free(scores);
   return(yy);
 }
 
