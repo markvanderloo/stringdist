@@ -35,7 +35,7 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE,
 #    qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L),
 #    cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L),
 #    jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L),
-#    jw      = .Call('R_jaro_winkler', a, b, as.double(p))
+#    jw      = .Call('R_match_jaro_winkler'   , x, table, as.integer(nomatch), as.integer(matchNA), as.double(p))
   )
 }
 
