@@ -146,6 +146,7 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p){
   // workspace for worker function
   int *work = (int *) malloc( sizeof(int)*max_char );
   if ( work == NULL ){
+     UNPROTECT(3);
      error("%s\n","unable to allocate enough memory");
   }
 
@@ -195,7 +196,8 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p){
   // workspace for worker function
   int *work = (int *) malloc( sizeof(int) * max(nx,ntable) );
   if ( work == NULL ){
-     error("%s\n","unable to allocate enough memory");
+    UNPROTECT(5);
+    error("%s\n","unable to allocate enough memory");
   }
 
   // output vector

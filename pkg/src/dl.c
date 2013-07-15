@@ -195,7 +195,8 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   dictionary *dict = new_dictionary( max_length(a) + max_length(b) + 1 );
   double *scores = (double *) malloc( (max_a + 3) * (max_b + 2) * sizeof(double) );
   if ( scores == NULL ){
-     error("%s\n","unable to allocate enough memory");
+    UNPROTECT(4);
+    error("%s\n","unable to allocate enough memory");
   }
 
   for ( k=0; k < nt; ++k ){
@@ -246,7 +247,8 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
   dictionary *dict = new_dictionary( max_x + max_table + 1 );
   double *scores = (double *) malloc( (max_x + 3) * (max_table + 2) * sizeof(double) );
   if ( scores == NULL ){
-     error("%s\n","unable to allocate enough memory");
+    UNPROTECT(6);
+    error("%s\n","unable to allocate enough memory");
   }
 
   // output vector
