@@ -1,5 +1,5 @@
 
-context("amatch: osa")
+context("amatch: Optimal String Alignment")
 
 test_that("simple test and multiple edge cases",{
   expect_equal(amatch("aa",c("ba","bb"), method="osa"), 1L)
@@ -60,5 +60,32 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="jw",matchNA=FALSE,nomatch=7L), 7L)
 })
 
+context("amatch: Longest Common Substring")
 
+test_that("simple test and multiple edge cases",{
+  expect_equal(amatch("aa", c("ba","bb"), method="lcs"), 1L)
+  expect_equal(amatch(NA,c(NA,NA),method="lcs"),1L)
+  expect_equal(amatch("","", method="lcs"), 1L)
+  expect_equal(amatch(NA,"a", method="lcs"), NA_integer_)
+  expect_equal(amatch(NA,"a", method="lcs",nomatch=0L), 0L)
+  expect_equal(amatch(NA,NA, method="lcs"), 1L)
+  expect_equal(amatch(NA,NA, method="lcs",matchNA=FALSE), NA_integer_)
+  expect_equal(amatch(NA,NA, method="lcs",matchNA=FALSE,nomatch=0L), 0L)
+  expect_equal(amatch(NA,NA, method="lcs",matchNA=FALSE,nomatch=7L), 7L)
+})
+
+
+context("amatch: Levenshtein")
+
+test_that("simple test and multiple edge cases",{
+  expect_equal(amatch("aa", c("ba","bb"), method="lv"), 1L)
+  expect_equal(amatch(NA,c(NA,NA),method="lv"),1L)
+  expect_equal(amatch("","", method="lv"), 1L)
+  expect_equal(amatch(NA,"a", method="lv"), NA_integer_)
+  expect_equal(amatch(NA,"a", method="lv",nomatch=0L), 0L)
+  expect_equal(amatch(NA,NA, method="lv"), 1L)
+  expect_equal(amatch(NA,NA, method="lv",matchNA=FALSE), NA_integer_)
+  expect_equal(amatch(NA,NA, method="lv",matchNA=FALSE,nomatch=0L), 0L)
+  expect_equal(amatch(NA,NA, method="lv",matchNA=FALSE,nomatch=7L), 7L)
+})
 
