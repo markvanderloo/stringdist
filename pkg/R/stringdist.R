@@ -166,6 +166,7 @@ stringdist <- function(a, b,
       all(is.finite(weight)),
       all(weight > 0),
       all(weight <=1),
+      q >= 0,
       p <= 0.25,
       p >= 0
   )
@@ -200,6 +201,7 @@ stringdistmatrix <- function(a, b,
       all(is.finite(weight)),
       all(weight > 0),
       all(weight <=1),
+      q >= 0,
       p <= 0.25,
       p >= 0
   )

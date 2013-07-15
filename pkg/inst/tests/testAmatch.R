@@ -89,3 +89,16 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="lv",matchNA=FALSE,nomatch=7L), 7L)
 })
 
+context("amatch: qgrams")
+
+test_that("simple test and multiple edge cases",{
+  expect_equal(amatch("aa", c("ba","bb"), method="qgram"), 1L)
+  expect_equal(amatch(NA,c(NA,NA),method="qgram"),1L)
+  expect_equal(amatch("","", method="qgram", q=0), 1L)
+  expect_equal(amatch(NA,"a", method="qgram"), NA_integer_)
+  expect_equal(amatch(NA,"a", method="qgram",nomatch=0L), 0L)
+  expect_equal(amatch(NA,NA, method="qgram"), 1L)
+  expect_equal(amatch(NA,NA, method="qgram",matchNA=FALSE), NA_integer_)
+  expect_equal(amatch(NA,NA, method="qgram",matchNA=FALSE,nomatch=0L), 0L)
+  expect_equal(amatch(NA,NA, method="qgram",matchNA=FALSE,nomatch=7L), 7L)
+})
