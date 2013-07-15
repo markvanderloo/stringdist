@@ -194,6 +194,9 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   int max_b = max_length(b);
   dictionary *dict = new_dictionary( max_length(a) + max_length(b) + 1 );
   double *scores = (double *) malloc( (max_a + 3) * (max_b + 2) * sizeof(double) );
+  if ( scores == NULL ){
+     error("%s\n","unable to allocate enough memory");
+  }
 
   for ( k=0; k < nt; ++k ){
     if ( INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
@@ -221,3 +224,85 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   return yy;
 } 
 
+//-- Match function interface with R
+
+SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEXP maxDistance){
+  PROTECT(x);
+  PROTECT(table);
+  PROTECT(nomatch);
+  PROTECT(matchNA);
+  PROTECT(weight);
+  PROTECT(maxDistance);
+
+  int nx = length(x), ntable = length(table);
+  int no_match = INTEGER(nomatch)[0];
+  // index to 0-base
+  if (no_match != NA_INTEGER ) --no_match;
+  double *w = REAL(weight);
+  double maxDist = REAL(maxDistance)[0];
+
+  // determine behaviour for NA matching.
+  // -- like match(NA,NA) (yields 1)
+  int na_match = 0; 
+  // -- like stringdist(NA,NA) (yields NA, hence no_match)
+  if (!INTEGER(matchNA)[0]) na_match = no_match;
+
+  /* claim space for workhorse */
+  int max_x = max_length(x);
+  int max_table = max_length(table);
+  dictionary *dict = new_dictionary( max_x + max_table + 1 );
+  double *scores = (double *) malloc( (max_x + 3) * (max_table + 2) * sizeof(double) );
+  if ( scores == NULL ){
+     error("%s\n","unable to allocate enough memory");
+  }
+
+  // output vector
+  SEXP yy;
+  PROTECT(yy = allocVector(INTSXP, nx));
+  int *y = INTEGER(yy);
+  int *X, *T;
+
+
+  double d, d1 = R_PosInf;
+  int index, xNA, tNA;
+
+  for ( int i=0; i<nx; i++){
+    index = no_match;
+
+    X = INTEGER(VECTOR_ELT(x,i));
+    xNA = (X[0] == NA_INTEGER);
+
+    for ( int j=0; j<ntable; j++){
+
+      T = INTEGER(VECTOR_ELT(table,j));
+      tNA = (T[0] == NA_INTEGER);
+
+      if ( !xNA && !tNA ){ // both are char (usual case)
+        d = distance(
+          (unsigned int *) X,
+          (unsigned int *) T,
+          length(VECTOR_ELT(x,i)),
+          length(VECTOR_ELT(table,j)),
+          w,
+          maxDist,
+          dict,
+          scores
+        );
+      } else if (xNA != tNA) {  // one of them NA
+        d = no_match;
+      } else {  // both are NA
+        d = na_match;
+      }
+      if ( d > -1 && d < d1){ 
+        index = j;
+        d1 = d;
+      }
+    }
+    y[i] = index == NA_INTEGER ? index : 1 + index;
+  }  
+
+  free_dictionary(dict);
+  free(scores);
+  UNPROTECT(7);
+  return(yy);
+}
