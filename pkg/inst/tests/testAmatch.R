@@ -46,20 +46,19 @@ test_that("simple test and multiple edge cases",{
 })
 
 
-#context("amatch: Jaro and Jaro-Winkler")
-#
-#test_that("simple test and multiple edge cases",{
-#  expect_equal(amatch("aa", c("ba","bb"), method="jw"), 1L)
-#  expect_equal(amatch(NA,c(NA,NA),method="jw"),1L)
-#  expect_equal(amatch("","", method="jw"), 1L)
-#  expect_equal(amatch(NA,"a", method="jw"), NA_integer_)
-#  expect_equal(amatch(NA,"a", method="jw",nomatch=0L), 0L)
-#  expect_equal(amatch(NA,NA, method="jw"), 1L)
-#  expect_equal(amatch(NA,NA, method="jw",matchNA=FALSE), NA_integer_)
-#  expect_equal(amatch(NA,NA, method="jw",matchNA=FALSE,nomatch=0L), 0L)
-#  expect_equal(amatch(NA,NA, method="jw",matchNA=FALSE,nomatch=7L), 7L)
-#  expect_equal(amatch("aa","bb", method="jw",maxDist=1), NA_integer_)
-#})
+context("amatch: Jaro and Jaro-Winkler")
+
+test_that("simple test and multiple edge cases",{
+  expect_equal(amatch("aa", c("ba","bb"), method="jw"), 1L)
+  expect_equal(amatch(NA,c(NA,NA),method="jw"),1L)
+  expect_equal(amatch("","", method="jw"), 1L)
+  expect_equal(amatch(NA,"a", method="jw"), NA_integer_)
+  expect_equal(amatch(NA,"a", method="jw",nomatch=0L), 0L)
+  expect_equal(amatch(NA,NA, method="jw"), 1L)
+  expect_equal(amatch(NA,NA, method="jw",matchNA=FALSE), NA_integer_)
+  expect_equal(amatch(NA,NA, method="jw",matchNA=FALSE,nomatch=0L), 0L)
+  expect_equal(amatch(NA,NA, method="jw",matchNA=FALSE,nomatch=7L), 7L)
+})
 
 
 

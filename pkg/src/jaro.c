@@ -81,6 +81,8 @@ static double jaro_winkler(
     x = z;
   }
 
+  memset(work,0,sizeof(int) * y);
+
   // max transposition distance
   int M = max(max(x,y)/2 - 1,0);
   // transposition counter
@@ -111,7 +113,6 @@ static double jaro_winkler(
   } else {
     d = 1.0 - (1.0/3.0)*(m/x + m/y + (m-t)/m);
   }
-  memset(work,0,sizeof(int) * y);
 
   // Winkler's penalty factor
   if ( p > 0 && d > 0 ){
@@ -125,9 +126,10 @@ static double jaro_winkler(
 
 /*----------- R interface ------------------------------------------------*/
 
-SEXP R_jaro_winkler(SEXP a, SEXP b, SEXP p){
+SEXP R_jw(SEXP a, SEXP b, SEXP p){
   PROTECT(a);
   PROTECT(b);
+  PROTECT(p);
 
   // find the length of longest strings
   int max_a = max_length(a);
@@ -142,7 +144,10 @@ SEXP R_jaro_winkler(SEXP a, SEXP b, SEXP p){
   int length_s, length_t;
 
   // workspace for worker function
-  int *work = (int *) calloc( sizeof(int), max_char );
+  int *work = (int *) malloc( sizeof(int)*max_char );
+  if ( work == NULL ){
+     error("%s\n","unable to allocate enough memory");
+  }
 
   // output variable
   SEXP yy;
@@ -167,33 +172,29 @@ SEXP R_jaro_winkler(SEXP a, SEXP b, SEXP p){
     j = RECYCLE(j+1,nb);
   }
     
-  UNPROTECT(3);
   free(work);
+  UNPROTECT(4);
   return yy;
 }
 
 
 //-- Match function interface with R
-/*
-SEXP R_match_jaro_winkler(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p){
+
+SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
   PROTECT(matchNA);
-  PROTECT(weight);
-  PROTECT(maxDistance);
+  PROTECT(p);
 
   int nx = length(x), ntable = length(table);
   int no_match = INTEGER(nomatch)[0];
   int match_na = INTEGER(matchNA)[0];
-  double *w = REAL(weight);
-  double maxDist = REAL(maxDistance)[0];
+  double pp = REAL(p)[0];
   
-  // claim space for workhorse 
-  int max_x = max_length(x);
-  int max_table = max_length(table);
-  double *scores = (double *) malloc( (max_x + 3) * (max_table + 2) * sizeof(double) );
-  if ( scores == NULL ){
+  // workspace for worker function
+  int *work = (int *) malloc( sizeof(int) * max(nx,ntable) );
+  if ( work == NULL ){
      error("%s\n","unable to allocate enough memory");
   }
 
@@ -205,29 +206,23 @@ SEXP R_match_jaro_winkler(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p
 
 
   double d = R_PosInf, d1 = R_PosInf;
-  int index, xNA, tNA;
+  int index, xNA, tNA, length_X,length_T;
 
   for ( int i=0; i<nx; i++){
     index = no_match;
 
     X = INTEGER(VECTOR_ELT(x,i));
+    length_X = length(VECTOR_ELT(x,i));
     xNA = (X[0] == NA_INTEGER);
 
     for ( int j=0; j<ntable; j++){
 
       T = INTEGER(VECTOR_ELT(table,j));
+      length_T = length(VECTOR_ELT(table,j));
       tNA = (T[0] == NA_INTEGER);
 
       if ( !xNA && !tNA ){        // both are char (usual case)
-        d = osa(
-          (unsigned int *) X, 
-          length(VECTOR_ELT(x,i)), 
-          (unsigned int *) T, 
-          length(VECTOR_ELT(table,j)), 
-          w,
-          maxDist,
-          scores
-        );
+        d = jaro_winkler(X, T, length_X, length_T, pp, work);
         if ( d > -1 && d < d1){ 
           index = j + 1;
           d1 = d;
@@ -240,9 +235,9 @@ SEXP R_match_jaro_winkler(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p
     
     y[i] = index;
   }  
-  UNPROTECT(7);
-  free(scores);
+  free(work);
+  UNPROTECT(6);
   return(yy);
 }
-*/
+
 

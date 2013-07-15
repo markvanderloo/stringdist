@@ -243,7 +243,7 @@ do_dist <- function(a, b, method, weight, maxDist, q, p){
     qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L),
     cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L),
     jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L),
-    jw      = .Call('R_jaro_winkler', a, b, as.double(p))
+    jw      = .Call('R_jw'    , a, b, as.double(p))
   )
 }
 

@@ -30,12 +30,12 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE,
     osa     = .Call('R_match_osa'   , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),
 #    lv      = .Call('R_lv'    , a, b, as.double(weight), as.double(maxDist)),
     dl      = .Call('R_match_dl'   , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),
-    hamming = .Call('R_match_hm'   , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist))
+    hamming = .Call('R_match_hm'   , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist)),
 #    lcs     = .Call('R_lcs'   , a, b, as.integer(maxDist)),
 #    qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L),
 #    cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L),
 #    jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L),
-#    jw      = .Call('R_match_jaro_winkler'   , x, table, as.integer(nomatch), as.integer(matchNA), as.double(p))
+    jw      = .Call('R_match_jw'   , x, table, as.integer(nomatch), as.integer(matchNA), as.double(p))
   )
 }
 
