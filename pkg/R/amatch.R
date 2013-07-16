@@ -1,33 +1,35 @@
 #' Approximate string matching
 #'
-#' Approximate string matching equivalents of \code{R}'s native \code{\link[pkg:base]{match}} and \code{\%in%\%}.
+#' Approximate string matching equivalents of \code{R}'s native \code{\link[base]{match}} and \code{\%in\%}.
 #'
 #' @section Note on \code{NA} handling:
-#' \code{R}'s native \code{\link[pkg:base]{match}} function matches \code{NA} with \code{NA}. This
+#' \code{R}'s native \code{\link[base]{match}} function matches \code{NA} with \code{NA}. This
 #' may feel inconsistent with \code{R}'s usual \code{NA} handling, since for example \code{NA==NA} yields
 #' \code{NA} rather than \code{TRUE}. In most cases, one may reason about the behaviour
 #' under \code{NA} along the lines of ``if one of the arguments is \code{NA}, the result shall be \code{NA}'',
 #' simply because not all information necessary to execute the function is available. One uses special 
 #' functions such as \code{is.na}, \code{is.null} \emph{etc.} to handle special values. 
 #'
-#' The \code{amatch} function mimics the behaviour of \code{\link[pkg:base]{match}} by default: \code{NA} is 
+#' The \code{amatch} function mimics the behaviour of \code{\link[base]{match}} by default: \code{NA} is 
 #' matched with \code{NA} and with nothing else. Note that this is inconsistent with the behaviour of \code{\link{stringdist}}
 #' since \code{stringdist} yields \code{NA} whenever one of the arguments is \code{NA}. The same inconsistency exists
-#' between \code{\link[pkg:base]{match}} and \code{\link[pkg:stats]{dist}}. However, in \code{amatch} this behaviour
+#' between \code{\link[base]{match}} and \code{\link[stats]{dist}}. However, in \code{amatch} this behaviour
 #' can be controlled by setting \code{matchNA=FALSE}. In that case, if any of the arguments in \code{x} 
 #' is \code{NA}, the \code{nomatch} value is returned, regardless of whether \code{NA} is present in \code{table}.
+#'
 #'
 #' @param x vector: elements to be approximately matched
 #' @param table vector: lookup table for matching
 #' @param nomatch the value to be returned when no match is found. This is coerced to integer. \code{nomatch=0} 
 #'  can be a useful option.
 #' @param matchNA Should \code{NA}'s be matched? Default behaviour mimics the
-#'   behaviour of base \code{\link[pkg:base]{match}}, meaning that \code{NA} matches
+#'   behaviour of base \code{\link[base]{match}}, meaning that \code{NA} matches
 #'   \code{NA} (which is inconsistent with \code{dist} or \code{stringdist}).
 #' @param method Matching algorithm to use. See \code{\link{stringdist}}.
 #' @param weight parameters for matching algorithm See \code{\link{stringdist}}.
-#' @param maxDist Elements in \code{x} will not be matched with elements of \code{table} if their distance is larger than \code{maxDist}.
-#'  \code{maxDist} must be larger than zero.
+#' @param maxDist Elements in \code{x} will not be matched with elements of
+#'  \code{table} if their distance is larger than \code{maxDist}. 
+#'   
 #' @param q q-gram size, see \code{\link{stringdist}}.
 #' @param p Winklers penalty parameter for Jaro-Winkler distance, see \code{\link{stringdist}}.
 #' @return \code{amatch} returns the position of the closest match of \code{x} in \code{table}. 
@@ -39,7 +41,7 @@
 amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE, 
   method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw"), 
   weight=c(d=1,i=1,s=1,t=1), 
-  maxDist=Inf, q=1, p=0){
+  maxDist=0.1, q=1, p=0){
 
 
   x <- as.character(x)
@@ -74,8 +76,8 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE,
 
 #' @param ... parameters to pass to \code{amatch} (except \code{nomatch})
 #' @rdname amatch
-#' 
+#' @export 
 ain <- function(x,table,...){
-  match(x, table, nomatch=0, ...) > 0
+  amatch(x, table, nomatch=0, ...) > 0
 }
 
