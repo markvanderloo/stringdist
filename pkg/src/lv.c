@@ -164,6 +164,7 @@ SEXP R_match_lv(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
         );
         if ( d > -1 && d < d1){ 
           index = j + 1;
+          if ( d == 0.0 ) break;
           d1 = d;
         }
       } else if ( xNA && tNA ) {  // both are NA

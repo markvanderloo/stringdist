@@ -285,6 +285,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
         );
         if ( d > -1 && d < d1){ 
           index = j + 1;
+          if ( abs(d) < 1e-14 ) break;
           d1 = d;
         }
       } else if ( xNA && tNA ) {  // both are NA

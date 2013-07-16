@@ -8,7 +8,7 @@
 /* Longest common substring
  * - basically edit distance, only allowing insertions and substitutions, at the cost of 1.
  */
-static double lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDistance, int *scores){
+static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDistance, int *scores){
   if (na == 0){
     if ( maxDistance > 0 && maxDistance < nb ){
       return -1.0;
@@ -51,8 +51,7 @@ static double lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDista
       return -1;
     }
   }
-  double dist = (double) scores[I*J-1];
-  return dist;
+  return scores[I*J - 1];
 }
 
 //-- interface with R
@@ -148,7 +147,7 @@ SEXP R_match_lcs(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistanc
       tNA = (T[0] == NA_INTEGER);
 
       if ( !xNA && !tNA ){        // both are char (usual case)
-        d = lcs(
+        d = (double) lcs(
           (unsigned int *) X, 
           length(VECTOR_ELT(x,i)), 
           (unsigned int *) T,
@@ -158,6 +157,7 @@ SEXP R_match_lcs(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistanc
         );
         if ( d > -1 && d < d1){ 
           index = j + 1;
+          if ( d == 0.0  ) break;
           d1 = d;
         }
       } else if ( xNA && tNA ) {  // both are NA
