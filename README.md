@@ -1,13 +1,20 @@
 stringdist
 ==========
 
-String distance functions for R 
+Approximate matching and string distance calculations for R.
 
 Current CRAN version: 0.5.0
 
-String distance functions are scattered around R, and R's packages. This package
-is a re-implementation of some common (weighted) distance functions, offered
-through a uniform interface. As of version >=0.5.1, distance functions include:
+String distance functions are scattered around R, and R's packages. Moreover,
+approximate string matching functions are scarce. The package offers four main functions:
+
+* `stringdist`  computes pairwise distances between two input character vectors (shorter one is recycled)
+* `stringdistmatrix` computes the distance matrix between two input character vectors, optionally running in parallel.
+* `amatch` is a fuzzy matching equivalent of R's native `match` function
+* `ain` is a fuzzy matching equivalent of R's native `%in%` operator
+
+These functions are built upon `C`-code that re-implements some common (weighted) string
+distance functions. As of version `>0.5`, distance functions include:
 
 * Hamming distance; 
 * Levenshtein distance (weighted);
@@ -19,14 +26,9 @@ through a uniform interface. As of version >=0.5.1, distance functions include:
 * Jaccard distance for q-gram count vectors (= 1-Jaccard similarity)
 * Jaro, and Jaro-Winker distance
 
+To my best knowledge, the latter six were not available before in R. 
 
-To my best knowledge, the latter six were not available before in R. Workhorse
-functions are implemented in C. The package offers two main functions:
-
-* `stringdist`  computes pairwise distances between two input character vectors (shorter one is recycled)
-* `stringdistmatrix` computes the distance matrix between two input character vectors, optionally running in parallel.
-
-Besides that the function `qgrams` tabulates the qgrams in a `charcter` vector.
+Besides the above the function `qgrams` tabulates the qgrams in a `charcter` vector.
 
 NOTE TO USERS: BREAKING UPDATE
 -------------

@@ -149,7 +149,20 @@ static void getjaccard(qtree *Q, double *d){
 
 
 /*Get qgram distances 
- * return values:
+ * Input
+ * s: a string
+ * t: a string
+ * x: length of s
+ * y: length of t
+ * q: the 'q' in q-gram
+ * Q: a qtree
+ * int: distance distance function to compute:
+ *  0 : q-gram distance
+ *  1 : cosine distance
+ *  2 : jaccard distance
+ *
+ *
+ * Return values:
  *  >=0 : qgram distance
  * -1   : infinite distance
  * -2   : Not enough memory
@@ -206,16 +219,8 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance){
   PROTECT(qq);
   PROTECT(distance);
   int q = INTEGER(qq)[0];
-  if ( q < 0 ){
-    UNPROTECT(4);
-    error("q must be a nonnegative integer");
-  }
   // choose distance function
   int dist = INTEGER(distance)[0];
-  if ( dist < 0 || dist > 2 ){
-    UNPROTECT(4);
-    error("unkown distance function");
-  } 
 
   int i=0, j=0;
   int na = length(a);
@@ -244,6 +249,7 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance){
         dist
     );
     if (y[k] == -2.0){
+      UNPROTECT(5);
       error("Could not allocate enough memory");
     }
     if (y[k] == -1.0){
@@ -255,6 +261,81 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance){
   free_qtree(Q);
   UNPROTECT(5);
   return yy;
+}
+
+
+//-- Match function interface with R
+
+SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq, SEXP maxDist, SEXP distance){
+  PROTECT(x);
+  PROTECT(table);
+  PROTECT(nomatch);
+  PROTECT(matchNA);
+  PROTECT(qq);
+  PROTECT(maxDist);
+  PROTECT(distance);
+  int q = INTEGER(qq)[0];
+  double max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
+  
+  // choose distance function
+  int dist = INTEGER(distance)[0];
+
+  int nx = length(x), ntable = length(table);
+  int no_match = INTEGER(nomatch)[0];
+  int match_na = INTEGER(matchNA)[0];
+  
+
+  // set up a qtree;
+  qtree *Q = NULL;
+
+  // output vector
+  SEXP yy;
+  PROTECT(yy = allocVector(INTSXP, nx));
+  int *y = INTEGER(yy);
+  int *X, *T;
+
+
+  double d = R_PosInf, d1 = R_PosInf;
+  int index, xNA, tNA;
+
+  for ( int i=0; i<nx; i++){
+    index = no_match;
+
+    X = INTEGER(VECTOR_ELT(x,i));
+    xNA = (X[0] == NA_INTEGER);
+
+    for ( int j=0; j<ntable; j++){
+
+      T = INTEGER(VECTOR_ELT(table,j));
+      tNA = (T[0] == NA_INTEGER);
+
+      if ( !xNA && !tNA ){        // both are char (usual case)
+        d = qgram_tree(
+          (unsigned int *) X,
+          (unsigned int *) T,
+          length(VECTOR_ELT(x,i)),
+          length(VECTOR_ELT(table,j)),
+          q,
+          Q,
+          dist
+        );
+        if ( d > max_dist ){
+          continue;
+        } else if ( d > -1 && d < d1){ 
+          index = j + 1;
+          if ( abs(d) < 1e-14 ) break; 
+          d1 = d;
+        }
+      } else if ( xNA && tNA ) {  // both are NA
+        index = match_na ? j + 1 : no_match;
+        break;
+      }
+    }
+    
+    y[i] = index;
+  }  
+  UNPROTECT(8);
+  return(yy);
 }
 
 

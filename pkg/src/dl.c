@@ -194,6 +194,10 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   int max_b = max_length(b);
   dictionary *dict = new_dictionary( max_length(a) + max_length(b) + 1 );
   double *scores = (double *) malloc( (max_a + 3) * (max_b + 2) * sizeof(double) );
+  if ( scores == NULL ){
+    UNPROTECT(4);
+    error("%s\n","unable to allocate enough memory");
+  }
 
   for ( k=0; k < nt; ++k ){
     if ( INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
@@ -221,3 +225,79 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   return yy;
 } 
 
+//-- Match function interface with R
+
+SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEXP maxDistance){
+  PROTECT(x);
+  PROTECT(table);
+  PROTECT(nomatch);
+  PROTECT(matchNA);
+  PROTECT(weight);
+  PROTECT(maxDistance);
+
+  int nx = length(x), ntable = length(table);
+  int no_match = INTEGER(nomatch)[0];
+  int match_na = INTEGER(matchNA)[0];
+  double *w = REAL(weight);
+  double maxDist = REAL(maxDistance)[0];
+  
+  /* claim space for workhorse */
+  int max_x = max_length(x);
+  int max_table = max_length(table);
+  dictionary *dict = new_dictionary( max_x + max_table + 1 );
+  double *scores = (double *) malloc( (max_x + 3) * (max_table + 2) * sizeof(double) );
+  if ( scores == NULL ){
+    UNPROTECT(6);
+    error("%s\n","unable to allocate enough memory");
+  }
+
+  // output vector
+  SEXP yy;
+  PROTECT(yy = allocVector(INTSXP, nx));
+  int *y = INTEGER(yy);
+  int *X, *T;
+
+
+  double d = R_PosInf, d1 = R_PosInf;
+  int index, xNA, tNA;
+
+  for ( int i=0; i<nx; i++){
+    index = no_match;
+
+    X = INTEGER(VECTOR_ELT(x,i));
+    xNA = (X[0] == NA_INTEGER);
+
+    for ( int j=0; j<ntable; j++){
+
+      T = INTEGER(VECTOR_ELT(table,j));
+      tNA = (T[0] == NA_INTEGER);
+
+      if ( !xNA && !tNA ){        // both are char (usual case)
+        d = distance(
+          (unsigned int *) X,
+          (unsigned int *) T,
+          length(VECTOR_ELT(x,i)),
+          length(VECTOR_ELT(table,j)),
+          w,
+          maxDist,
+          dict,
+          scores
+        );
+        if ( d > -1 && d < d1){ 
+          index = j + 1;
+          if ( abs(d) < 1e-14 ) break;
+          d1 = d;
+        }
+      } else if ( xNA && tNA ) {  // both are NA
+        index = match_na ? j + 1 : no_match;
+        break;
+      }
+    }
+    
+    y[i] = index;
+  }  
+  UNPROTECT(7);
+  free_dictionary(dict);
+  free(scores);
+  return(yy);
+}

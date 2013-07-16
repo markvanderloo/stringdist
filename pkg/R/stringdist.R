@@ -149,7 +149,7 @@
 stringdist <- function(a, b, 
   method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard", "jw"), 
   weight=c(d=1,i=1,s=1,t=1), 
-  maxDist=0, q=1, p=0
+  maxDist=Inf, q=1, p=0
 ){
   a <- as.character(a)
   b <- as.character(b)
@@ -166,6 +166,7 @@ stringdist <- function(a, b,
       all(is.finite(weight)),
       all(weight > 0),
       all(weight <=1),
+      q >= 0,
       p <= 0.25,
       p >= 0
   )
@@ -187,7 +188,7 @@ stringdist <- function(a, b,
 stringdistmatrix <- function(a, b, 
   method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw"), 
   weight=c(d=1,i=1,s=1,t=1), 
-  maxDist=0, q=1, p=0,
+  maxDist=Inf, q=1, p=0,
   ncores=1, cluster=NULL
 ){
   a <- as.character(a)
@@ -200,6 +201,7 @@ stringdistmatrix <- function(a, b,
       all(is.finite(weight)),
       all(weight > 0),
       all(weight <=1),
+      q >= 0,
       p <= 0.25,
       p >= 0
   )
@@ -217,7 +219,7 @@ stringdistmatrix <- function(a, b,
     x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q, p)
     if (is.null(cluster)) stopCluster(cl)
   }
-  x
+  as.matrix(x)
 }
 
 
@@ -233,6 +235,7 @@ char2int <- function(x){
 
 
 do_dist <- function(a, b, method, weight, maxDist, q, p){
+  if (maxDist==Inf) maxDist <- 0L;
   switch(method,
     osa     = .Call('R_osa'   , a, b, as.double(weight), as.double(maxDist)),
     lv      = .Call('R_lv'    , a, b, as.double(weight), as.double(maxDist)),
@@ -242,7 +245,7 @@ do_dist <- function(a, b, method, weight, maxDist, q, p){
     qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L),
     cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L),
     jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L),
-    jw      = .Call('R_jaro_winkler', a, b, as.double(p))
+    jw      = .Call('R_jw'    , a, b, as.double(p))
   )
 }
 

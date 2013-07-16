@@ -37,6 +37,17 @@ static int match_int(int a, int *b, int *guard, int width){
   return -1;
 }
 
+// Winkler's l-factor (nr of matching characters at beginning of the string).
+static double get_l(int *a, int *b, int n){
+  int i=0;
+  double l;
+  while ( a[i] == b[i] && i < n ){ 
+    i++;
+  }
+  l = (double) i;
+  return l;
+}
+
 
 /* jaro distance (see http://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance).
  *
@@ -44,14 +55,16 @@ static int match_int(int a, int *b, int *guard, int width){
  * b    : string (in int rep)
  * x    : length of a (in uints)
  * y    : length of b (in uints)
+ * p    : Winkler's p-factor in (0,0.25)
  * work : workspace, minimally of length max(x,y)
  *
  */
-static double jaro(
+static double jaro_winkler(
              int *a, 
              int *b,
              int x,
              int y,
+             double p,
              int *work
         ){
 
@@ -67,6 +80,8 @@ static double jaro(
     y = x;
     x = z;
   }
+
+  memset(work,0,sizeof(int) * y);
 
   // max transposition distance
   int M = max(max(x,y)/2 - 1,0);
@@ -98,27 +113,23 @@ static double jaro(
   } else {
     d = 1.0 - (1.0/3.0)*(m/x + m/y + (m-t)/m);
   }
-  memset(work,0,sizeof(int) * y);
-  return d;
-}
 
-// Winkler's l-factor (nr of matching characters at beginning of the string).
-static double get_l(int *a, int *b, int n){
-  int i=0;
-  double l;
-  while ( a[i] == b[i] && i < n ){ 
-    i++;
+  // Winkler's penalty factor
+  if ( p > 0 && d > 0 ){
+    int n = min(min(x,y),4);
+    d =  d - get_l(a,b,n)*p*d; 
   }
-  l = (double) i;
-  return l;
+
+  return d;
 }
 
 
 /*----------- R interface ------------------------------------------------*/
 
-SEXP R_jaro_winkler(SEXP a, SEXP b, SEXP p){
+SEXP R_jw(SEXP a, SEXP b, SEXP p){
   PROTECT(a);
   PROTECT(b);
+  PROTECT(p);
 
   // find the length of longest strings
   int max_a = max_length(a);
@@ -133,7 +144,11 @@ SEXP R_jaro_winkler(SEXP a, SEXP b, SEXP p){
   int length_s, length_t;
 
   // workspace for worker function
-  int *work = (int *) calloc( sizeof(int), max_char );
+  int *work = (int *) malloc( sizeof(int)*max_char );
+  if ( work == NULL ){
+     UNPROTECT(3);
+     error("%s\n","unable to allocate enough memory");
+  }
 
   // output variable
   SEXP yy;
@@ -151,25 +166,85 @@ SEXP R_jaro_winkler(SEXP a, SEXP b, SEXP p){
     if ( s[0] == NA_INTEGER || t[0] == NA_INTEGER){
       y[k] = NA_REAL;
       continue;
-    } else { // jaro distance
-      y[k] = jaro(s, t, length_s, length_t, work);
+    } else { // jaro-winkler distance
+      y[k] = jaro_winkler(s, t, length_s, length_t, pp, work);
     } 
-    // Winkler's penalty factor
-    if ( pp > 0 && y[k] != NA_REAL && y[k] > 0 ){
-      n = min(min(length_s,length_t),4);
-      y[k] =  y[k] - get_l(s,t,n)*pp*y[k]; 
-
-    }
     i = RECYCLE(i+1,na);
     j = RECYCLE(j+1,nb);
   }
     
-
-  UNPROTECT(3);
   free(work);
+  UNPROTECT(4);
   return yy;
 }
 
 
+//-- Match function interface with R
+
+SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP maxDist){
+  PROTECT(x);
+  PROTECT(table);
+  PROTECT(nomatch);
+  PROTECT(matchNA);
+  PROTECT(p);
+  PROTECT(maxDist);
+
+  int nx = length(x), ntable = length(table);
+  int no_match = INTEGER(nomatch)[0];
+  int match_na = INTEGER(matchNA)[0];
+  double pp = REAL(p)[0];
+  double max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
+  
+  // workspace for worker function
+  int *work = (int *) malloc( sizeof(int) * max(nx,ntable) );
+  if ( work == NULL ){
+    UNPROTECT(5);
+    error("%s\n","unable to allocate enough memory");
+  }
+
+  // output vector
+  SEXP yy;
+  PROTECT(yy = allocVector(INTSXP, nx));
+  int *y = INTEGER(yy);
+  int *X, *T;
+
+
+  double d = R_PosInf, d1 = R_PosInf;
+  int index, xNA, tNA, length_X,length_T;
+
+  for ( int i=0; i<nx; i++){
+    index = no_match;
+
+    X = INTEGER(VECTOR_ELT(x,i));
+    length_X = length(VECTOR_ELT(x,i));
+    xNA = (X[0] == NA_INTEGER);
+
+    for ( int j=0; j<ntable; j++){
+
+      T = INTEGER(VECTOR_ELT(table,j));
+      length_T = length(VECTOR_ELT(table,j));
+      tNA = (T[0] == NA_INTEGER);
+
+      if ( !xNA && !tNA ){        // both are char (usual case)
+        d = jaro_winkler(X, T, length_X, length_T, pp, work);
+        if ( d > max_dist ){
+          continue;
+        } else if ( d > -1 && d < d1){ 
+          index = j + 1;
+          if ( abs(d) < 1e-14 ) break;
+          d1 = d;
+        }
+      } else if ( xNA && tNA ) {  // both are NA
+        index = match_na ? j + 1 : no_match;
+        break;
+      }
+    }
+    
+    y[i] = index;
+  }  
+  free(work);
+  UNPROTECT(7);
+  return(yy);
+}
 
 

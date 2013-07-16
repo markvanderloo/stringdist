@@ -1,5 +1,5 @@
 
-#define USE_RINTERNALS
+//#define USE_RINTERNALS
 #include <stdlib.h>
 #include <R.h>
 #include <Rdefines.h>
@@ -66,7 +66,7 @@ static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weig
    return(scores[I*J-1]);
 }
 
-//-- interface with R
+//-- Distance function interface with R
 
 
 SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
@@ -82,7 +82,8 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
 
    scores = (double *) malloc( (max_length(a) + 1) * (max_length(b) + 1) * sizeof(double)); 
    if ( scores == NULL ){
-      error("%s\n","unable to allocate enough memory for workspace");
+      UNPROTECT(4);
+      error("%s\n","unable to allocate enough memory");
    }
 
    // output vector
@@ -116,5 +117,80 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
    return(yy);
 }
 
+
+
+//-- Match function interface with R
+
+SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEXP maxDistance){
+  PROTECT(x);
+  PROTECT(table);
+  PROTECT(nomatch);
+  PROTECT(matchNA);
+  PROTECT(weight);
+  PROTECT(maxDistance);
+
+  int nx = length(x), ntable = length(table);
+  int no_match = INTEGER(nomatch)[0];
+  int match_na = INTEGER(matchNA)[0];
+  double *w = REAL(weight);
+  double maxDist = REAL(maxDistance)[0];
+  
+  /* claim space for workhorse */
+  int max_x = max_length(x);
+  int max_table = max_length(table);
+  double *scores = (double *) malloc( (max_x + 3) * (max_table + 2) * sizeof(double) );
+  if ( scores == NULL ){
+     UNPROTECT(6);
+     error("%s\n","unable to allocate enough memory");
+  }
+
+  // output vector
+  SEXP yy;
+  PROTECT(yy = allocVector(INTSXP, nx));
+  int *y = INTEGER(yy);
+  int *X, *T;
+
+
+  double d = R_PosInf, d1 = R_PosInf;
+  int index, xNA, tNA;
+
+  for ( int i=0; i<nx; i++){
+    index = no_match;
+
+    X = INTEGER(VECTOR_ELT(x,i));
+    xNA = (X[0] == NA_INTEGER);
+
+    for ( int j=0; j<ntable; j++){
+
+      T = INTEGER(VECTOR_ELT(table,j));
+      tNA = (T[0] == NA_INTEGER);
+
+      if ( !xNA && !tNA ){        // both are char (usual case)
+        d = osa(
+          (unsigned int *) X, 
+          length(VECTOR_ELT(x,i)), 
+          (unsigned int *) T, 
+          length(VECTOR_ELT(table,j)), 
+          w,
+          maxDist,
+          scores
+        );
+        if ( d > -1 && d < d1){ 
+          index = j + 1;
+          if ( d == 0.0 ) break;
+          d1 = d;
+        }
+      } else if ( xNA && tNA ) {  // both are NA
+        index = match_na ? j + 1 : no_match;
+        break;
+      }
+    }
+    
+    y[i] = index;
+  }  
+  UNPROTECT(7);
+  free(scores);
+  return(yy);
+}
 
 

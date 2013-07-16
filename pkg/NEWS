@@ -1,10 +1,14 @@
 version 0.6.0
-- BREAKING CHANGE: output -1 is replaced by Inf for all distance methods.
+- added amatch function: approximate matching version of 'match'
+- added ain function: approximate matching version of '%in%'
 - qgrams now accepts arbitrary number of arguments. Outputs array, not table
 - added cosine distance
 - added Jaccard distance
 - added Jaro and Jaro-Winkler distances
 - small performance tweeks in underlying C code
+- Edge case in strindistmatrix: output is now always of class matrix
+- Default maxDist is now Inf (this is only to make it more intuitive and does not break previous code)
+- BREAKING CHANGE: output -1 is replaced by Inf for all distance methods
 
 
 version 0.5.0
