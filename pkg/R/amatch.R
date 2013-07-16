@@ -67,10 +67,10 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE,
     dl      = .Call('R_match_dl'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),
     hamming = .Call('R_match_hm'        , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist)),
     lcs     = .Call('R_match_hm'        , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist)),
-    qgram   = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q),0L),
-    cosine  = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q),1L),
-    jaccard = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q),1L),
-    jw      = .Call('R_match_jw'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(p))
+    qgram   = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 0L),
+    cosine  = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 1L),
+    jaccard = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 2L),
+    jw      = .Call('R_match_jw'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(p), as.double(maxDist))
   )
 }
 

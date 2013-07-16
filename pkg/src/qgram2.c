@@ -266,14 +266,17 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance){
 
 //-- Match function interface with R
 
-SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq, SEXP distance){
+SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq, SEXP maxDist, SEXP distance){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
   PROTECT(matchNA);
   PROTECT(qq);
+  PROTECT(maxDist);
   PROTECT(distance);
   int q = INTEGER(qq)[0];
+  double max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
+  
   // choose distance function
   int dist = INTEGER(distance)[0];
 
@@ -316,8 +319,11 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq,
           Q,
           dist
         );
-        if ( d > -1 && d < d1){ 
+        if ( d > max_dist ){
+          continue;
+        } else if ( d > -1 && d < d1){ 
           index = j + 1;
+          if ( abs(d) < 1e-14 ) break; 
           d1 = d;
         }
       } else if ( xNA && tNA ) {  // both are NA
@@ -328,7 +334,7 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq,
     
     y[i] = index;
   }  
-  UNPROTECT(7);
+  UNPROTECT(8);
   return(yy);
 }
 

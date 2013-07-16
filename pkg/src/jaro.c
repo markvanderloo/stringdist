@@ -181,17 +181,19 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p){
 
 //-- Match function interface with R
 
-SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p){
+SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP maxDist){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
   PROTECT(matchNA);
   PROTECT(p);
+  PROTECT(maxDist);
 
   int nx = length(x), ntable = length(table);
   int no_match = INTEGER(nomatch)[0];
   int match_na = INTEGER(matchNA)[0];
   double pp = REAL(p)[0];
+  double max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
   
   // workspace for worker function
   int *work = (int *) malloc( sizeof(int) * max(nx,ntable) );
@@ -225,8 +227,11 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p){
 
       if ( !xNA && !tNA ){        // both are char (usual case)
         d = jaro_winkler(X, T, length_X, length_T, pp, work);
-        if ( d > -1 && d < d1){ 
+        if ( d > max_dist ){
+          continue;
+        } else if ( d > -1 && d < d1){ 
           index = j + 1;
+          if ( abs(d) < 1e-14 ) break;
           d1 = d;
         }
       } else if ( xNA && tNA ) {  // both are NA
@@ -238,7 +243,7 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p){
     y[i] = index;
   }  
   free(work);
-  UNPROTECT(6);
+  UNPROTECT(7);
   return(yy);
 }
 
