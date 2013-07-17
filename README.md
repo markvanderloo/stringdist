@@ -66,39 +66,3 @@ Warning: the github version can change any time and may not even build properly.
 of the code is written in `C`, the development version may crash your `R`-session.
 
 
-TODO
-----
-* Approximate matching equivalent of R's `match` function
-* Episode distance
-* ~~Longest common substring~~
-* distances based on q-grams
-    * ~~Using unsorted list storage~~
-    * ~~Using tree storage~~
-    * Using hashed storage
-    * Option to add _q-1_ pre- and or postfixes
-* ~~Jaccard similarity (exposed as a distance)~~
-* ~~cosine similarity (idem)~~
-* ~~jaro distance~~
-* ~~jaro-winkler distance~~
-* ~~optionally use user-defined cluster for parallel computations~~
-* ~~get q-gram counts from string~~
-* small (C-style) performance tweeks, like 
-    * ~~detect where |nchar(a)-nchar(b)| > maxDist or smarter distribution of jobs over clusters~~
-    * ~~faster recycling index calculations~~
-
-Could
-----
-
-* Perhaps in the future I'll add supporting functionality such as
-    * An encoding sniffer, detecting character encodings from files (not sure if that's available in R already)
-    * Some string normalizing functionality
-    * ...
-* Put paralellisation under the hood with openMP
-
-Won't
-------
-
-* get actual longest common substring (Can't see the use case)
-* get actual edits needed to go from one string to another (idem)
-* Tanimoto coefficient -> nice example of `qgrams` usage
-
