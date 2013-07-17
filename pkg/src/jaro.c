@@ -156,7 +156,7 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p){
   double *y = REAL(yy);
 
   // compute distances, skipping NA's
-  int i=0,j=0,n;
+  int i=0,j=0;
   double pp = REAL(p)[0];
   for ( int k=0; k < nt; ++k ){
     length_s = length(VECTOR_ELT(a,i));

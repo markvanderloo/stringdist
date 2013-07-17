@@ -133,7 +133,7 @@ SEXP R_match_lcs(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistanc
 
   int *X, *T;
   double d = R_PosInf, d1 = R_PosInf;
-  int nchar, index, xNA, tNA;
+  int index, xNA, tNA;
 
   for ( int i=0; i<nx; i++){
     index = no_match;
