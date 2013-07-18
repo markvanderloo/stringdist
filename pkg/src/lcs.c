@@ -167,7 +167,8 @@ SEXP R_match_lcs(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistanc
     }
     
     y[i] = index;
-  }  
+  }
+  free(scores);  
   UNPROTECT(6);
   return(yy);
 }
