@@ -11,7 +11,7 @@
 #' @param ... any number of (named) arguments, that will be coerced to character with \code{as.character}.
 #' @param q size of q-gram, must be non-negative.
 #'
-#' @return An table with $q$-gram counts. Detected q-grams are column names and the argument names as row names.
+#' @return A table with \eqn{q}-gram counts. Detected \eqn{q}-grams are column names and the argument names as row names.
 #' If no argument names were provided, they will be generated.
 #'
 #' @seealso \code{\link{stringdist}}. 

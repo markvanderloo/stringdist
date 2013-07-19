@@ -5,7 +5,7 @@
 #' @useDynLib stringdist
 {}
 
-#' Compute distance between strings
+#' Compute distance metrics between strings
 #'
 #' @section Details:
 #' \code{stringdist} computes pairwise string distances between elements of \code{character} vectors \code{a} and \code{b},
@@ -16,21 +16,21 @@
 #' Currently, the following distance metrics are supported:
 #' \tabular{ll}{
 #'    \code{osa} \tab Optimal string aligment, (restricted Damerau-Levenshtein distance).\cr
-#'    \code{lv} \tab Levenshtein distance.\cr
+#'    \code{lv} \tab Levenshtein distance (as in R's native \code{\link[utils]{adist}}).\cr
 #'    \code{dl} \tab Full Damerau-Levenshtein distance.\cr
 #'    \code{hamming}  \tab Hamming distance (\code{a} and \code{b} must have same nr of characters).\cr
-#'    \code{lcs} \tab Longest common substring.\cr
+#'    \code{lcs} \tab Longest common substring distance.\cr
 #'    \code{qgram} \tab \eqn{q}-gram distance. \cr
-#'    \code{cosine} \tab cosine distance between \eqn{q}-gram counts \cr
-#'    \code{jaccard} \tab Jaccard distance between \eqn{q}-gram counts \cr
+#'    \code{cosine} \tab cosine distance between \eqn{q}-gram profiles \cr
+#'    \code{jaccard} \tab Jaccard distance between \eqn{q}-gram profiles \cr
 #'    \code{jw} \tab Jaro, or Jaro-Winker distance.
 #' }
-#' The \bold{Hamming distance} counts the number of character substitutions that turns 
+#' The \bold{Hamming distance} (\code{hamming}) counts the number of character substitutions that turns 
 #' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters \code{Inf} is
 #' returned.
 #'
 #' The \bold{Levenshtein distance} (\code{lv}) counts the number of deletions, insertions and substitutions necessary
-#' to turn \code{b} into \code{a}. This method is equivalent to \code{R}'s native \code{adist} function.
+#' to turn \code{b} into \code{a}. This method is equivalent to \code{R}'s native \code{\link[utils]{adist}} function.
 #' The computation is aborted when \code{maxDist} is exceeded, in which case \code{Inf}  is returned.
 #'
 #' The \bold{Optimal String Alignment distance} (\code{osa}) is like the Levenshtein distance but also 
@@ -61,10 +61,10 @@
 #' dissimilarity between strings.
 #' It is defined to be 0 when both strings have length 0, and 1 when  there are no character matches between \code{a} and \code{b}. 
 #' Otherwise, the Jaro distance is defined as \eqn{1-(1/3)(m/|a| + m/|b| + (m-t)/m)}. Here,\eqn{|a|} indicates the number of
-#' characters in \code{a} (after conversion to integers), \eqn{m} is the number of 
+#' characters in \code{a}, \eqn{m} is the number of 
 #' character matches and \eqn{t} the number of transpositions of matching characters.
 #' A character \eqn{c} of \code{a} \emph{matches} a character from \code{b} when
-#' \eqn{c} occurs in \code{b}, and the index of \eqn{c} in \code{a} differs less than \eqn{max(|a|,|b|)/2 -1} (where we use integer division).
+#' \eqn{c} occurs in \code{b}, and the index of \eqn{c} in \code{a} differs less than \eqn{\max(|a|,|b|)/2 -1} (where we use integer division).
 #' Two matching characters are transposed when they are matched but they occur in different order in string \code{a} and \code{b}.
 #'  
 #' The \bold{Jaro-Winkler distance} (\code{method=jw}, \code{0<p<=0.25}) adds a correction term to the Jaro-distance. It is defined as \eqn{d - l*p*d}, where
@@ -99,6 +99,10 @@
 #' F.J. Damerau (1964) A technique for computer detection and correction of spelling errors. Communications of the ACM 7 171-176.
 #' }
 #' \item{
+#'  An extensive overview of (online) string matching algorithms is given by G. Navarro (2001). 
+#'  A guided tour to approximate string matching, ACM Computing Surveys 33 31-88.
+#' }
+#' \item{
 #' Many algorithms are available in pseudocode from wikipedia: http://en.wikipedia.org/wiki/Damerau-Levenshtein_distance.
 #' }
 #' \item{The code for the full Damerau-Levenshtein distance was adapted from Nick Logan's public github repository:
@@ -116,6 +120,7 @@
 #'  report a different matching window for characters in strings \code{a} and \code{b}. 
 #' }
 #'
+#'
 #'}
 #'
 #'
@@ -125,16 +130,13 @@
 #' @param method Method for distance calculation. The default is \code{"osa"} (see details).
 #' @param weight The penalty for deletion, insertion, substitution and transposition, in that order.  
 #'   Weights must be positive and not exceed 1. \code{weight[4]} is ignored when \code{method='lv'} and \code{weight} is
-#'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'} or \code{'lcs'}.
+#'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'}, \code{'lcs'} or \code{'jw'}.
 #' @param maxDist  Maximum string distance before calculation is stopped, \code{maxDist=0} 
-#'    means calculation goes on untill the distance is computed. Ignored for \code{method='qgram'} and
+#'    means calculation goes on untill the distance is computed. Ignored for \code{method='qgram'}, \code{'cosine'}, \code{'jaccard'} and
 #'    \code{method='jw'}.
-#' @param q  size of the \eqn{q}-gram, must be nonnegative. Ignored for all but \code{method='qgram'}.
+#' @param q  size of the \eqn{q}-gram, must be nonnegative. Ignored for all but \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
 #' @param p penalty factor for Jaro-Winkler distance. The valid range for \code{p} is \code{0<= p <= 0.25}. 
 #'  If \code{p=0} (default), the Jaro-distance is returned. Ignored for all methods except \code{'jw'}.
-#'
-#'
-#'
 #'
 #'
 #'

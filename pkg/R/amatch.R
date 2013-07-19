@@ -12,7 +12,7 @@
 #'
 #' The \code{amatch} function mimics the behaviour of \code{\link[base]{match}} by default: \code{NA} is 
 #' matched with \code{NA} and with nothing else. Note that this is inconsistent with the behaviour of \code{\link{stringdist}}
-#' since \code{stringdist} yields \code{NA} whenever one of the arguments is \code{NA}. The same inconsistency exists
+#' since \code{stringdist} yields \code{NA} when at least one of the arguments is \code{NA}. The same inconsistency exists
 #' between \code{\link[base]{match}} and \code{\link[stats]{dist}}. However, in \code{amatch} this behaviour
 #' can be controlled by setting \code{matchNA=FALSE}. In that case, if any of the arguments in \code{x} 
 #' is \code{NA}, the \code{nomatch} value is returned, regardless of whether \code{NA} is present in \code{table}.
@@ -33,8 +33,9 @@
 #' @param q q-gram size, see \code{\link{stringdist}}.
 #' @param p Winklers penalty parameter for Jaro-Winkler distance, see \code{\link{stringdist}}.
 #' @return \code{amatch} returns the position of the closest match of \code{x} in \code{table}. 
+#'  When multiple matches with the same smallest distance metric exist, the first one is returned.
 #'  \code{ain} returns a \code{logical} vector of length \code{length(x)} indicating wether 
-#'  an element of \code{x} approximately appears in \code{table}.
+#'  an element of \code{x} approximately matches an element in \code{table}.
 #'
 #' @example ../examples/amatch.R
 #' @export
