@@ -1,5 +1,5 @@
 
-//#define USE_RINTERNALS
+#define USE_RINTERNALS
 #include <stdlib.h>
 #include <R.h>
 #include <Rdefines.h>
