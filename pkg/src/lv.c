@@ -29,7 +29,7 @@ static double lv(unsigned int *a, int na, unsigned int *b, int nb, double *weigh
  
    int i, j;
    int I = na+1, J = nb+1;
-   double sub, colmin;
+   double sub;
 
    for ( i = 0; i < I; ++i ){
       scores[i] = i;
@@ -39,7 +39,7 @@ static double lv(unsigned int *a, int na, unsigned int *b, int nb, double *weigh
    }
 
    for ( i = 1; i <= na; ++i ){
-      colmin = (double) na + nb + 1;
+      
       for ( j = 1; j <= nb; ++j ){
          sub = (a[i-1] == b[j-1]) ? 0 : weight[2];
          scores[i + I*j] = min3( 
@@ -47,13 +47,11 @@ static double lv(unsigned int *a, int na, unsigned int *b, int nb, double *weigh
             scores[i   + I*(j-1)] + weight[1],     // insertion
             scores[i-1 + I*(j-1)] + sub            // substitution
          );
-        colmin = min2(colmin, scores[i + I*j]);
-      }
-      if ( maxDistance > 0 && colmin > maxDistance ){
-         return -1;
+     
       }
    }
-   return(scores[I*J-1]);
+   double score = scores[I*J-1];
+   return (maxDistance > 0 && maxDistance < score)?(-1):score;
 }
 
 //-- interface with R

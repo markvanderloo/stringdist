@@ -26,7 +26,7 @@ static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDistance
 
   int i, j;
   int I = na+1, J = nb+1;
-  int mincol;
+  
   for ( i = 0; i < I; ++i ){
     scores[i] = i;
   }
@@ -35,7 +35,6 @@ static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDistance
   }
 
   for ( i = 1; i <= na; ++i ){
-    mincol = na + nb + 1;
     for ( j = 1; j <= nb; ++j ){
       if ( a[i-1] == b[j-1] ){ // equality, copy previous score
         scores[i + I*j] = scores[i-1 + I*(j-1)];
@@ -45,13 +44,11 @@ static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDistance
           scores[i   + I*(j-1)] + 1       // insertion
         );
       }
-      mincol = min2(mincol,scores[i+I*j]);
-    }
-    if ( maxDistance > 0 && mincol > maxDistance ){
-      return -1;
+      
     }
   }
-  return scores[I*J - 1];
+  int score = scores[I*J - 1];
+  return (maxDistance > 0 && maxDistance < score )?(-1):score;
 }
 
 //-- interface with R

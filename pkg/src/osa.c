@@ -29,7 +29,7 @@ static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weig
 
   int i, j;
   int I = na+1, J = nb+1;
-  double sub, tran, colmin;
+  double sub, tran;
 
    for ( i = 0; i < I; ++i ){
       scores[i] = i;
@@ -39,7 +39,6 @@ static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weig
    }
 
    for ( i = 1; i <= na; ++i ){
-      colmin = (double) na + nb + 1;
       for ( j = 1; j <= nb; ++j ){
          if (a[i-1] == b[j-1]){
             sub = 0;
@@ -57,14 +56,10 @@ static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weig
          if ( i>1 && j>1 && a[i-1] == b[j-2] && a[i-2] == b[j-1] ){
             scores[i + I*j] = min2(scores[i + I*j], scores[i-2+I*(j-2)]) + tran; // transposition
          }
-         colmin = min2(colmin, scores[i + I*j]);
       }
-         if ( maxDistance > 0 && colmin > maxDistance ){
-         
-            return -1;
-         }
    }
-   return(scores[I*J-1]);
+   double score = scores[I*J-1];
+   return (maxDistance > 0 && maxDistance < score)?(-1):score;
 }
 
 //-- Distance function interface with R

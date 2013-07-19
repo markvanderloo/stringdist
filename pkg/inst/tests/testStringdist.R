@@ -25,6 +25,8 @@ test_that("max distance is obeyed",{
    expect_equal(stringdist("aa","bb",method='osa',maxDist=1), Inf)
    # Thanks to Daniel Deckhard pointing to this bug
    expect_equal(stringdist("abc","abc",method='osa',maxDist=1), 0)
+   expect_equal(stringdist("aa","bbb",method='osa',maxDist=2), Inf)
+   expect_equal(stringdist("bbb","aa",method='osa',maxDist=2), Inf)
    expect_equal(stringdist("","abc",method='osa',maxDist=1), Inf)
    expect_equal(stringdist("abc","",method='osa',maxDist=2), Inf)
 })
@@ -71,6 +73,8 @@ test_that("max distance is obeyed",{
    expect_equal(stringdist("abc","abc",method='lv',maxDist=1), 0)
    expect_equal(stringdist("","abc",method='lv',maxDist=1), Inf)
    expect_equal(stringdist("abc","",method='lv',maxDist=2), Inf)
+   expect_equal(stringdist("aa","bbb",method='lv',maxDist=2), Inf)
+   expect_equal(stringdist("bbb","aa",method='lv',maxDist=2), Inf)
 })
 
 test_that("Shortest argument is recycled",{
@@ -112,6 +116,8 @@ test_that("max distance is obeyed",{
    expect_equal(stringdist("abc","abc",method='dl',maxDist=1), 0)
    expect_equal(stringdist("","abc",method='dl',maxDist=2), Inf)
    expect_equal(stringdist("abc","",method='dl',maxDist=2), Inf)
+   expect_equal(stringdist("aa","bbb",method='dl',maxDist=2), Inf)
+   expect_equal(stringdist("bbb","aa",method='dl',maxDist=2), Inf)
 })
 
 test_that("Shortest argument is recycled",{
@@ -155,6 +161,8 @@ test_that("max distance is obeyed",{
    expect_equal(stringdist("abc","abc",method='lcs',maxDist=1), 0)
    expect_equal(stringdist("","abc",method='lcs',maxDist=1), Inf)
    expect_equal(stringdist("abc","",method='lcs',maxDist=1), Inf)
+   expect_equal(stringdist("aa","bbb",method='lcs',maxDist=2), Inf)
+   expect_equal(stringdist("bbb","aa",method='lcs',maxDist=2), Inf)
 })
 
 test_that("Shortest argument is recycled",{
