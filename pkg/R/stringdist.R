@@ -131,8 +131,8 @@
 #' @param weight The penalty for deletion, insertion, substitution and transposition, in that order.  
 #'   Weights must be positive and not exceed 1. \code{weight[4]} is ignored when \code{method='lv'} and \code{weight} is
 #'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'}, \code{'lcs'} or \code{'jw'}.
-#' @param maxDist  Maximum string distance before calculation is stopped, \code{maxDist=0} 
-#'    means calculation goes on untill the distance is computed. Ignored for \code{method='qgram'}, \code{'cosine'}, \code{'jaccard'} and
+#' @param maxDist  Maximum string distance for edit-like distances, in some cases computation is stopped when \code{maxDist} is reached. 
+#'    \code{maxDist=Inf} means calculation goes on untill the distance is computed. Ignored for \code{method='qgram'}, \code{'cosine'}, \code{'jaccard'} and
 #'    \code{method='jw'}.
 #' @param q  size of the \eqn{q}-gram, must be nonnegative. Ignored for all but \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
 #' @param p penalty factor for Jaro-Winkler distance. The valid range for \code{p} is \code{0<= p <= 0.25}. 

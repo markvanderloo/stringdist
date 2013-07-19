@@ -1,3 +1,6 @@
+version 0.6.1
+- bugfix in lv/osa/dl: maxDist ignored in certain cases
+
 version 0.6.0
 - added amatch function: approximate matching version of 'match'
 - added ain function: approximate matching version of '%in%'
