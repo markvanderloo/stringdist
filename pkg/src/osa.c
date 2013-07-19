@@ -163,10 +163,10 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SE
 
       if ( !xNA && !tNA ){        // both are char (usual case)
         d = osa(
-          (unsigned int *) T, 
-          length(VECTOR_ELT(table,j)), 
           (unsigned int *) X, 
           length(VECTOR_ELT(x,i)), 
+          (unsigned int *) T, 
+          length(VECTOR_ELT(table,j)), 
           w,
           maxDist,
           scores
