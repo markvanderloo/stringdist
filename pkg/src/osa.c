@@ -11,6 +11,7 @@
  * - Extended with custom weights and maxDistance
  */
 static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weight, double maxDistance, double *scores){
+
   if (na == 0){
     if ( maxDistance > 0 && maxDistance < nb ){
       return -1;
@@ -167,10 +168,10 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SE
 
       if ( !xNA && !tNA ){        // both are char (usual case)
         d = osa(
-          (unsigned int *) X, 
-          length(VECTOR_ELT(x,i)), 
           (unsigned int *) T, 
           length(VECTOR_ELT(table,j)), 
+          (unsigned int *) X, 
+          length(VECTOR_ELT(x,i)), 
           w,
           maxDist,
           scores

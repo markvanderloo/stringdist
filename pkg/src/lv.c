@@ -154,10 +154,10 @@ SEXP R_match_lv(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
 
       if ( !xNA && !tNA ){        // both are char (usual case)
         d = lv(
-          (unsigned int *) X, 
-          length(VECTOR_ELT(x,i)), 
           (unsigned int *) T, 
           length(VECTOR_ELT(table,j)), 
+          (unsigned int *) X, 
+          length(VECTOR_ELT(x,i)), 
           w,
           maxDist,
           scores
