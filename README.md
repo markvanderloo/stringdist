@@ -3,7 +3,7 @@ stringdist
 
 Approximate matching and string distance calculations for R.
 
-Current CRAN version: 0.5.0
+Current CRAN version: 0.6.0
 
 String distance functions are scattered around R, and R's packages. Moreover,
 approximate string matching functions are scarce. The package offers four main functions:
