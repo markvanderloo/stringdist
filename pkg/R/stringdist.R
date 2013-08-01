@@ -210,7 +210,7 @@ stringdistmatrix <- function(a, b,
   a <- char2int(a)
   b <- lapply(char2int(b),list)
   if (ncores==1){
-    x <- sapply(b,do_dist,a,method,weight,maxDist, q)
+    x <- sapply(b,do_dist,a,method,weight,maxDist, q, p)
   } else {
     if ( is.null(cluster) ){
       cl <- makeCluster(ncores)
