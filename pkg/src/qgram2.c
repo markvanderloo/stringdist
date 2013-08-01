@@ -55,16 +55,16 @@ static int compare(unsigned int *q1, unsigned int *q2, int q){
 static qtree *push(qtree *Q, unsigned int *qgram, unsigned int q, int iLoc, int nLoc ){
   int cond;  
   if( Q == NULL ){ // new qgram
+
     Q = (qtree *) malloc(sizeof(qtree));
     if ( Q == NULL ) return NULL;
-    // TODO: combine to a single malloc
+
     Q->qgram = (unsigned int *) malloc(sizeof(int) * q);
     if (Q->qgram == NULL ) return NULL;
 
     Q->n = (double *) malloc(sizeof(double) * nLoc);
     if (Q->n == NULL) return NULL;
     for (int i=0; i<nLoc; ++i) Q->n[i] = 0.0;
-    // END TODO 
 
     Q->n[iLoc]++;
     memcpy(Q->qgram, qgram, sizeof(int) * q);
