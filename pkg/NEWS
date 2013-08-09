@@ -1,3 +1,5 @@
+version 0.6.2
+
 version 0.6.1
 - bugfix in parallel version of stringdistmatrix: parameter p was not passed (thanks to Ricardo Saporta)
 - bugfix in lv/osa/dl: maxDist ignored in certain cases
