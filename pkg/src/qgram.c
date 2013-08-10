@@ -29,8 +29,8 @@ typedef struct qnode {
 /* -- Simple memory allocator to store nodes of the qtree -- */
 
 
-/* Nodes are stored in boxes which are stored on a shelve
- * every time a new box is added to the shelve, the capacity 
+/* Nodes are stored in boxes which are stored on a shelve.
+ * Every time a new box is added to the shelve, the capacity 
  * for node storage doubles, unless MAXBOXES is surpassed.
  */
 #define MAXBOXES 20
@@ -174,6 +174,17 @@ static int compare(unsigned int *q1, unsigned int *q2, int q){
   return compare( q1 + 1, q2 + 1, q - 1 );
 }
 
+// helper functions
+static qtree *new_qtree(int q, int nstr){
+  init_shelve(q, nstr);
+  return NULL;
+}
+
+static void free_qtree(qtree *Q){
+  clear_shelve();
+}
+
+
 /* push qgram into binary tree
  * 
  * qtree : see above
@@ -189,7 +200,7 @@ static qtree *push(qtree *Q, unsigned int *qgram, unsigned int q, int iLoc, int 
     Q = (qtree *) alloc( Qtree);
     if ( Q == NULL ) return NULL;
 
-    Q->qgram = (unsigned int *) alloc( Uint);
+    Q->qgram = (unsigned int *) alloc( uInt);
     if (Q->qgram == NULL ) return NULL;
 
     Q->n = (double *) alloc( Double);
@@ -225,15 +236,6 @@ static qtree *push_string(unsigned int *str, int strlen, unsigned int q, qtree *
   return Q;
 }
 
-// helper functions
-qtree *new_tree(int q, int nstr){
-  init_shelve(q, nstr);
-  return NULL;
-}
-
-void free_qtree(qtree *Q){
-  clear_shelve();
-}
 
 
 
