@@ -4,7 +4,7 @@
 
 typedef long long int qtree;
 
-typedef enum { Qgram, Count, Qtree } type;
+typedef enum { Int, Double, Qtree } type;
 
 
 #define MAXBOXES 20
@@ -25,7 +25,7 @@ typedef struct {
 
 // A shelve can store up to MAXBOXES Boxes.
 typedef struct {
-  Box **box[MAXBOXES];
+  Box *box[MAXBOXES];
   int nboxes;         // number of boxes on the shelf
   int q;              // the q in q-gram
   int nstr;           // the number of stings compared
@@ -74,7 +74,7 @@ static void add_box(int nnodes){
 
 static void clear_shelve(){
   for ( int i = 0; i < shelve.nboxes; i++ ){
-    free( shelve.box[i] );
+    free_box(shelve.box[i]);
   }
   shelve.nboxes=0L;
 }
@@ -84,7 +84,7 @@ static void clear_shelve(){
 static void *alloc(type t){
 
   if ( shelve.nboxes == 0L ){
-    add_box(MIN_BOX_SIZE)
+    add_box(MIN_BOX_SIZE);
   }
 
   int ibox = shelve.nboxes;
@@ -98,14 +98,14 @@ static void *alloc(type t){
   
   void *x;
   switch ( t){
-    case Qgram:
-      x = (void *) box->intblocks + box.nnodes * shelve.q;
+    case Int:
+      x = (void *) box->intblocks + box->nnodes * shelve.q;
       break;
-    case Count:
-      x = (void *) box->dblblocks + box.nnodes * shelve.nstr;
+    case Double:
+      x = (void *) box->dblblocks + box->nnodes * shelve.nstr;
       break;
     case Qtree:
-      x = (void *) box->qtrblocks + box.nnodes;
+      x = (void *) box->qtrblocks + box->nnodes;
       break;
     default:
       // TODO: raise hell
@@ -118,6 +118,8 @@ static void *alloc(type t){
 
 
 int main(){
+
+  init_shelve();
 
   int x[1] = {7};
   void *p = (void *) x;
