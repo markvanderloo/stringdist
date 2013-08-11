@@ -22,56 +22,14 @@ typedef struct qnode {
   struct qnode *right;
 } qtree;
 
-
-typedef struct {
-  
-  int numnodes;   // number of nodes
-  int curnode;    // index first empty node
-  int q;          // the 'q' in q-gram 
-  int nstr;       // the nr of strings being compared
-
-  // preallocated memory 
-  unsigned int *qgram;
-  double *n;
-  int *left;
-  int *right;
-} qtree;
-
-static void free_qtree(Q){
+static void free_qtree(qtree *Q){
   if ( Q == NULL ) return;
+  free_qtree(Q->left);
+  free_qtree(Q->right);
   free(Q->qgram);
   free(Q->n);
-  free(Q->left);
-  free(Q->right);
   free(Q);
 }
-
-static qtree *new_qtree(int q, int nstr){
-  qrtree *Q   = (qtree *) malloc(sizeof(qtree));
-  if ( Q == NULL ) return NULL;
-  Q->numnodes = 2 << 6 // 128
-  Q->curnode  = 0;
-  Q->q        = q;
-  Q->nstr     = nstr;
-  Q->qgram    = (unsigned int *) malloc( Q->numnodes * sizeof(unsigned int));
-  Q->n        = (double *) malloc( Q->numnodes * sizeof(double));
-  Q->left     = (int *) malloc( Q->numnodes * sizeof(int));
-  Q->right    = (int *) malloc( Q->numnodes * sizeof(int));
-
-  if ( 
-    Q->qgram == NULL ||
-    Q->n == NULL ||
-    Q->left == NULL ||
-    Q->right == NULL )
-  {
-    free_qtree(Q);
-    return NULL;
-  }
-  return Q;
-}
-
-
-
 
 /* Lexicographical comparison of two qgrams.
  * output:
