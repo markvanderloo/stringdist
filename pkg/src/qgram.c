@@ -72,8 +72,10 @@ static Box *new_box(int nnodes, int q, int nstr){
 }
 
 static void free_box(Box *box){
+//Rprintf("floopsiee! %d\n", box);
   // empty box
   free( box->intblocks);
+// Rprintf("flapsiee!\n");
   free( box->dblblocks);
   free( box->qtrblocks);
   // throw box
@@ -115,9 +117,9 @@ static void init_shelve(int q, int nstr){
   shelve.q = q;
   shelve.nstr = nstr;
   shelve.nboxes = 0L;
-  for ( int i=0; i<MAXBOXES; i++ ){ 
-    shelve.box[i] = NULL; 
-  }
+//  for ( int i=0; i<MAXBOXES; i++ ){ 
+//    shelve.box[i] = NULL; 
+//  }
 }
 
 /* add box to shelve
@@ -130,7 +132,7 @@ static void init_shelve(int q, int nstr){
 static int add_box(int nnodes){
   int nb = shelve.nboxes;
   if ( nb + 1 < MAXBOXES ){
-    shelve.box[nb + 1] = new_box(nnodes, shelve.q, shelve.nstr);
+    shelve.box[nb] = new_box(nnodes, shelve.q, shelve.nstr);
     ++shelve.nboxes;
   } else {
     return 1;
@@ -139,6 +141,8 @@ static int add_box(int nnodes){
 }
 
 static void clear_shelve(){
+//Rprintf("sh-0: %d\n",shelve.box[0]);
+//Rprintf("sh-1: %d\n",shelve.box[1]);
   for ( int i = 0; i < shelve.nboxes; i++ ){
     free_box(shelve.box[i]);
   }
@@ -159,13 +163,13 @@ static void *alloc(type t){
     add_box(MIN_BOX_SIZE);
   }
 
-  Box *box = shelve.box[shelve.nboxes];
+  Box *box = shelve.box[shelve.nboxes-1];
   if ( box->nalloc == box->nnodes ){
     // add box such that storage size is doubled.
     if ( !add_box(2^(shelve.nboxes-1L) * MIN_BOX_SIZE) ){
       return NULL;
     }
-    box = shelve.box[shelve.nboxes];
+    box = shelve.box[shelve.nboxes-1];
   }
   
   void *x;
@@ -177,8 +181,8 @@ static void *alloc(type t){
       x = (void *) (box->dblblocks + box->nalloc * shelve.nstr);
       break;
     case Qtree:
-  Rprintf("box->qtrblocks %d\n", box->qtrblocks);
-  Rprintf("box->nalloc %d\n", box->nalloc);
+  //Rprintf("box->qtrblocks %d\n", box->qtrblocks);
+  //Rprintf("box->nalloc %d\n", box->nalloc);
       x = (void *) (box->qtrblocks + box->nalloc);
       break;
     default:
@@ -212,8 +216,8 @@ static qtree *new_qtree(int q, int nstr){
   return NULL;
 }
 
-static void free_qtree(qtree *Q){
-printf("MOTHERFUCKER!\n");
+// TODO remove Q argument
+static void free_qtree(){
   clear_shelve();
 }
 
@@ -262,12 +266,11 @@ static qtree *push_string(unsigned int *str, int strlen, unsigned int q, qtree *
   for ( int i=0; i < strlen - q + 1; ++i ){
     P = push(Q, str + i, q, iLoc, nLoc);
     if ( P == NULL ){ 
-      free_qtree(Q);
+      free_qtree();
       return NULL;
     }
     Q = P;
   }
-print_qtree(Q);
   return Q;
 }
 
@@ -425,7 +428,6 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance){
         Q,
         dist
     );
-Rprintf("ok3\n");
     if (y[k] == -2.0){
       UNPROTECT(5);
       error("Could not allocate enough memory");
@@ -437,7 +439,9 @@ Rprintf("ok3\n");
     j = RECYCLE(j+1,nb);
   }
 
-  clear_shelve();
+
+  free_qtree();
+
   UNPROTECT(5);
   return yy;
 }
@@ -591,7 +595,7 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
   
   setAttrib(qcount, install("qgrams"), qgrams);
   
-  free_qtree(Q);
+  free_qtree();
   UNPROTECT(4);
 
   return(qcount);
