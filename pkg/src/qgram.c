@@ -1,7 +1,7 @@
 /* 
  * 
  * 
- *
+ * 
  */
 
 #define USE_RINTERNALS
@@ -45,7 +45,7 @@ void print_qtree(qtree *Q){
  */
 #define MAXBOXES 20
 // number of nodes to initially allocate space for.
-#define MIN_BOX_SIZE (1<<10)  
+#define MIN_BOX_SIZE (1<<3)  
 
 // A Box can store a number of nodes
 typedef struct {
@@ -130,8 +130,9 @@ static void init_shelve(int q, int nstr){
  *
  */
 static int add_box(int nnodes){
+Rprintf("adding box! %d\n",nnodes);
   int nb = shelve.nboxes;
-  if ( nb + 1 < MAXBOXES ){
+  if ( nb < MAXBOXES ){
     shelve.box[nb] = new_box(nnodes, shelve.q, shelve.nstr);
     ++shelve.nboxes;
   } else {
@@ -141,8 +142,6 @@ static int add_box(int nnodes){
 }
 
 static void clear_shelve(){
-//Rprintf("sh-0: %d\n",shelve.box[0]);
-//Rprintf("sh-1: %d\n",shelve.box[1]);
   for ( int i = 0; i < shelve.nboxes; i++ ){
     free_box(shelve.box[i]);
   }
@@ -163,13 +162,13 @@ static void *alloc(type t){
     add_box(MIN_BOX_SIZE);
   }
 
-  Box *box = shelve.box[shelve.nboxes-1];
+  Box *box = shelve.box[shelve.nboxes-1L];
   if ( box->nalloc == box->nnodes ){
     // add box such that storage size is doubled.
     if ( !add_box(2^(shelve.nboxes-1L) * MIN_BOX_SIZE) ){
       return NULL;
     }
-    box = shelve.box[shelve.nboxes-1];
+    box = shelve.box[shelve.nboxes-1L];
   }
   
   void *x;
