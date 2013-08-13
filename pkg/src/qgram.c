@@ -31,7 +31,7 @@ typedef struct qnode {
  * Every time a new box is added to the shelve, the capacity 
  * for node storage doubles, unless MAXBOXES is surpassed.
  */
-#define MAXBOXES 20           // number of nodes to initially allocate space for.
+#define MAXBOXES 20           // max number of boxes
 #define MIN_BOX_SIZE (1<<10)  // nr of nodes in initial box
 
 // A Box of nodes.
