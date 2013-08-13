@@ -45,7 +45,7 @@ static double lv(unsigned int *a, int na, unsigned int *b, int nb, double *weigh
       L = I; M= 0; 
       for ( j = 1; j <= nb; ++j, L += I, M += I ){
          sub = (a[i-1] == b[j-1]) ? 0 : weight[2];
-         scores[i + I*j] = min3( 
+         scores[i + L] = min3( 
             scores[i-1 + L] + weight[0],     // deletion
             scores[i   + M] + weight[1],     // insertion
             scores[i-1 + M] + sub            // substitution
