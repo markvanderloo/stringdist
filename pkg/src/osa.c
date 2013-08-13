@@ -12,14 +12,14 @@
  */
 static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weight, double maxDistance, double *scores){
 
-  if (na == 0){
+  if (!na){
     if ( maxDistance > 0 && maxDistance < nb ){
       return -1;
     } else {
       return (double) nb;
     }
   }
-  if (nb == 0){
+  if (!nb){
     if (maxDistance > 0 && maxDistance < na){
       return -1;
     } else {
@@ -28,18 +28,19 @@ static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weig
   }
 
   int i, j;
-  int I = na+1, J = nb+1;
+  int M, I = na+1, L=na+1, J = nb+1;
   double sub, tran;
 
    for ( i = 0; i < I; ++i ){
       scores[i] = i;
    }
-   for ( j = 1; j < J; ++j ){
-      scores[I*j] = j;
+   for ( j = 1; j < J; ++j, L += I ){
+      scores[L] = j;
    }
 
    for ( i = 1; i <= na; ++i ){
-      for ( j = 1; j <= nb; ++j ){
+      L = I; M = 0;
+      for ( j = 1; j <= nb; ++j, L += I, M += I ){
          if (a[i-1] == b[j-1]){
             sub = 0;
             tran= 0;
@@ -48,13 +49,13 @@ static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weig
             tran= weight[3];
          }
          
-         scores[i + I*j] = min3( 
-            scores[i-1 + I*j    ] + weight[0],     // deletion
-            scores[i   + I*(j-1)] + weight[1],     // insertion
-            scores[i-1 + I*(j-1)] + sub            // substitution
+         scores[i + L] = min3( 
+            scores[i-1 + L] + weight[0],     // deletion
+            scores[i   + M] + weight[1],     // insertion
+            scores[i-1 + M] + sub            // substitution
          );
          if ( i>1 && j>1 && a[i-1] == b[j-2] && a[i-2] == b[j-1] ){
-            scores[i + I*j] = min2(scores[i + I*j], scores[i-2+I*(j-2)]) + tran; // transposition
+            scores[i + L] = min2(scores[i + L], scores[i-2 + M-I]) + tran; // transposition
          }
       }
    }
