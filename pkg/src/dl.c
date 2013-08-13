@@ -93,14 +93,14 @@ static double distance(
       double *scores
     ){
 
-  if (x == 0){
+  if (!x){
     if ( maxDistance > 0 && maxDistance < y ){
       return -1;
     } else {
       return (double) y;
     }
   }
-  if (y == 0){
+  if (!y){
     if (maxDistance > 0 && maxDistance < x){
       return -1;
     } else {

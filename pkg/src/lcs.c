@@ -9,14 +9,14 @@
  * - basically edit distance, only allowing insertions and substitutions, at the cost of 1.
  */
 static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDistance, int *scores){
-  if (na == 0){
+  if (!na){
     if ( maxDistance > 0 && maxDistance < nb ){
       return -1.0;
     } else {
       return (double) nb;
     }
   }
-  if (nb == 0){
+  if (!nb){
     if (maxDistance > 0 && maxDistance < na){
       return -1.0;
     } else {
@@ -25,23 +25,24 @@ static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDistance
   }
 
   int i, j;
-  int I = na+1, J = nb+1;
+  int M, I = na+1, L = na+1, J = nb+1;
   
   for ( i = 0; i < I; ++i ){
     scores[i] = i;
   }
-  for ( j = 1; j < J; ++j ){
-    scores[I*j] = j;
+  for ( j = 1; j < J; ++j, L += I ){
+    scores[L] = j;
   }
 
   for ( i = 1; i <= na; ++i ){
-    for ( j = 1; j <= nb; ++j ){
+    M = 0; L = I;
+    for ( j = 1; j <= nb; ++j, L += I, M += I ){
       if ( a[i-1] == b[j-1] ){ // equality, copy previous score
-        scores[i + I*j] = scores[i-1 + I*(j-1)];
+        scores[i + L] = scores[i-1 + M];
       } else {
-        scores[i + I*j] = min2(
-          scores[i-1 + I*j    ] + 1 ,     // deletion
-          scores[i   + I*(j-1)] + 1       // insertion
+        scores[i + L] = min2(
+          scores[i-1 + L] + 1 ,     // deletion
+          scores[i   + M] + 1       // insertion
         );
       }
       

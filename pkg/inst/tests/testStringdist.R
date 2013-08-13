@@ -31,6 +31,10 @@ test_that("max distance is obeyed",{
    expect_equal(stringdist("abc","",method='osa',maxDist=2), Inf)
 })
 
+test_that("transpositions are found",{
+  expect_equal(stringdist("ab","ba",method='osa'),1)
+})
+
 test_that("Shortest argument is recycled",{
    expect_equal(stringdist(c('a','b'),'a',method='osa'),c(0,1))
    expect_equal(stringdist('a',c('a','b'),method='osa'),c(0,1))
