@@ -15,25 +15,13 @@
 /* binary tree; dictionary of qgrams */
 
 typedef struct qnode {
-  // the payload q-gram
-  unsigned int *qgram;
-  // vector of q-gram counts 
-  // (double to prevent int overload 
-  // when calulating distances)
-  double *n; 
+  unsigned int *qgram; // the q-gram.
+  double *n;           // (vector of) counts.
   struct qnode *left;
   struct qnode *right;
 } qtree;
 
 
-// only useful in debug
-void print_qtree(qtree *Q){
-  if (Q==NULL) return;
-  Rprintf("qgram %d\n",Q->qgram[0]);
-  Rprintf("n     %g\n",Q->n[0]);
-  print_qtree(Q->left);
-  print_qtree(Q->right);
-}
 
 
 /* -- Simple memory allocator to store nodes of the qtree -- */
@@ -43,11 +31,10 @@ void print_qtree(qtree *Q){
  * Every time a new box is added to the shelve, the capacity 
  * for node storage doubles, unless MAXBOXES is surpassed.
  */
-#define MAXBOXES 20
-// number of nodes to initially allocate space for.
-#define MIN_BOX_SIZE (1<<3)  
+#define MAXBOXES 20           // number of nodes to initially allocate space for.
+#define MIN_BOX_SIZE (1<<10)  // nr of nodes in initial box
 
-// A Box can store a number of nodes
+// A Box of nodes.
 typedef struct {
   
   int nnodes; // number of nodes
@@ -62,7 +49,8 @@ typedef struct {
 
 static Box *new_box(int nnodes, int q, int nstr){
   Box *b = malloc(sizeof(Box));
-// TODO: raise hell ico malloc failure.
+  if ( b == NULL ) 
+    return NULL;
   b->nnodes     = nnodes;
   b->nalloc     = 0L;
   b->intblocks  = (unsigned int *) malloc(sizeof(int) * nnodes * q);
@@ -72,13 +60,9 @@ static Box *new_box(int nnodes, int q, int nstr){
 }
 
 static void free_box(Box *box){
-//Rprintf("floopsiee! %d\n", box);
-  // empty box
   free( box->intblocks);
-// Rprintf("flapsiee!\n");
   free( box->dblblocks);
   free( box->qtrblocks);
-  // throw box
   free( box);
 }
 
@@ -92,6 +76,16 @@ typedef struct {
 
 // one shelve for all.
 static Shelve shelve;
+
+/* in case of emergency: break glass. 
+
+void print_qtree(qtree *Q){
+  if (Q==NULL) return;
+  Rprintf("qgram %d\n",Q->qgram[0]);
+  Rprintf("n     %g\n",Q->n[0]);
+  print_qtree(Q->left);
+  print_qtree(Q->right);
+}
 
 void print_box(Box *box){
   Rprintf("qgram: ");
@@ -112,14 +106,14 @@ void print_shelve(){
   Rprintf("Shelve nbox :%d\n",shelve.nboxes);
   
 }
+*/
 
 static void init_shelve(int q, int nstr){
   shelve.q = q;
   shelve.nstr = nstr;
   shelve.nboxes = 0L;
-//  for ( int i=0; i<MAXBOXES; i++ ){ 
-//    shelve.box[i] = NULL; 
-//  }
+  for ( int i=0; i<MAXBOXES; i++ )
+    shelve.box[i] = NULL;
 }
 
 /* add box to shelve
@@ -130,15 +124,19 @@ static void init_shelve(int q, int nstr){
  *
  */
 static int add_box(int nnodes){
-Rprintf("adding box! %d\n",nnodes);
-  int nb = shelve.nboxes;
-  if ( nb < MAXBOXES ){
-    shelve.box[nb] = new_box(nnodes, shelve.q, shelve.nstr);
-    ++shelve.nboxes;
+
+  // is there room for another box?
+  if ( shelve.nboxes >= MAXBOXES ) return 1;
+
+  Box *b = new_box(nnodes, shelve.q, shelve.nstr);
+  if ( b != NULL ){
+    shelve.box[shelve.nboxes] = b;
+    shelve.nboxes++;
+    return 0L;
   } else {
-    return 1;
+    return 1L;
   }
-  return 0;
+  
 }
 
 static void clear_shelve(){
@@ -158,16 +156,16 @@ typedef enum { uInt, Double, Qtree } type;
 static void *alloc(type t){
 
   if ( shelve.nboxes == 0L ){
-    // TODO add check.
+    // TODO add check for memory allocation.
     add_box(MIN_BOX_SIZE);
   }
 
   Box *box = shelve.box[shelve.nboxes-1L];
   if ( box->nalloc == box->nnodes ){
     // add box such that storage size is doubled.
-    if ( !add_box(2^(shelve.nboxes-1L) * MIN_BOX_SIZE) ){
-      return NULL;
-    }
+    if (
+      !add_box( (1 << (shelve.nboxes-1L)) * MIN_BOX_SIZE )
+    ) return NULL;
     box = shelve.box[shelve.nboxes-1L];
   }
   
@@ -180,15 +178,14 @@ static void *alloc(type t){
       x = (void *) (box->dblblocks + box->nalloc * shelve.nstr);
       break;
     case Qtree:
-  //Rprintf("box->qtrblocks %d\n", box->qtrblocks);
-  //Rprintf("box->nalloc %d\n", box->nalloc);
       x = (void *) (box->qtrblocks + box->nalloc);
+      box->nalloc += 1;
       break;
     default:
       // TODO: raise hell
       break;
   }
-  box->nalloc += 1;
+  
   return x;
 }
 
@@ -215,7 +212,6 @@ static qtree *new_qtree(int q, int nstr){
   return NULL;
 }
 
-// TODO remove Q argument
 static void free_qtree(){
   clear_shelve();
 }
