@@ -11,14 +11,14 @@
  * - Extended with custom weights and maxDistance
  */
 static double lv(unsigned int *a, int na, unsigned int *b, int nb, double *weight, double maxDistance, double *scores){
-  if (na == 0){
+  if (!na){
     if ( maxDistance > 0 && maxDistance < nb ){
       return -1;
     } else {
       return (double) nb;
     }
   }
-  if (nb == 0){
+  if (!nb){
     if (maxDistance > 0 && maxDistance < na){
       return -1;
     } else {
@@ -28,26 +28,28 @@ static double lv(unsigned int *a, int na, unsigned int *b, int nb, double *weigh
   
  
    int i, j;
-   int I = na+1, J = nb+1;
+   int I = na+1, L = na+1, J = nb+1;
    double sub;
+
+  
 
    for ( i = 0; i < I; ++i ){
       scores[i] = i;
    }
-   for ( j = 1; j < J; ++j ){
-      scores[I*j] = j;
+   for ( j = 1; j < J; ++j, L += I ){
+     scores[L] = j;
    }
 
+   int M;
    for ( i = 1; i <= na; ++i ){
-      
-      for ( j = 1; j <= nb; ++j ){
+      L = I; M= 0; 
+      for ( j = 1; j <= nb; ++j, L += I, M += I ){
          sub = (a[i-1] == b[j-1]) ? 0 : weight[2];
          scores[i + I*j] = min3( 
-            scores[i-1 + I*j    ] + weight[0],     // deletion
-            scores[i   + I*(j-1)] + weight[1],     // insertion
-            scores[i-1 + I*(j-1)] + sub            // substitution
+            scores[i-1 + L] + weight[0],     // deletion
+            scores[i   + M] + weight[1],     // insertion
+            scores[i-1 + M] + sub            // substitution
          );
-     
       }
    }
    double score = scores[I*J-1];
