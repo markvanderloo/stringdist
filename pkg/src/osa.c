@@ -59,7 +59,7 @@ static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weig
          }
       }
    }
-   double score = scores[I*J-1];
+   double score = scores[L-1];
    return (maxDistance > 0 && maxDistance < score)?(-1):score;
 }
 
