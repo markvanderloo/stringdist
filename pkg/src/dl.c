@@ -161,10 +161,10 @@ static double distance(
         subScore = scores[i * (y + 2) + j] + weight[2];
         insScore = scores[(i+1) * (y + 2) + j] + weight[1];
         delScore = scores[i * (y + 2) + (j + 1)] + weight[0];
-        scores[(i+1) * (y + 2) + (j + 1)] = min2(swapScore, min3(delScore, insScore, subScore));
+        scores[(i+1) * (y + 2) + (j + 1)] = MIN(swapScore, MIN(delScore, MIN(insScore, subScore) ));
       } else {
         swapCount = j;
-        scores[(i+1) * (y + 2) + (j + 1)] = min2(scores[i * (y + 2) + j], swapScore);
+        scores[(i+1) * (y + 2) + (j + 1)] = MIN(scores[i * (y + 2) + j], swapScore);
       }
     }
     /* We will return -1 here if the */

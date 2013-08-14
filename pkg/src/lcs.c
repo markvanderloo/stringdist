@@ -58,7 +58,7 @@ static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDistance
       if ( a[i-1] == b[j-1] ){ // equality, copy previous score
         scores[i + L] = scores[i-1 + M];
       } else {
-        scores[i + L] = min2(
+        scores[i + L] = MIN(
           scores[i-1 + L] + 1 ,     // deletion
           scores[i   + M] + 1       // insertion
         );

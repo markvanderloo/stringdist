@@ -23,10 +23,7 @@
 /* integer recycling macro ( equals X % Y) */
 #define RECYCLE(X,Y) ( (X) == (Y) ? 0 : (X) )
 
-
-double min3(double, double, double);
-
-double min2(double, double);
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 
 unsigned int max_length(SEXP);
 
