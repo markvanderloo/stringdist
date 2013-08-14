@@ -155,10 +155,10 @@ typedef enum { uInt, Double, Qtree } type;
 // cf. n1256.pdf (C99 std) sect 6.3.2.3 for pointer conversion.
 static void *alloc(type t){
 
-  if ( shelve.nboxes == 0L ){
-    // TODO add check for memory allocation.
-    add_box(MIN_BOX_SIZE);
-  }
+  if ( 
+    shelve.nboxes == 0L &&
+    !add_box(MIN_BOX_SIZE)
+  ) return NULL;
 
   Box *box = shelve.box[shelve.nboxes-1L];
   if ( box->nalloc == box->nnodes ){
@@ -182,7 +182,7 @@ static void *alloc(type t){
       box->nalloc += 1;
       break;
     default:
-      // TODO: raise hell
+      return NULL;
       break;
   }
   
@@ -234,7 +234,6 @@ static qtree *push(qtree *Q, unsigned int *qgram, unsigned int q, int iLoc, int 
 
     Q->qgram = (unsigned int *) alloc( uInt);
     if (Q->qgram == NULL ) return NULL;
-
 
     Q->n = (double *) alloc( Double);
     if (Q->n == NULL) return NULL;
@@ -496,6 +495,10 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq,
           Q,
           dist
         );
+        if ( d == -2.0 ){
+          UNPROTECT(5);
+          error("could not allocate enough memory");
+        }
         if ( d > max_dist ){
           continue;
         } else if ( d > -1 && d < d1){ 
@@ -534,9 +537,9 @@ static void get_counts( qtree *Q, int q, int *qgrams, int nLoc, int *index, doub
   get_counts(Q->right,q, qgrams, nLoc, index, count);
 }
 
-/* TODO:
+/* 
  * 
- * - Detect memory allocation failure.
+ * 
  */
 SEXP R_get_qgrams(SEXP a, SEXP qq){
   PROTECT(a);
@@ -571,6 +574,10 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
         continue ;
       }
       Q = push_string(str, nchar, q, Q, iLoc, nLoc);
+      if ( Q == NULL ){
+        UNPROTECT(2);
+        error("could not allocate enough memory");
+      }
     }
   }
   // pick and delete the tree
