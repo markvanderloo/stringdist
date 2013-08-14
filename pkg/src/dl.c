@@ -1,4 +1,23 @@
-/* This code is gratefully based on Nick Logan's github repository
+/*  stringdist - a C library of string distance algorithms with an interface to R.
+ *  Copyright (C) 2013  Mark van der Loo
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+ *
+ *  You can contact the author at: mark _dot_ vanderloo _at_ gmail _dot_ com
+ *
+ *
+ * This code is gratefully based on Nick Logan's github repository
  * https://github.com/ugexe/Text--Levenshtein--Damerau--XS/blob/master/damerau-int.c
  * 
  *
@@ -7,13 +26,13 @@
  * - Added R interface function
  * - Added edit weights (function is now of type double)
  * - Added corner cases for length-zero strings.
- * - Replaced linked list dictionary with fixed-size struct for loop externalization.
+ * - Replaced linked list dictionary with fixed-size struct for loop 
+ *    externalization of memory allocation.
  * - Externalized allocation of dynamic programming matrix.
  * 
- * mark.vanderloo@gmail.com
+ * 
  */
 
-/* ugexe@cpan.org (Nick Logan)    */
 
 #define USE_RINTERNALS
 #include <R.h>
