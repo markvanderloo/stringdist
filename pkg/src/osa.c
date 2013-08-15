@@ -67,13 +67,13 @@ static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weig
             tran= weight[3];
          }
          
-         scores[i + L] = min3( 
+         scores[i + L] = MIN(MIN( 
             scores[i-1 + L] + weight[0],     // deletion
-            scores[i   + M] + weight[1],     // insertion
+            scores[i   + M] + weight[1]),    // insertion
             scores[i-1 + M] + sub            // substitution
          );
          if ( i>1 && j>1 && a[i-1] == b[j-2] && a[i-2] == b[j-1] ){
-            scores[i + L] = min2(scores[i + L], scores[i-2 + M-I]) + tran; // transposition
+            scores[i + L] = MIN(scores[i + L], scores[i-2 + M-I]) + tran; // transposition
          }
       }
    }
