@@ -92,8 +92,7 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
     , ml_a = max_length(a)
     , ml_b = max_length(b);
 
-  double *scores; 
-    , *w = REAL(weight);
+  double *scores, *w = REAL(weight);
 
   double maxDist = REAL(maxDistance)[0];
 
