@@ -23,13 +23,18 @@
 #include <Rdefines.h>
 #include "utils.h"
 
-
 /* Levenshtein distance
  * Computes Levenshtein distance
  * - Simplified from restricted DL pseudocode at http://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance
  * - Extended with custom weights and maxDistance
  */
-static double lv(unsigned int *a, int na, unsigned int *b, int nb, double *weight, double maxDistance, double *scores){
+static double lv(
+  unsigned int *a, int na, 
+  unsigned int *b, int nb, 
+  int bytes,
+  double *weight, 
+  double maxDistance, 
+  double *scores){
   if (!na){
     if ( maxDistance > 0 && maxDistance < nb ){
       return -1;
@@ -44,39 +49,36 @@ static double lv(unsigned int *a, int na, unsigned int *b, int nb, double *weigh
       return (double) na;
     }
   }
-  
- 
-   int i, j;
-   int I = na+1, L = na+1, J = nb+1;
-   double sub;
 
-  
+  int i, j;
+  int I = na+1, L = na+1, J = nb+1;
+  double sub;
 
-   for ( i = 0; i < I; ++i ){
-      scores[i] = i;
-   }
-   for ( j = 1; j < J; ++j, L += I ){
-     scores[L] = j;
-   }
 
-   int M;
-   for ( i = 1; i <= na; ++i ){
-      L = I; M= 0; 
-      for ( j = 1; j <= nb; ++j, L += I, M += I ){
-         sub = (a[i-1] == b[j-1]) ? 0 : weight[2];
-         scores[i + L] = MIN(MIN( 
-            scores[i-1 + L] + weight[0],     // deletion
-            scores[i   + M] + weight[1]),    // insertion
-            scores[i-1 + M] + sub            // substitution
-         );
-      }
-   }
-   double score = scores[I*J-1];
-   return (maxDistance > 0 && maxDistance < score)?(-1):score;
+  for ( i = 0; i < I; ++i ){
+    scores[i] = i;
+  }
+  for ( j = 1; j < J; ++j, L += I ){
+   scores[L] = j;
+  }
+
+  int M;
+  for ( i = 1; i <= na; ++i ){
+    L = I; M= 0; 
+    for ( j = 1; j <= nb; ++j, L += I, M += I ){
+      sub = (a[i-1] == b[j-1]) ? 0 : weight[2];
+      scores[i + L] = MIN(MIN( 
+        scores[i-1 + L] + weight[0],     // deletion
+        scores[i   + M] + weight[1]),    // insertion
+        scores[i-1 + M] + sub            // substitution
+      );
+    }
+  }
+  double score = scores[I*J-1];
+  return (maxDistance > 0 && maxDistance < score)?(-1):score;
 }
 
-//-- interface with R
-
+/* ------ interface with R -------- */
 
 SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   PROTECT(a);
@@ -84,17 +86,28 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   PROTECT(weight);
   PROTECT(maxDistance);
 
-  int na = length(a), nb = length(b);
+  int na = length(a)
+    , nb = length(b)
+    , bytes = IS_CHARACTER(a)
+    , ml_a = max_length(a)
+    , ml_b = max_length(b);
+
   double *scores; 
-  double *w = REAL(weight);
+    , *w = REAL(weight);
+
   double maxDist = REAL(maxDistance)[0];
 
-  scores = (double *) malloc((max_length(a) + 1) * (max_length(b) + 1) * sizeof(double)); 
+  int *s, *t;
+
+  scores = (double *) malloc((ml_a + 1) * (ml_b + 1) * sizeof(double)); 
   if ( scores == NULL ){
     UNPROTECT(4);
     error("%s\n","unable to allocate enough memory for workspace");
   }
-
+  if ( bytes ){
+    s = (unsigned int *) malloc(ml_a * sizeof(int));
+    t = (unsigned int *) malloc(ml_b * sizeof(int));
+  }
   // output vector
   int nt = (na > nb) ? na : nb;   
   int i=0,j=0;
@@ -102,19 +115,23 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   PROTECT(yy = allocVector(REALSXP, nt));
   double *y = REAL(yy);   
   
+  int len_s, len_t, isna_s, isna_t;
   for ( int k=0; k < nt; ++k ){
-    if (INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
+    s = get_elem(a, i, bytes, &len_s, &isna_s, s);
+    t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+    if (isna_s || isna_t){
       y[k] = NA_REAL;
       continue;
     }
     y[k] = lv(
-     (unsigned int *) INTEGER(VECTOR_ELT(a,i)), 
-     length(VECTOR_ELT(a,i)), 
-     (unsigned int *) INTEGER(VECTOR_ELT(b,j)), 
-     length(VECTOR_ELT(b,j)), 
-     w,
-     maxDist,
-     scores
+        s
+      , len_s
+      , t
+      , len_t
+      , bytes
+      , w
+      , maxDist
+      , scores
     );
     if (y[k] < 0 ) y[k] = R_PosInf;
     i = RECYCLE(i+1,na);
@@ -122,6 +139,10 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   }
   
   free(scores);
+  if ( bytes ){
+    free(s); 
+    free(t);
+  }
   UNPROTECT(5);
   return(yy);
 }
@@ -177,6 +198,7 @@ SEXP R_match_lv(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
           length(VECTOR_ELT(x,i)), 
           (unsigned int *) T, 
           length(VECTOR_ELT(table,j)), 
+          0,
           w,
           maxDist,
           scores

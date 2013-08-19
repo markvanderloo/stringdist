@@ -128,6 +128,7 @@
 #' @param a R object (target); will be converted by \code{as.character}.
 #' @param b R object (source); will be converted by \code{as.character}.
 #' @param method Method for distance calculation. The default is \code{"osa"} (see details).
+#' @param useBytes If \code{TRUE}, use bytewise instead of characterwise comparison (see Encoding issues, below).
 #' @param weight The penalty for deletion, insertion, substitution and transposition, in that order.  
 #'   Weights must be positive and not exceed 1. \code{weight[4]} is ignored when \code{method='lv'} and \code{weight} is
 #'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'}, \code{'lcs'} or \code{'jw'}.
@@ -150,6 +151,7 @@
 #' @export
 stringdist <- function(a, b, 
   method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard", "jw"), 
+  useBytes = FALSE,
   weight=c(d=1,i=1,s=1,t=1), 
   maxDist=Inf, q=1, p=0
 ){
@@ -162,17 +164,21 @@ stringdist <- function(a, b,
     warning(RECYCLEWARNING)
   }
   method <- match.arg(method)
-  a <- char2int(a)
-  b <- char2int(b)
+  
   stopifnot(
       all(is.finite(weight)),
       all(weight > 0),
       all(weight <=1),
       q >= 0,
       p <= 0.25,
-      p >= 0
+      p >= 0,
+      is.logical(useBytes)
   )
-  do_dist(b,a,method,weight,maxDist,q,p)
+  if (!useBytes){
+    a <- char2int(a)
+    b <- char2int(b)
+  }
+  do_dist(b, a, method, useBytes, weight, maxDist, q, p)
 }
 
 
@@ -236,11 +242,11 @@ char2int <- function(x){
 
 
 
-do_dist <- function(a, b, method, weight, maxDist, q, p){
+do_dist <- function(a, b, method, useBytes, weight, maxDist, q, p){
   if (maxDist==Inf) maxDist <- 0L;
   switch(method,
     osa     = .Call('R_osa'   , a, b, as.double(weight), as.double(maxDist)),
-    lv      = .Call('R_lv'    , a, b, as.double(weight), as.double(maxDist)),
+    lv      = .Call('R_lv'    , a, b, as.double(weight), as.double(maxDist), as.integer(useBytes)),
     dl      = .Call('R_dl'    , a, b, as.double(weight), as.double(maxDist)),
     hamming = .Call('R_hm'    , a, b, as.integer(maxDist)),
     lcs     = .Call('R_lcs'   , a, b, as.integer(maxDist)),
