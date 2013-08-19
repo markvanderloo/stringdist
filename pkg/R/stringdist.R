@@ -178,7 +178,7 @@ stringdist <- function(a, b,
     a <- char2int(a)
     b <- char2int(b)
   }
-  do_dist(b, a, method, useBytes, weight, maxDist, q, p)
+  do_dist(b, a, method, weight, maxDist, q, p)
 }
 
 
@@ -242,11 +242,11 @@ char2int <- function(x){
 
 
 
-do_dist <- function(a, b, method, useBytes, weight, maxDist, q, p){
+do_dist <- function(a, b, method, weight, maxDist, q, p){
   if (maxDist==Inf) maxDist <- 0L;
   switch(method,
     osa     = .Call('R_osa'   , a, b, as.double(weight), as.double(maxDist)),
-    lv      = .Call('R_lv'    , a, b, as.double(weight), as.double(maxDist), as.integer(useBytes)),
+    lv      = .Call('R_lv'    , a, b, as.double(weight), as.double(maxDist)),
     dl      = .Call('R_dl'    , a, b, as.double(weight), as.double(maxDist)),
     hamming = .Call('R_hm'    , a, b, as.integer(maxDist)),
     lcs     = .Call('R_lcs'   , a, b, as.integer(maxDist)),

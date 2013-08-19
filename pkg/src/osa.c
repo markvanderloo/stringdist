@@ -85,51 +85,63 @@ static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weig
 
 
 SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
-   PROTECT(a);
-   PROTECT(b);
-   PROTECT(weight);
-   PROTECT(maxDistance);
+  PROTECT(a);
+  PROTECT(b);
+  PROTECT(weight);
+  PROTECT(maxDistance);
 
-   int na = length(a), nb = length(b);
-   double *scores; 
-   double *w = REAL(weight);
-   double maxDist = REAL(maxDistance)[0];
+  int na = length(a)
+    , nb = length(b)
+    , bytes = IS_CHARACTER(a)
+    , ml_a = max_length(a)
+    , ml_b = max_length(b);
+  double *scores, *w = REAL(weight);
+  double maxDist = REAL(maxDistance)[0];
+  int *s, *t;
 
-   scores = (double *) malloc( (max_length(a) + 1) * (max_length(b) + 1) * sizeof(double)); 
-   if ( scores == NULL ){
-      UNPROTECT(4);
-      error("%s\n","unable to allocate enough memory");
-   }
+  scores = (double *) malloc( (ml_a + 1) * (ml_b + 1) * sizeof(double)); 
+  if ( scores == NULL ){
+     UNPROTECT(4);
+     error("%s\n","unable to allocate enough memory");
+  }
+  if (bytes){
+    s = (unsigned int *) malloc(ml_a * sizeof(int));
+    t = (unsigned int *) malloc(ml_b * sizeof(int));
+  }
+    
 
-   // output vector
-   int nt = (na > nb) ? na : nb;   
-   int i=0, j=0;
-   SEXP yy;
-   PROTECT(yy = allocVector(REALSXP, nt));
-   double *y = REAL(yy);   
+  // output vector
+  int nt = (na > nb) ? na : nb;   
+  SEXP yy;
+  PROTECT(yy = allocVector(REALSXP, nt));
+  double *y = REAL(yy);   
    
-   for ( int k=0; k < nt; ++k ){
-      if (INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
-         y[k] = NA_REAL;
-         continue;
-      }
-      y[k] = osa(
-        (unsigned int *) INTEGER(VECTOR_ELT(a,i)), 
-         length(VECTOR_ELT(a,i)), 
-        (unsigned int *) INTEGER(VECTOR_ELT(b,j)), 
-         length(VECTOR_ELT(b,j)), 
-         w,
-         maxDist,
-         scores
-      );
-      if ( y[k] < 0 ) y[k] = R_PosInf;
-      i = RECYCLE(i+1,na);
-      j = RECYCLE(j+1,nb);
-   }
+  int i=0, j=0, len_s, len_t, isna_s, isna_t;
+  for ( int k=0; k < nt; ++k ){
+    s = get_elem(a, i, bytes, &len_s, &isna_s, s);
+    t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+ 
+    if (isna_s || isna_t){
+      y[k] = NA_REAL;
+      continue;
+    }
+    y[k] = osa(
+       s, len_s 
+     , t, len_t
+     , w, maxDist, scores
+    );
+    if ( y[k] < 0 ) y[k] = R_PosInf;
+    i = RECYCLE(i+1,na);
+    j = RECYCLE(j+1,nb);
+  }
    
-   free(scores);
-   UNPROTECT(5);
-   return(yy);
+  free(scores);
+  if (bytes){
+    free(s);
+    free(t);
+  }    
+  UNPROTECT(5);
+  return(yy);
 }
 
 

@@ -356,4 +356,17 @@ test_that("dimensions work out",{
     )
 })
 
+# since the result of useBytes depends on the encoding used we cannot really unit-test on
+# distance values. However, we can do some basic tests and check for crashes.
+context("useBytes")
+test_that("useBytes gets NA",{
+  expect_true(is.na(stringdist('a',NA,method='osa',useBytes=TRUE)))
+  expect_true(is.na(stringdist('a',NA,method='lv',useBytes=TRUE)))
+})
 
+test_that("useBytes doesn't crash",{
+  # smoketest
+  x <- sapply(sample(5:25,10,replace=TRUE),function(x) paste(letters[x],collapse=""))
+  stringdist(x,sample(x),useBytes=TRUE)
+
+})
