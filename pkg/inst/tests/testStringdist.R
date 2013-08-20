@@ -385,12 +385,15 @@ test_that("useBytes translates correctly to numeric",{
   expect_equal(
     stringdist(x,y,method='jw',useBytes=TRUE)
   , stringdist(x,y,method='jw',useBytes=FALSE))
+  expect_equal(
+    stringdist(x,y,method='lcs',useBytes=TRUE)
+  , stringdist(x,y,method='lcs',useBytes=FALSE))
 
 })
 
 test_that("useBytes really analyses bytes",{
-  x <- paste0('Mot',intToUtf8(0x00F6),'rhead') # right spelling
-  y <- 'Motorhead' # wrong spelling
+  x <- paste0('Mot',intToUtf8(0x00F6),'rhead') # correct spelling
+  y <- 'Motorhead' # Pissing off Lemmy.
   expect_equal(stringdist(x,y,method='osa',useBytes=TRUE), 2)
   expect_equal(stringdist(x,y,method='lv',useBytes=TRUE),  2)
   expect_equal(stringdist(x,y,method='dl',useBytes=TRUE),  2)
@@ -399,6 +402,7 @@ test_that("useBytes really analyses bytes",{
     round(stringdist(x,y,method='jw',useBytes=TRUE),3),
     round(1-(1/3)*(8/9 + 8/10 + 1),3)
   )
+  expect_equal(stringdist(x,y,method='lcs',useBytes=TRUE),  3)
 })
 
 
