@@ -24,27 +24,188 @@
 #include <R.h>
 #include <Rdefines.h>
 #include "utils.h"
+
+
 /* binary tree; dictionary of qgrams */
 
 typedef struct qnode {
-  // the payload q-gram
-  unsigned int *qgram;
-  // vector of q-gram counts 
-  // (double to prevent int overload 
-  // when calulating distances)
-  double *n; 
+  unsigned int *qgram; // the q-gram.
+  double *n;           // (vector of) counts.
   struct qnode *left;
   struct qnode *right;
 } qtree;
 
-static void free_qtree(qtree *Q){
-  if ( Q == NULL ) return;
-  free_qtree(Q->left);
-  free_qtree(Q->right);
-  free(Q->qgram);
-  free(Q->n);
-  free(Q);
+
+
+
+/* -- Simple memory allocator to store nodes of the qtree -- */
+
+
+/* Nodes are stored in boxes which are stored on a shelve.
+ * Every time a new box is added to the shelve, the capacity 
+ * for node storage doubles, unless MAXBOXES is surpassed.
+ */
+#define MAXBOXES 20           // max number of boxes
+#define MIN_BOX_SIZE (1<<10)  // nr of nodes in initial box
+
+// A Box of nodes.
+typedef struct {
+  
+  int nnodes; // number of nodes
+  int nalloc; // number of nodes allocated
+
+  // Room in the box.
+  unsigned int  *intblocks; // store qgrams
+  double        *dblblocks; // store qgram-counts
+  qtree         *qtrblocks; // store nodes
+} Box;
+
+
+static Box *new_box(int nnodes, int q, int nstr){
+  Box *b = malloc(sizeof(Box));
+  if ( b == NULL ) 
+    return NULL;
+  b->nnodes     = nnodes;
+  b->nalloc     = 0L;
+  b->intblocks  = (unsigned int *) malloc(sizeof(int) * nnodes * q);
+  b->dblblocks  = (double *) malloc(sizeof(double) * nnodes * nstr);
+  b->qtrblocks  = (qtree *) malloc(sizeof(qtree) * nnodes);
+  return b;
 }
+
+static void free_box(Box *box){
+  free( box->intblocks);
+  free( box->dblblocks);
+  free( box->qtrblocks);
+  free( box);
+}
+
+// A shelve can store up to MAXBOXES Boxes.
+typedef struct {
+  Box *box[MAXBOXES];
+  int nboxes;         // number of boxes on the shelf
+  int q;              // the q in q-gram
+  int nstr;           // the number of stings compared
+} Shelve;
+
+// one shelve for all.
+static Shelve shelve;
+
+/* in case of emergency: break glass. 
+
+void print_qtree(qtree *Q){
+  if (Q==NULL) return;
+  Rprintf("qgram %d\n",Q->qgram[0]);
+  Rprintf("n     %g\n",Q->n[0]);
+  print_qtree(Q->left);
+  print_qtree(Q->right);
+}
+
+void print_box(Box *box){
+  Rprintf("qgram: ");
+  for (int i=0; i<shelve.q; i++ ){
+    Rprintf("%d,",  box->intblocks[i]);
+  }
+  Rprintf("\n");
+  Rprintf("count: ");
+  for (int i=0; i<shelve.nstr; i++ ){
+    Rprintf("%g",box->dblblocks[i]);
+  }  
+  Rprintf("\n");
+}
+
+void print_shelve(){
+  Rprintf("Shelve q    :%d\n",shelve.q);
+  Rprintf("Shelve nstr :%d\n",shelve.nstr);
+  Rprintf("Shelve nbox :%d\n",shelve.nboxes);
+  
+}
+*/
+
+static void init_shelve(int q, int nstr){
+  shelve.q = q;
+  shelve.nstr = nstr;
+  shelve.nboxes = 0L;
+  for ( int i=0; i<MAXBOXES; i++ )
+    shelve.box[i] = NULL;
+}
+
+/* add box to shelve
+ *
+ * return values:
+ * 0: okidoki
+ * 1: no luck: out of memory or MAXBOXES exceeded
+ *
+ */
+static int add_box(int nnodes){
+
+  // is there room for another box?
+  if ( shelve.nboxes >= MAXBOXES ) return 1;
+
+  Box *b = new_box(nnodes, shelve.q, shelve.nstr);
+  if ( b != NULL ){
+    shelve.box[shelve.nboxes] = b;
+    shelve.nboxes++;
+    return 0L;
+  } else {
+    return 1L;
+  }
+  
+}
+
+static void clear_shelve(){
+  for ( int i = 0; i < shelve.nboxes; i++ ){
+    free_box(shelve.box[i]);
+  }
+  shelve.nboxes=0L;
+}
+
+/* the allocator can store ints (q-grams), doubles (counts, per string) 
+ * and qtree (nodes).
+ */
+typedef enum { uInt, Double, Qtree } type;
+
+
+// cf. n1256.pdf (C99 std) sect 6.3.2.3 for pointer conversion.
+static void *alloc(type t){
+
+  if ( 
+    shelve.nboxes == 0L &&
+    !add_box(MIN_BOX_SIZE)
+  ) return NULL;
+
+  Box *box = shelve.box[shelve.nboxes-1L];
+  if ( box->nalloc == box->nnodes ){
+    // add box such that storage size is doubled.
+    if (
+      !add_box( (1 << (shelve.nboxes-1L)) * MIN_BOX_SIZE )
+    ) return NULL;
+    box = shelve.box[shelve.nboxes-1L];
+  }
+  
+  void *x;
+  switch ( t){
+    case uInt:
+      x = (void *) (box->intblocks + box->nalloc * shelve.q);
+      break;
+    case Double:
+      x = (void *) (box->dblblocks + box->nalloc * shelve.nstr);
+      break;
+    case Qtree:
+      x = (void *) (box->qtrblocks + box->nalloc);
+      box->nalloc += 1;
+      break;
+    default:
+      return NULL;
+      break;
+  }
+  
+  return x;
+}
+
+
+/* -- END OF ALLOCATOR -- */
+
 
 /* Lexicographical comparison of two qgrams.
  * output:
@@ -59,6 +220,17 @@ static int compare(unsigned int *q1, unsigned int *q2, int q){
   return compare( q1 + 1, q2 + 1, q - 1 );
 }
 
+// helper functions
+static qtree *new_qtree(int q, int nstr){
+  init_shelve(q, nstr);
+  return NULL;
+}
+
+static void free_qtree(){
+  clear_shelve();
+}
+
+
 /* push qgram into binary tree
  * 
  * qtree : see above
@@ -71,13 +243,13 @@ static qtree *push(qtree *Q, unsigned int *qgram, unsigned int q, int iLoc, int 
   int cond;  
   if( Q == NULL ){ // new qgram
 
-    Q = (qtree *) malloc(sizeof(qtree));
+    Q = (qtree *) alloc( Qtree);
     if ( Q == NULL ) return NULL;
 
-    Q->qgram = (unsigned int *) malloc(sizeof(int) * q);
+    Q->qgram = (unsigned int *) alloc( uInt);
     if (Q->qgram == NULL ) return NULL;
 
-    Q->n = (double *) malloc(sizeof(double) * nLoc);
+    Q->n = (double *) alloc( Double);
     if (Q->n == NULL) return NULL;
     for (int i=0; i<nLoc; ++i) Q->n[i] = 0.0;
 
@@ -102,7 +274,7 @@ static qtree *push_string(unsigned int *str, int strlen, unsigned int q, qtree *
   for ( int i=0; i < strlen - q + 1; ++i ){
     P = push(Q, str + i, q, iLoc, nLoc);
     if ( P == NULL ){ 
-      free_qtree(Q);
+      free_qtree();
       return NULL;
     }
     Q = P;
@@ -246,9 +418,10 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance){
   PROTECT(yy = allocVector(REALSXP, nt));
   double *y = REAL(yy);
 
+  
   // set up a qtree;
-  qtree *Q = NULL;
-
+  qtree *Q = new_qtree(q, 2L);
+ 
   for ( int k=0; k < nt; ++k ){
     if (INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
       y[k] = NA_REAL;
@@ -273,7 +446,10 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance){
     i = RECYCLE(i+1,na);
     j = RECYCLE(j+1,nb);
   }
-  free_qtree(Q);
+
+
+  free_qtree();
+
   UNPROTECT(5);
   return yy;
 }
@@ -299,9 +475,8 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq,
   int no_match = INTEGER(nomatch)[0];
   int match_na = INTEGER(matchNA)[0];
   
-
   // set up a qtree;
-  qtree *Q = NULL;
+  qtree *Q = new_qtree(q, 2);
 
   // output vector
   SEXP yy;
@@ -334,6 +509,10 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq,
           Q,
           dist
         );
+        if ( d == -2.0 ){
+          UNPROTECT(5);
+          error("could not allocate enough memory");
+        }
         if ( d > max_dist ){
           continue;
         } else if ( d > -1 && d < d1){ 
@@ -372,9 +551,9 @@ static void get_counts( qtree *Q, int q, int *qgrams, int nLoc, int *index, doub
   get_counts(Q->right,q, qgrams, nLoc, index, count);
 }
 
-/* TODO:
+/* 
  * 
- * - Detect memory allocation failure.
+ * 
  */
 SEXP R_get_qgrams(SEXP a, SEXP qq){
   PROTECT(a);
@@ -387,12 +566,13 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
     error("q must be a nonnegative integer");
   }
 
-  // set up a tree; push all the qgrams.
-  qtree *Q = NULL;
 
   SEXP strlist;
   int nstr, nchar, nLoc = length(a);
   unsigned int *str;
+  
+  // set up a tree; push all the qgrams.
+  qtree *Q = new_qtree( q, nLoc);
   
   for ( int iLoc = 0; iLoc < nLoc; ++iLoc ){
     strlist = VECTOR_ELT(a, iLoc);
@@ -408,6 +588,10 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
         continue ;
       }
       Q = push_string(str, nchar, q, Q, iLoc, nLoc);
+      if ( Q == NULL ){
+        UNPROTECT(2);
+        error("could not allocate enough memory");
+      }
     }
   }
   // pick and delete the tree
@@ -427,7 +611,7 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
   
   setAttrib(qcount, install("qgrams"), qgrams);
   
-  free_qtree(Q);
+  free_qtree();
   UNPROTECT(4);
 
   return(qcount);
