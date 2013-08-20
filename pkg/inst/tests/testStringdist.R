@@ -362,6 +362,7 @@ test_that("useBytes gets NA",{
   expect_true(is.na(stringdist('a',NA,method='osa',useBytes=TRUE)))
   expect_true(is.na(stringdist('a',NA,method='lv',useBytes=TRUE)))
   expect_true(is.na(stringdist('a',NA,method='dl',useBytes=TRUE)))
+  expect_true(is.na(stringdist('a',NA,method='hamming',useBytes=TRUE)))
 })
 
 test_that("useBytes translates correctly to numeric",{
@@ -378,6 +379,9 @@ test_that("useBytes translates correctly to numeric",{
   expect_equal(
     stringdist(x,y,method='dl',useBytes=TRUE)
   , stringdist(x,y,method='dl',useBytes=FALSE))
+  expect_equal(
+    stringdist(x,y,method='hamming',useBytes=TRUE)
+  , stringdist(x,y,method='hamming',useBytes=FALSE))
 
 })
 
@@ -387,7 +391,7 @@ test_that("useBytes really analyses bytes",{
   expect_equal(stringdist(x,y,method='osa',useBytes=TRUE), 2)
   expect_equal(stringdist(x,y,method='lv',useBytes=TRUE),  2)
   expect_equal(stringdist(x,y,method='dl',useBytes=TRUE),  2)
-
+  expect_equal(stringdist(x,y,method='hamming',useBytes=TRUE),  Inf)
 })
 
 
