@@ -382,6 +382,9 @@ test_that("useBytes translates correctly to numeric",{
   expect_equal(
     stringdist(x,y,method='hamming',useBytes=TRUE)
   , stringdist(x,y,method='hamming',useBytes=FALSE))
+  expect_equal(
+    stringdist(x,y,method='jw',useBytes=TRUE)
+  , stringdist(x,y,method='jw',useBytes=FALSE))
 
 })
 
@@ -392,6 +395,10 @@ test_that("useBytes really analyses bytes",{
   expect_equal(stringdist(x,y,method='lv',useBytes=TRUE),  2)
   expect_equal(stringdist(x,y,method='dl',useBytes=TRUE),  2)
   expect_equal(stringdist(x,y,method='hamming',useBytes=TRUE),  Inf)
+  expect_equal(
+    round(stringdist(x,y,method='jw',useBytes=TRUE),3),
+    round(1-(1/3)*(8/9 + 8/10 + 1),3)
+  )
 })
 
 

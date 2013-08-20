@@ -151,22 +151,25 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p){
   PROTECT(p);
 
   // find the length of longest strings
-  int max_a = max_length(a);
-  int max_b = max_length(b);
-  int max_char = max(max_a,max_b);
-  // recycling parameters
-  int na = length(a);
-  int nb = length(b);
-  int nt = max(na,nb);
+  int ml_a = max_length(a)
+    , ml_b = max_length(b)
+    , na = length(a)
+    , nb = length(b)
+    , nt = max(na,nb)
+    , bytes = IS_CHARACTER(a);
   
-  int *s, *t;
-  int length_s, length_t;
+  double pp = REAL(p)[0];
 
   // workspace for worker function
-  int *work = (int *) malloc( sizeof(int)*max_char );
-  if ( work == NULL ){
-     UNPROTECT(3);
-     error("%s\n","unable to allocate enough memory");
+  int *work = (int *) malloc( sizeof(int) * max(ml_a,ml_b) );
+  unsigned int *s, *t;
+  if (bytes){
+    s = malloc((ml_a + ml_b) * sizeof(int));
+    t = s + ml_a;
+  }
+  if ( work == NULL | (bytes && s == NULL) ){
+     UNPROTECT(3); free(s); free(work);
+     error("Unable to allocate enough memory");
   }
 
   // output variable
@@ -175,24 +178,25 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p){
   double *y = REAL(yy);
 
   // compute distances, skipping NA's
-  int i=0,j=0;
-  double pp = REAL(p)[0];
-  for ( int k=0; k < nt; ++k ){
-    length_s = length(VECTOR_ELT(a,i));
-    length_t = length(VECTOR_ELT(b,j));
-    s = INTEGER(VECTOR_ELT(a,i));
-    t = INTEGER(VECTOR_ELT(b,j));
-    if ( s[0] == NA_INTEGER || t[0] == NA_INTEGER){
+  int i=0,j=0, len_s, len_t, isna_s, isna_t;
+
+  for ( int k=0; k < nt; 
+      ++k 
+    , i = RECYCLE(i+1,na)
+    , j = RECYCLE(j+1,nb) ){
+
+    s = get_elem(a, i, bytes, &len_s, &isna_s, s);
+    t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+    if ( isna_s || isna_t ){
       y[k] = NA_REAL;
       continue;
     } else { // jaro-winkler distance
-      y[k] = jaro_winkler(s, t, length_s, length_t, pp, work);
+      y[k] = jaro_winkler(s, t, len_s, len_t, pp, work);
     } 
-    i = RECYCLE(i+1,na);
-    j = RECYCLE(j+1,nb);
   }
     
   free(work);
+  if (bytes) free(s);
   UNPROTECT(4);
   return yy;
 }
