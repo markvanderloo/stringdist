@@ -97,16 +97,18 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
     , ml_b = max_length(b);
   double *scores, *w = REAL(weight);
   double maxDist = REAL(maxDistance)[0];
-  int *s, *t;
 
   scores = (double *) malloc( (ml_a + 1) * (ml_b + 1) * sizeof(double)); 
-  if ( scores == NULL ){
-     UNPROTECT(4);
-     error("%s\n","unable to allocate enough memory");
-  }
+
+  int *s, *t;
   if (bytes){
     s = (unsigned int *) malloc(( ml_a + ml_b) * sizeof(int));
     t = s + ml_a;
+  }
+
+  if ( scores == NULL | (bytes && s == NULL) ){
+    UNPROTECT(4); free(scores); free(s);
+    error("Unable to allocate enough memory");
   }
     
 
@@ -136,10 +138,9 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   }
    
   free(scores);
-  if (bytes){
-    free(s);
-  }    
+  if (bytes) free(s);
   UNPROTECT(5);
+
   return(yy);
 }
 
@@ -167,7 +168,7 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SE
   double *scores = (double *) malloc( (max_x + 3) * (max_table + 2) * sizeof(double) );
   if ( scores == NULL ){
      UNPROTECT(6);
-     error("%s\n","unable to allocate enough memory");
+     error("%s\n","Unable to allocate enough memory");
   }
 
   // output vector

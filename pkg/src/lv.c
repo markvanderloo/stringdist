@@ -96,26 +96,32 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
 
   double maxDist = REAL(maxDistance)[0];
 
-  int *s, *t;
 
   scores = (double *) malloc((ml_a + 1) * (ml_b + 1) * sizeof(double)); 
-  if ( scores == NULL ){
-    UNPROTECT(4);
-    error("%s\n","unable to allocate enough memory for workspace");
-  }
+  int *s, *t;
   if ( bytes ){
-    s = (unsigned int *) malloc(ml_a * sizeof(int));
-    t = (unsigned int *) malloc(ml_b * sizeof(int));
+    s = (unsigned int *) malloc( (ml_a + ml_b) * sizeof(int));
+    t = s + ml_a;
   }
+  if ( scores == NULL | (bytes && s == NULL) ){
+    UNPROTECT(4);
+    free(scores);
+    free(s);
+    error("Unable to allocate enough memory for workspace");
+  }
+
   // output vector
-  int nt = (na > nb) ? na : nb;   
-  int i=0,j=0;
+  int nt = (na > nb) ? na : nb; 
   SEXP yy;
   PROTECT(yy = allocVector(REALSXP, nt));
   double *y = REAL(yy);   
   
-  int len_s, len_t, isna_s, isna_t;
-  for ( int k=0; k < nt; ++k ){
+  int i=0, j=0, len_s, len_t, isna_s, isna_t;
+  for ( int k=0; k < nt; 
+        ++k
+      , i = RECYCLE(i+1,na)
+      , j = RECYCLE(j+1,nb) ){
+
     s = get_elem(a, i, bytes, &len_s, &isna_s, s);
     t = get_elem(b, j, bytes, &len_t, &isna_t, t);
     if (isna_s || isna_t){
@@ -123,26 +129,17 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
       continue;
     }
     y[k] = lv(
-        s
-      , len_s
-      , t
-      , len_t
-      , bytes
-      , w
-      , maxDist
-      , scores
+        s, len_s
+      , t, len_t
+      , bytes, w, maxDist, scores 
     );
     if (y[k] < 0 ) y[k] = R_PosInf;
-    i = RECYCLE(i+1,na);
-    j = RECYCLE(j+1,nb);
   }
   
   free(scores);
-  if ( bytes ){
-    free(s); 
-    free(t);
-  }
+  if ( bytes ) free(s); 
   UNPROTECT(5);
+
   return(yy);
 }
 
