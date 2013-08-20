@@ -146,9 +146,9 @@ static int add_box(int nnodes){
   if ( b != NULL ){
     shelve.box[shelve.nboxes] = b;
     shelve.nboxes++;
-    return 0L;
-  } else {
     return 1L;
+  } else {
+    return 0L;
   }
   
 }
@@ -182,7 +182,7 @@ static void *alloc(type t){
     ) return NULL;
     box = shelve.box[shelve.nboxes-1L];
   }
-  
+
   void *x;
   switch ( t){
     case uInt:
@@ -192,6 +192,7 @@ static void *alloc(type t){
       x = (void *) (box->dblblocks + box->nalloc * shelve.nstr);
       break;
     case Qtree:
+
       x = (void *) (box->qtrblocks + box->nalloc);
       box->nalloc += 1;
       break;
@@ -242,10 +243,8 @@ static void free_qtree(){
 static qtree *push(qtree *Q, unsigned int *qgram, unsigned int q, int iLoc, int nLoc ){
   int cond;  
   if( Q == NULL ){ // new qgram
-
     Q = (qtree *) alloc( Qtree);
     if ( Q == NULL ) return NULL;
-
     Q->qgram = (unsigned int *) alloc( uInt);
     if (Q->qgram == NULL ) return NULL;
 
@@ -375,7 +374,6 @@ static double qgram_tree(
   }
 
   double dist[3] = {0,0,0};
-
   Q = push_string(s, x, q, Q, 0, 2);
   if (Q == NULL) return -2.0;
   Q = push_string(t, y, q, Q, 1, 2);
@@ -405,51 +403,61 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance){
   PROTECT(b);
   PROTECT(qq);
   PROTECT(distance);
-  int q = INTEGER(qq)[0];
   // choose distance function
-  int dist = INTEGER(distance)[0];
 
-  int i=0, j=0;
-  int na = length(a);
-  int nb = length(b);
+  int dist = INTEGER(distance)[0]
+    , q = INTEGER(qq)[0]
+    , na = length(a)
+    , nb = length(b)
+    , ml_a = max_length(a)
+    , ml_b = max_length(b)
+    , bytes = IS_CHARACTER(a);
+
+  // set up a qtree; 
+  qtree *Q = new_qtree(q, 2L);
+  unsigned int *s, *t;
+  if ( bytes ){
+    s = (unsigned int *) malloc( (ml_a + ml_b) * sizeof(int) );
+    if ( s == NULL ){ 
+      UNPROTECT(4);
+      error("Unable to allocate enough memory");
+    }
+    t = s + ml_a;
+  }
+
+  // output
   int nt = (na > nb) ? na : nb;
-
   SEXP yy; 
   PROTECT(yy = allocVector(REALSXP, nt));
   double *y = REAL(yy);
 
   
-  // set up a qtree;
-  qtree *Q = new_qtree(q, 2L);
  
-  for ( int k=0; k < nt; ++k ){
-    if (INTEGER(VECTOR_ELT(a,i))[0] == NA_INTEGER || INTEGER(VECTOR_ELT(b,j))[0] == NA_INTEGER){
+  int i=0, j=0, len_s, len_t, isna_s, isna_t;
+  for ( int k=0; k < nt; ++k 
+      , i = RECYCLE(i+1,na)
+      , j = RECYCLE(j+1,nb) ){
+
+    s = get_elem(a, i, bytes, &len_s, &isna_s, s);
+    t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+
+    if ( isna_s || isna_t ){
       y[k] = NA_REAL;
       continue;
     }
-    y[k] = qgram_tree(
-       (unsigned int *) INTEGER(VECTOR_ELT(a,i)),
-       (unsigned int *) INTEGER(VECTOR_ELT(b,j)),
-        length(VECTOR_ELT(a,i)),
-        length(VECTOR_ELT(b,j)),
-        q,
-        Q,
-        dist
-    );
+    y[k] = qgram_tree(s, t, len_s, len_t, q, Q, dist);
     if (y[k] == -2.0){
       UNPROTECT(5);
-      error("Could not allocate enough memory");
+      error("Unable to allocate enough memory");
     }
     if (y[k] == -1.0){
       y[k] = R_PosInf;
     }
-    i = RECYCLE(i+1,na);
-    j = RECYCLE(j+1,nb);
   }
 
 
   free_qtree();
-
+  if ( bytes ) free(s);
   UNPROTECT(5);
   return yy;
 }

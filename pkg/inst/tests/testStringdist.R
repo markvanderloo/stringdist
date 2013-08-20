@@ -388,6 +388,9 @@ test_that("useBytes translates correctly to numeric",{
   expect_equal(
     stringdist(x,y,method='lcs',useBytes=TRUE)
   , stringdist(x,y,method='lcs',useBytes=FALSE))
+  expect_equal(
+    stringdist(x,y,method='qgram',q=3,useBytes=TRUE)
+  , stringdist(x,y,method='qgram',q=3,useBytes=FALSE))
 
 })
 
@@ -403,6 +406,7 @@ test_that("useBytes really analyses bytes",{
     round(1-(1/3)*(8/9 + 8/10 + 1),3)
   )
   expect_equal(stringdist(x,y,method='lcs',useBytes=TRUE),  3)
+  expect_equal(stringdist(x,y,method='qgram',q=3,useBytes=TRUE),  7)
 })
 
 
