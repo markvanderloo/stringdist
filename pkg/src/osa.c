@@ -105,8 +105,8 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
      error("%s\n","unable to allocate enough memory");
   }
   if (bytes){
-    s = (unsigned int *) malloc(ml_a * sizeof(int));
-    t = (unsigned int *) malloc(ml_b * sizeof(int));
+    s = (unsigned int *) malloc(( ml_a + ml_b) * sizeof(int));
+    t = s + ml_a;
   }
     
 
@@ -138,7 +138,6 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   free(scores);
   if (bytes){
     free(s);
-    free(t);
   }    
   UNPROTECT(5);
   return(yy);

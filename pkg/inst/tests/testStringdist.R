@@ -356,17 +356,38 @@ test_that("dimensions work out",{
     )
 })
 
-# since the result of useBytes depends on the encoding used we cannot really unit-test on
-# distance values. However, we can do some basic tests and check for crashes.
+
 context("useBytes")
 test_that("useBytes gets NA",{
   expect_true(is.na(stringdist('a',NA,method='osa',useBytes=TRUE)))
   expect_true(is.na(stringdist('a',NA,method='lv',useBytes=TRUE)))
+  expect_true(is.na(stringdist('a',NA,method='dl',useBytes=TRUE)))
 })
 
-test_that("useBytes doesn't crash",{
+test_that("useBytes translates correctly to numeric",{
   # smoketest
+  set.seed(1)
   x <- sapply(sample(5:25,10,replace=TRUE),function(x) paste(letters[x],collapse=""))
-  stringdist(x,sample(x),useBytes=TRUE)
+  y <- sample(x)
+  expect_equal(
+    stringdist(x,y,method='osa',useBytes=TRUE)
+  , stringdist(x,y,method='osa',useBytes=FALSE))
+  expect_equal(
+    stringdist(x,y,method='lv',useBytes=TRUE)
+  , stringdist(x,y,method='lv',useBytes=FALSE))
+  expect_equal(
+    stringdist(x,y,method='dl',useBytes=TRUE)
+  , stringdist(x,y,method='dl',useBytes=FALSE))
 
 })
+
+test_that("useBytes really analyses bytes",{
+  x <- paste0('Mot',intToUtf8(0x00F6),'rhead') # right spelling
+  y <- 'Motorhead' # wrong spelling
+  expect_equal(stringdist(x,y,method='osa',useBytes=TRUE), 2)
+  expect_equal(stringdist(x,y,method='lv',useBytes=TRUE),  2)
+  expect_equal(stringdist(x,y,method='dl',useBytes=TRUE),  2)
+
+})
+
+
