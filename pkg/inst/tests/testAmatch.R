@@ -117,3 +117,19 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="qgram",matchNA=FALSE,nomatch=0L), 0L)
   expect_equal(amatch(NA,NA, method="qgram",matchNA=FALSE,nomatch=7L), 7L)
 })
+
+context("amatch: useBytes")
+
+test_that("bytewise matching differs from character wise matching",{
+  x <- paste0('Mot',intToUtf8(0x00F6),'rhead') # correct spelling
+  y <- 'Motorhead' # Seriously pissing off Lemmy.
+
+  expect_equal(amatch(x, y, method='dl', maxDist=2, useBytes=TRUE), 1);
+  expect_equal(amatch(x, y, method='dl', maxDist=1, nomatch=0L, useBytes=TRUE), 0L);
+  
+
+})
+
+
+
+

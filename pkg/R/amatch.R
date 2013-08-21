@@ -41,6 +41,7 @@
 #' @export
 amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE, 
   method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw"), 
+  useBytes = FALSE,
   weight=c(d=1,i=1,s=1,t=1), 
   maxDist=0.1, q=1, p=0){
 
@@ -49,17 +50,20 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE,
   table <- as.character(table)
 
   method <- match.arg(method)
-  x <- char2int(x)
-  table <- char2int(table)
+  if (!useBytes){
+    x <- char2int(x)
+    table <- char2int(table)
+  }
   stopifnot(
-      all(is.finite(weight)),
-      all(weight > 0),
-      all(weight <=1),
-      q >= 0,
-      p <= 0.25,
-      p >= 0,
-      matchNA %in% c(TRUE,FALSE),
-      maxDist > 0
+      all(is.finite(weight))
+      , all(weight > 0)
+      , all(weight <=1)
+      , q >= 0
+      , p <= 0.25
+      , p >= 0
+      , matchNA %in% c(TRUE,FALSE)
+      , maxDist > 0
+      , is.logical(useBytes)
   )
   if (maxDist==Inf) maxDist <- 0L;
   switch(method,

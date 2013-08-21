@@ -357,7 +357,7 @@ test_that("dimensions work out",{
 })
 
 
-context("useBytes")
+context("stringdist: useBytes")
 test_that("useBytes gets NA",{
   expect_true(is.na(stringdist('a',NA,method='osa',useBytes=TRUE)))
   expect_true(is.na(stringdist('a',NA,method='lv',useBytes=TRUE)))

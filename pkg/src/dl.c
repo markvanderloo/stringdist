@@ -260,60 +260,57 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
   PROTECT(weight);
   PROTECT(maxDistance);
 
-  int nx = length(x), ntable = length(table);
-  int no_match = INTEGER(nomatch)[0];
-  int match_na = INTEGER(matchNA)[0];
+  int nx = length(x)
+    , ntable = length(table)
+    , no_match = INTEGER(nomatch)[0]
+    , match_na = INTEGER(matchNA)[0]
+    , bytes = IS_CHARACTER(x)
+    , ml_x = max_length(x)
+    , ml_t = max_length(table);
+
   double *w = REAL(weight);
   double maxDist = REAL(maxDistance)[0];
   
   /* claim space for workhorse */
-  int max_x = max_length(x);
-  int max_table = max_length(table);
-  dictionary *dict = new_dictionary( max_x + max_table + 1 );
-  double *scores = (double *) malloc( (max_x + 3) * (max_table + 2) * sizeof(double) );
-  if ( scores == NULL ){
-    UNPROTECT(6);
-    error("%s\n","unable to allocate enough memory");
+  dictionary *dict = new_dictionary( ml_x + ml_t + 1 );
+  double *scores = (double *) malloc( (ml_x + 3) * (ml_t + 2) * sizeof(double) );
+
+  unsigned int *X = NULL, *T;
+  if ( bytes ){
+    X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int) );
+    T = X + ml_x;
+  }
+
+  if ( scores == NULL | (bytes && X == NULL) ){
+    UNPROTECT(6); free(X); 
+    error("Unable to allocate enough memory");
   }
 
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
-  int *X, *T;
-
 
   double d = R_PosInf, d1 = R_PosInf;
-  int index, xNA, tNA;
+  int index, len_X, len_T, isna_X, isna_T;
 
   for ( int i=0; i<nx; i++){
     index = no_match;
-
-    X = INTEGER(VECTOR_ELT(x,i));
-    xNA = (X[0] == NA_INTEGER);
+    X = get_elem(x, i , bytes, &len_X, &isna_X, X);
 
     for ( int j=0; j<ntable; j++){
+      T = get_elem(table, i, bytes, &len_T, &isna_T, T);
 
-      T = INTEGER(VECTOR_ELT(table,j));
-      tNA = (T[0] == NA_INTEGER);
-
-      if ( !xNA && !tNA ){        // both are char (usual case)
+      if ( !isna_X && !isna_T ){        // both are char (usual case)
         d = distance(
-          (unsigned int *) X,
-          (unsigned int *) T,
-          length(VECTOR_ELT(x,i)),
-          length(VECTOR_ELT(table,j)),
-          w,
-          maxDist,
-          dict,
-          scores
+          X, T, len_X, len_T, w, maxDist, dict, scores
         );
         if ( d > -1 && d < d1){ 
           index = j + 1;
           if ( abs(d) < 1e-14 ) break;
           d1 = d;
         }
-      } else if ( xNA && tNA ) {  // both are NA
+      } else if ( isna_X && isna_T ) {  // both are NA
         index = match_na ? j + 1 : no_match;
         break;
       }
@@ -322,6 +319,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
     y[i] = index;
   }  
   UNPROTECT(7);
+  if (bytes) free(X);
   free_dictionary(dict);
   free(scores);
   return(yy);
