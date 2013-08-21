@@ -102,48 +102,50 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistance
   PROTECT(matchNA);
   PROTECT(maxDistance);
 
-  int nx = length(x), ntable = length(table);
-  int no_match = INTEGER(nomatch)[0];
-  int match_na = INTEGER(matchNA)[0];
-  int max_dist = INTEGER(maxDistance)[0];
+  int nx = length(x)
+    , ntable = length(table)
+    , no_match = INTEGER(nomatch)[0]
+    , match_na = INTEGER(matchNA)[0]
+    , max_dist = INTEGER(maxDistance)[0]
+    , bytes = IS_CHARACTER(x);
 
+
+  unsigned int *X, *T;
+  if ( bytes ){
+    int ml_x = max_length(x);
+    X = (unsigned int *) malloc((ml_x + max_length(table)) * sizeof(int));
+    T = X + ml_x;
+    if ( X == NULL ){
+      UNPROTECT(5);
+      error("Unable to allocate enough memory");
+    }
+  }
 
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
-  int *X, *T;
 
 
   double d = R_PosInf, d1 = R_PosInf;
-  int nchar, index, xNA, tNA;
+  int nchar, index, isna_X, isna_T, len_X, len_T;
 
   for ( int i=0; i<nx; i++){
     index = no_match;
-    nchar = length(VECTOR_ELT(x,i));
-
-    X = INTEGER(VECTOR_ELT(x,i));
-    xNA = (X[0] == NA_INTEGER);
+    X = get_elem(x, i, bytes, &len_X, &isna_X, X);
 
     for ( int j=0; j<ntable; j++){
-      if ( nchar != length(VECTOR_ELT(table,j)) ) continue;
+      T = get_elem(table, j, bytes, &len_T, &isna_T, T);
+      if ( len_X != len_T ) continue;
 
-      T = INTEGER(VECTOR_ELT(table,j));
-      tNA = (T[0] == NA_INTEGER);
-
-      if ( !xNA && !tNA ){        // both are char (usual case)
-        d = (double) hamming(
-          (unsigned int *) X,
-          (unsigned int *) T,
-          nchar,
-          max_dist
-        );
+      if ( !isna_X && !isna_T ){        // both are char (usual case)
+        d = (double) hamming( X, T, len_X, max_dist );
         if ( d > -1 && d < d1){ 
           index = j + 1;
           if ( d == 0.0 ) break;
           d1 = d;
         }
-      } else if ( xNA && tNA ) {  // both are NA
+      } else if ( isna_X && isna_T ) {  // both are NA
         index = match_na ? j + 1 : no_match;
         break;
       }
@@ -152,6 +154,7 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistance
     y[i] = index;
   }  
   UNPROTECT(6);
+  if (bytes) free(X);
   return(yy);
 }
 

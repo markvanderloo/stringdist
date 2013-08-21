@@ -299,7 +299,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
     X = get_elem(x, i , bytes, &len_X, &isna_X, X);
 
     for ( int j=0; j<ntable; j++){
-      T = get_elem(table, i, bytes, &len_T, &isna_T, T);
+      T = get_elem(table, j, bytes, &len_T, &isna_T, T);
 
       if ( !isna_X && !isna_T ){        // both are char (usual case)
         d = distance(
