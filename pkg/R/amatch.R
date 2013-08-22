@@ -26,6 +26,8 @@
 #'   behaviour of base \code{\link[base]{match}}, meaning that \code{NA} matches
 #'   \code{NA} (which is inconsistent with \code{dist} or \code{stringdist}).
 #' @param method Matching algorithm to use. See \code{\link{stringdist}}.
+#' @param useBytes Perform byte-wise comparison. \code{useBytes=TRUE} is faster but may yield different
+#' 	results depending on character encoding. For \code{ASCII} it is identical. See also \code{\link{strindist}}.
 #' @param weight parameters for matching algorithm See \code{\link{stringdist}}.
 #' @param maxDist Elements in \code{x} will not be matched with elements of
 #'  \code{table} if their distance is larger than \code{maxDist}. 
