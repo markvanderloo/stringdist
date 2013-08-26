@@ -15,7 +15,9 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="osa",matchNA=FALSE, nomatch=7L), 7L)
   expect_equal(amatch("aa","bb", method="osa",maxDist=1), NA_integer_)
   expect_equal(amatch("aa","bb", method="osa",maxDist=1), NA_integer_)
+  expect_equal(amatch(c("m","fem"),c("male","female"),method="osa",maxDist=Inf), c(1,2))
 })
+
 
 
 context("amatch: Damerau-Levenshtein")
@@ -34,6 +36,7 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="dl",matchNA=FALSE,nomatch=7L), 7L)
   expect_equal(amatch("aa","bb", method="dl",maxDist=1), NA_integer_)
   expect_equal(amatch("aa","bb", method="dl",maxDist=1), NA_integer_)
+  expect_equal(amatch(c("m","fem"),c("male","female"),method="dl",maxDist=Inf), c(1,2))
 })
 
 context("amatch: Hamming")
@@ -66,6 +69,7 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="jw",matchNA=FALSE), NA_integer_)
   expect_equal(amatch(NA,NA, method="jw",matchNA=FALSE,nomatch=0L), 0L)
   expect_equal(amatch(NA,NA, method="jw",matchNA=FALSE,nomatch=7L), 7L)
+  expect_equal(amatch(c("m","fem"),c("male","female"),method="jw",maxDist=Inf), c(1,2))
 })
 
 context("amatch: Longest Common Substring")
@@ -83,6 +87,7 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="lcs",matchNA=FALSE), NA_integer_)
   expect_equal(amatch(NA,NA, method="lcs",matchNA=FALSE,nomatch=0L), 0L)
   expect_equal(amatch(NA,NA, method="lcs",matchNA=FALSE,nomatch=7L), 7L)
+
 })
 
 
@@ -101,6 +106,7 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="lv",matchNA=FALSE), NA_integer_)
   expect_equal(amatch(NA,NA, method="lv",matchNA=FALSE,nomatch=0L), 0L)
   expect_equal(amatch(NA,NA, method="lv",matchNA=FALSE,nomatch=7L), 7L)
+  expect_equal(amatch(c("m","fem"),c("male","female"),method="lv",maxDist=Inf), c(1,2))
 })
 
 context("amatch: qgrams")
