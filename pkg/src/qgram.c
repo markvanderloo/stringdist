@@ -501,7 +501,7 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq,
 
     X = INTEGER(VECTOR_ELT(x,i));
     xNA = (X[0] == NA_INTEGER);
-
+    d1 = R_PosInf;
     for ( int j=0; j<ntable; j++){
 
       T = INTEGER(VECTOR_ELT(table,j));
@@ -585,7 +585,7 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
   for ( int iLoc = 0; iLoc < nLoc; ++iLoc ){
     strlist = VECTOR_ELT(a, iLoc);
     nstr    = length(strlist);
-
+ 
     for ( int i=0; i < nstr; ++i ){
       str   = (unsigned int *) INTEGER(VECTOR_ELT(strlist,i));
       nchar = length(VECTOR_ELT(strlist,i));

@@ -127,10 +127,10 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistance
 
     for ( int j=0; j<ntable; j++){
       if ( nchar != length(VECTOR_ELT(table,j)) ) continue;
-
+      
       T = INTEGER(VECTOR_ELT(table,j));
       tNA = (T[0] == NA_INTEGER);
-
+      d1 = R_PosInf;
       if ( !xNA && !tNA ){        // both are char (usual case)
         d = (double) hamming(
           (unsigned int *) X,

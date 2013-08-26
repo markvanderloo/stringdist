@@ -242,12 +242,12 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP max
     length_X = length(VECTOR_ELT(x,i));
     xNA = (X[0] == NA_INTEGER);
 
+    d1 = R_PosInf;
     for ( int j=0; j<ntable; j++){
 
       T = INTEGER(VECTOR_ELT(table,j));
       length_T = length(VECTOR_ELT(table,j));
       tNA = (T[0] == NA_INTEGER);
-
       if ( !xNA && !tNA ){        // both are char (usual case)
         d = jaro_winkler(X, T, length_X, length_T, pp, work);
         if ( d > max_dist ){
