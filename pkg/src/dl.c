@@ -297,6 +297,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
   for ( int i=0; i<nx; i++){
     index = no_match;
     X = get_elem(x, i , bytes, &len_X, &isna_X, X);
+    d1 = R_PosInf;
 
     for ( int j=0; j<ntable; j++){
       T = get_elem(table, j, bytes, &len_T, &isna_T, T);

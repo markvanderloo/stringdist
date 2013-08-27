@@ -182,7 +182,7 @@ SEXP R_match_lv(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
 
     X = INTEGER(VECTOR_ELT(x,i));
     xNA = (X[0] == NA_INTEGER);
-
+    d1 = R_PosInf;
     for ( int j=0; j<ntable; j++){
 
       T = INTEGER(VECTOR_ELT(table,j));

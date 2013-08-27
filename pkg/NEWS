@@ -1,6 +1,7 @@
 version 0.6.2
 - new memory allocation method for q-grams increases speed between ~5% and ~30% depending on q and input string.
 - C-code optimization in edit-based distances:  10~20% speed increase depending on input
+- bugfix in amatch: sometimes NA was unjustly returned (because of an initialisation error in computed distances)
 
 version 0.6.1
 - bugfix in parallel version of stringdistmatrix: parameter p was not passed (thanks to Ricardo Saporta)
