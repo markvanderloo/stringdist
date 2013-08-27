@@ -206,12 +206,12 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   dictionary *dict = new_dictionary( ml_a + ml_b + 1 );
   double *scores = (double *) malloc( (ml_a + 3) * (ml_b + 2) * sizeof(double) );
 
-  unsigned int *s, *t;
+  unsigned int *s=NULL, *t=NULL;
   if ( bytes ){
     s = (unsigned int *) malloc((ml_a + ml_b) * sizeof(int));
     t = s + ml_a;
   }
-  if ( scores == NULL | (bytes && s==NULL) ){
+  if ( (scores == NULL) | (bytes && s == NULL) ){
     UNPROTECT(4);
     free(scores);
     free(s);
@@ -275,13 +275,13 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
   dictionary *dict = new_dictionary( ml_x + ml_t + 1 );
   double *scores = (double *) malloc( (ml_x + 3) * (ml_t + 2) * sizeof(double) );
 
-  unsigned int *X = NULL, *T;
+  unsigned int *X = NULL, *T = NULL;
   if ( bytes ){
     X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int) );
     T = X + ml_x;
   }
 
-  if ( scores == NULL | (bytes && X == NULL) ){
+  if ( (scores == NULL) | (bytes && X == NULL) ){
     UNPROTECT(6); free(X); 
     error("Unable to allocate enough memory");
   }

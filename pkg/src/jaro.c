@@ -39,7 +39,7 @@ static inline int min(int x, int y){
  * Parameter 'guard; indicates which elements of b have been matched before to avoid
  * matching two instances of the same character to the same position in b (which we treat read-only).
  */
-static int match_int(int a, int *b, int *guard, int width){
+static int match_int(unsigned int a, unsigned int *b, int *guard, int width){
 
   int i = 0;
   while ( 
@@ -57,7 +57,7 @@ static int match_int(int a, int *b, int *guard, int width){
 }
 
 // Winkler's l-factor (nr of matching characters at beginning of the string).
-static double get_l(int *a, int *b, int n){
+static double get_l(unsigned int *a, unsigned int *b, int n){
   int i=0;
   double l;
   while ( a[i] == b[i] && i < n ){ 
@@ -79,8 +79,8 @@ static double get_l(int *a, int *b, int n){
  *
  */
 static double jaro_winkler(
-             int *a, 
-             int *b,
+             unsigned int *a, 
+             unsigned int *b,
              int x,
              int y,
              double p,
@@ -92,8 +92,8 @@ static double jaro_winkler(
 
   // swap arguments if necessary, so we always loop over the shortest string
   if ( x > y ){
-    int *c = b;
-    int z = y;
+    unsigned int *c = b;
+    unsigned int z = y;
     b = a;
     a = c;
     y = x;
@@ -162,12 +162,12 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p){
 
   // workspace for worker function
   int *work = (int *) malloc( sizeof(int) * max(ml_a,ml_b) );
-  unsigned int *s, *t;
+  unsigned int *s = NULL, *t = NULL;
   if (bytes){
-    s = malloc((ml_a + ml_b) * sizeof(int));
+    s = (unsigned int *) malloc((ml_a + ml_b) * sizeof(int));
     t = s + ml_a;
   }
-  if ( work == NULL | (bytes && s == NULL) ){
+  if ( (work == NULL) | (bytes && s == NULL) ){
      UNPROTECT(3); free(s); free(work);
      error("Unable to allocate enough memory");
   }
@@ -224,13 +224,13 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP max
   double max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
   
   // workspace for worker function
-  int *work = (int *) malloc( sizeof(int) * max(nx,ntable) );
-  unsigned int *X, *T;
+  int *work = (int *) malloc( sizeof(int) * max(ml_x, ml_t) );
+  unsigned int *X = NULL, *T = NULL;
   if (bytes){
     X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int));
     T = X + ml_x;
   }
-  if ( work == NULL | (bytes && X == NULL) ){
+  if ( (work == NULL) | (bytes && X == NULL) ){
     UNPROTECT(6); free(work); free(X);
     error ("Unable to allocate enough memory\n");
   }
@@ -250,8 +250,6 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP max
     X = get_elem(x, i, bytes, &len_X, &isna_X, X);
     d1 = R_PosInf;
     for ( int j=0; j<ntable; j++){
-
-
       T = get_elem(table, j, bytes, &len_T, &isna_T, T);
 
       if ( !isna_X && !isna_T ){        // both are char (usual case)
@@ -271,11 +269,8 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP max
     
     y[i] = index;
   }   
-  if (bytes){ 
-    Rprintf("ok7a\n");
-      free(X); 
-    Rprintf("ok7b\n");
-  }
+
+  if (bytes) free(X); 
   free(work);
   UNPROTECT(7);
   return(yy);

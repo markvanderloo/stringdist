@@ -56,7 +56,7 @@ SEXP R_hm(SEXP a, SEXP b, SEXP maxDistance){
     , ml_a = max_length(a)
     , ml_b = max_length(b);
 
-  unsigned int *s, *t;
+  unsigned int *s = NULL, *t = NULL;
   if ( bytes ){
     s = (unsigned int *) malloc( (ml_a + ml_b) * sizeof(int));
     if ( s == NULL ) error("Unable to allocate enough memory");
@@ -110,7 +110,7 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistance
     , bytes = IS_CHARACTER(x);
 
 
-  unsigned int *X, *T;
+  unsigned int *X = NULL, *T = NULL;
   if ( bytes ){
     int ml_x = max_length(x);
     X = (unsigned int *) malloc((ml_x + max_length(table)) * sizeof(int));
@@ -128,7 +128,7 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistance
 
 
   double d = R_PosInf, d1 = R_PosInf;
-  int nchar, index, isna_X, isna_T, len_X, len_T;
+  int index, isna_X, isna_T, len_X, len_T;
 
   for ( int i=0; i<nx; i++){
     index = no_match;

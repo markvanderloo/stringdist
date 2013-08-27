@@ -415,7 +415,7 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance){
 
   // set up a qtree; 
   qtree *Q = new_qtree(q, 2L);
-  unsigned int *s, *t;
+  unsigned int *s = NULL, *t = NULL;
   if ( bytes ){
     s = (unsigned int *) malloc( (ml_a + ml_b) * sizeof(int) );
     if ( s == NULL ){ 

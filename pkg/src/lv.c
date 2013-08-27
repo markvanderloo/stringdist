@@ -98,12 +98,12 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
 
 
   scores = (double *) malloc((ml_a + 1) * (ml_b + 1) * sizeof(double)); 
-  unsigned int *s, *t;
+  unsigned int *s = NULL, *t = NULL;
   if ( bytes ){
     s = (unsigned int *) malloc( (ml_a + ml_b) * sizeof(int));
     t = s + ml_a;
   }
-  if ( scores == NULL | (bytes && s == NULL) ){
+  if ( (scores == NULL) | (bytes && s == NULL) ){
     UNPROTECT(4);
     free(scores);
     free(s);

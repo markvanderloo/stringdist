@@ -89,13 +89,13 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP maxDistance){
   int *scores; 
   scores = (int *) malloc( (ml_a + 1) * (ml_b + 1) * sizeof(int)); 
 
-  unsigned int *s, *t;
+  unsigned int *s = NULL, *t = NULL;
   if ( bytes ){
     s = (unsigned int *) malloc( (ml_a + ml_b) * sizeof(int));
     t = s + ml_a; 
   }
 
-  if ( scores == NULL | (bytes && s == NULL) ){
+  if ( (scores == NULL) | (bytes && s == NULL) ){
     UNPROTECT(3); free(scores); free(s);
     error("%s\n","unable to allocate enough memory for workspace");
   }
