@@ -156,67 +156,71 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SE
   PROTECT(weight);
   PROTECT(maxDistance);
 
-  int nx = length(x), ntable = length(table);
-  int no_match = INTEGER(nomatch)[0];
-  int match_na = INTEGER(matchNA)[0];
+  int nx = length(x)
+    , ntable = length(table)
+    , no_match = INTEGER(nomatch)[0]
+    , match_na = INTEGER(matchNA)[0]
+    , bytes = IS_CHARACTER(x)
+    , ml_x = max_length(x)
+    , ml_t = max_length(table);
+
   double *w = REAL(weight);
   double maxDist = REAL(maxDistance)[0];
   
   /* claim space for workhorse */
-  int max_x = max_length(x);
-  int max_table = max_length(table);
-  double *scores = (double *) malloc( (max_x + 3) * (max_table + 2) * sizeof(double) );
-  if ( scores == NULL ){
-     UNPROTECT(6);
-     error("%s\n","Unable to allocate enough memory");
+  double *work = (double *) malloc( (ml_x + 3) * (ml_t + 2) * sizeof(double) );
+
+  unsigned int *X = NULL, *T = NULL;
+  if ( bytes ){
+    X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int));
+    T = X + ml_x;
+  }
+
+  if ( (work == NULL) | (bytes && X == NULL) ){
+     UNPROTECT(6); free(work); free(X);
+     error("Unable to allocate enough memory");
   }
 
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
-  int *X, *T;
 
 
   double d = R_PosInf, d1 = R_PosInf;
-  int index, xNA, tNA;
+  int index, isna_X, isna_T, len_X, len_T;
 
   for ( int i=0; i<nx; i++){
     index = no_match;
-
-    X = INTEGER(VECTOR_ELT(x,i));
-    xNA = (X[0] == NA_INTEGER);
+    X = get_elem(x, i, bytes, &len_X, &isna_X, X);
     d1 = R_PosInf;
+
     for ( int j=0; j<ntable; j++){
 
-      T = INTEGER(VECTOR_ELT(table,j));
-      tNA = (T[0] == NA_INTEGER);
+      T = get_elem(table, j, bytes, &len_T, &isna_T, T);
+      
 
-      if ( !xNA && !tNA ){        // both are char (usual case)
+      if ( !isna_X && !isna_T ){        // both are char (usual case)
         d = osa(
-          (unsigned int *) X, 
-          length(VECTOR_ELT(x,i)), 
-          (unsigned int *) T, 
-          length(VECTOR_ELT(table,j)), 
-          w,
-          maxDist,
-          scores
+          X, len_X, T, len_T, w, maxDist, work
         );
         if ( d > -1 && d < d1){ 
           index = j + 1;
           if ( d == 0.0 ) break;
           d1 = d;
         }
-      } else if ( xNA && tNA ) {  // both are NA
+      } else if ( isna_X && isna_T ) {  // both are NA
         index = match_na ? j + 1 : no_match;
         break;
       }
     }
     
     y[i] = index;
-  }  
+  }
+
+  if (bytes) free(X);  
+  free(work);
   UNPROTECT(7);
-  free(scores);
   return(yy);
 }
 
