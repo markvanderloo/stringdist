@@ -143,6 +143,8 @@ test_that("bytewise matching differs from character wise matching",{
   expect_equal(amatch(x, y, method='lv',maxDist=1, useBytes=TRUE, nomatch=0L), 0L);
   expect_equal(amatch(x, y, method='osa',maxDist=2, useBytes=TRUE),2L); 
   expect_equal(amatch(x, y, method='osa',maxDist=1, useBytes=TRUE, nomatch=0L), 0L);
+  expect_equal(amatch(x, y, method='qgram',maxDist=7, q=3, useBytes=TRUE),2L); 
+  expect_equal(amatch(x, y, method='qgram',maxDist=6, q=3, useBytes=TRUE, nomatch=0L), 0L);
 
 
 })

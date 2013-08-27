@@ -473,53 +473,57 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq,
   PROTECT(qq);
   PROTECT(maxDist);
   PROTECT(distance);
-  int q = INTEGER(qq)[0];
+
   double max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
   
-  // choose distance function
-  int dist = INTEGER(distance)[0];
-
-  int nx = length(x), ntable = length(table);
-  int no_match = INTEGER(nomatch)[0];
-  int match_na = INTEGER(matchNA)[0];
+  
+  int dist = INTEGER(distance)[0] // choose distance function
+    , q = INTEGER(qq)[0]
+    , nx = length(x)
+    , ntable = length(table)
+    , no_match = INTEGER(nomatch)[0]
+    , match_na = INTEGER(matchNA)[0]
+    , bytes = IS_CHARACTER(x)
+    , ml_x = max_length(x)
+    , ml_t = max_length(table);
   
   // set up a qtree;
   qtree *Q = new_qtree(q, 2);
+
+  unsigned int *X = NULL, *T = NULL;
+  if (bytes){
+    X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int));
+    if ( X == NULL){
+      UNPROTECT(7);
+      error("Unable to allocate enough memory");
+    }
+    T = X + ml_x;
+  }
 
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
-  int *X, *T;
 
 
   double d = R_PosInf, d1 = R_PosInf;
-  int index, xNA, tNA;
+  int index, isna_X, isna_T, len_X, len_T;
 
   for ( int i=0; i<nx; i++){
     index = no_match;
-
-    X = INTEGER(VECTOR_ELT(x,i));
-    xNA = (X[0] == NA_INTEGER);
+    X = get_elem(x, i, bytes, &len_X, &isna_X, X);
     d1 = R_PosInf;
     for ( int j=0; j<ntable; j++){
 
-      T = INTEGER(VECTOR_ELT(table,j));
-      tNA = (T[0] == NA_INTEGER);
+      T = get_elem(table, j, bytes, &len_T, &isna_T,T);
 
-      if ( !xNA && !tNA ){        // both are char (usual case)
+      if ( !isna_X && !isna_T ){        // both are char (usual case)
         d = qgram_tree(
-          (unsigned int *) X,
-          (unsigned int *) T,
-          length(VECTOR_ELT(x,i)),
-          length(VECTOR_ELT(table,j)),
-          q,
-          Q,
-          dist
+          X, T, len_X, len_T, q, Q, dist
         );
         if ( d == -2.0 ){
-          UNPROTECT(5);
-          error("could not allocate enough memory");
+          UNPROTECT(7);
+          error("Unable to allocate enough memory for qgram storage");
         }
         if ( d > max_dist ){
           continue;
@@ -528,14 +532,16 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq,
           if ( abs(d) < 1e-14 ) break; 
           d1 = d;
         }
-      } else if ( xNA && tNA ) {  // both are NA
+      } else if ( isna_X && isna_T ) {  // both are NA
         index = match_na ? j + 1 : no_match;
         break;
       }
     }
     
     y[i] = index;
-  }  
+  } 
+  if ( bytes ) free(X);
+  free_qtree();
   UNPROTECT(8);
   return(yy);
 }
