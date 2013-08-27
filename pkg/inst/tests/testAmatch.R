@@ -135,8 +135,8 @@ test_that("bytewise matching differs from character wise matching",{
   expect_equal(amatch(x, y, method='dl', maxDist=1, nomatch=0L, useBytes=TRUE), 0L);
   expect_equal(amatch(x, x, method='hamming',maxDist=1L, useBytes=TRUE),1); 
   expect_equal(amatch(x, y, method='hamming',nomatch=0L,useBytes=TRUE), 0L);
-  expect_equal(amatch(x, y, method='jw', maxDist=1, useBytes=TRUE), 2);
-  expect_equal(amatch(x, y, method='jw', maxDist=jwdist+0.2, nomatch=0L, useBytes=TRUE), 0L);
+  expect_equal(amatch(x, y, method='jw', maxDist=1.0, useBytes=TRUE), 2);
+  expect_equal(amatch(x, y, method='jw', maxDist=jwdist-0.01, nomatch=0L, useBytes=TRUE), 0L);
 
 
 })

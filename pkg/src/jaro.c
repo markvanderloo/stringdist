@@ -23,15 +23,7 @@
 #include "utils.h"
 #include <string.h>
 
-static inline int max(int x, int y){
-  int m = (x < y) ? y : x;
-  return m;
-}
 
-static inline int min(int x, int y){
-  int m = (x < y) ? x : y;
-  return m; 
-}
 
 
 /* First match of a in b[] 
@@ -103,7 +95,7 @@ static double jaro_winkler(
   memset(work,0,sizeof(int) * y);
 
   // max transposition distance
-  int M = max(max(x,y)/2 - 1,0);
+  int M = MAX(MAX(x,y)/2 - 1,0);
   // transposition counter
   double t = 0.0;
   // number of matches 
@@ -112,18 +104,18 @@ static double jaro_winkler(
   int left, right, J, jmax=0;
   
   for ( int i=0; i < x; ++i ){
-    left  = max(0, i-M);
+    left  = MAX(0, i-M);
 
     if ( left >= y ){
       J = -1;
     } else {
-      right = min(y, i+M);
+      right = MIN(y, i+M);
       J =  match_int(a[i], b + left, work + left, right - left);
     }
     if ( J >= 0 ){
       ++m;
       t += (J + left < jmax ) ? 1 : 0; 
-      jmax = max(jmax, J + left);
+      jmax = MAX(jmax, J + left);
     }
   }
   double d;
@@ -135,7 +127,7 @@ static double jaro_winkler(
 
   // Winkler's penalty factor
   if ( p > 0 && d > 0 ){
-    int n = min(min(x,y),4);
+    int n = MIN(MIN(x,y),4);
     d =  d - get_l(a,b,n)*p*d; 
   }
 
@@ -155,13 +147,13 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p){
     , ml_b = max_length(b)
     , na = length(a)
     , nb = length(b)
-    , nt = max(na,nb)
+    , nt = MAX(na,nb)
     , bytes = IS_CHARACTER(a);
   
   double pp = REAL(p)[0];
 
   // workspace for worker function
-  int *work = (int *) malloc( sizeof(int) * max(ml_a,ml_b) );
+  int *work = (int *) malloc( sizeof(int) * MAX(ml_a,ml_b) );
   unsigned int *s = NULL, *t = NULL;
   if (bytes){
     s = (unsigned int *) malloc((ml_a + ml_b) * sizeof(int));
@@ -224,7 +216,7 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP max
   double max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
   
   // workspace for worker function
-  int *work = (int *) malloc( sizeof(int) * max(ml_x, ml_t) );
+  int *work = (int *) malloc( sizeof(int) * MAX(ml_x, ml_t) );
   unsigned int *X = NULL, *T = NULL;
   if (bytes){
     X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int));
@@ -256,9 +248,9 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP max
         d = jaro_winkler(X, T, len_X, len_T, pp, work);
         if ( d > max_dist ){
           continue;
-        } else if ( d > -1 && d < d1){ 
+        } else if ( d > -1.0 && d < d1){ 
           index = j + 1;
-          if ( abs(d) < 1e-14 ) break;
+          if ( ABS(d) < 1e-14 ) break; // exact match
           d1 = d;
         }
       } else if ( isna_X && isna_T ) {  // both are NA
