@@ -139,15 +139,24 @@ SEXP R_match_lcs(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistanc
   PROTECT(matchNA);
   PROTECT(maxDistance);
 
-  int nx = length(x), ntable = length(table);
-  int no_match = INTEGER(nomatch)[0];
-  int match_na = INTEGER(matchNA)[0];
-  int max_dist = INTEGER(maxDistance)[0];
+  int nx = length(x)
+    , ntable = length(table)
+    , no_match = INTEGER(nomatch)[0]
+    , match_na = INTEGER(matchNA)[0]
+    , max_dist = INTEGER(maxDistance)[0]
+    , bytes = IS_CHARACTER(x)
+    , ml_x = max_length(x)
+    , ml_t = max_length(table);
 
   // space for the workfunction
-  int *scores = (int *) malloc( (max_length(x) + 1) * (max_length(table) + 1) * sizeof(int)); 
-  if ( scores == NULL ){
-    UNPROTECT(3);
+  int *work = (int *) malloc( (max_length(x) + 1) * (max_length(table) + 1) * sizeof(int)); 
+  unsigned int *X = NULL, *T = NULL;
+  if ( bytes ){
+    X = (unsigned int *) malloc((ml_x + ml_t)*sizeof(int));
+    T = X + ml_x;
+  }
+  if ( ( work == NULL) | (bytes && X == NULL) ){
+    UNPROTECT(3); free(work); free(X);
     error("%s\n","unable to allocate enough memory for workspace");
   }
 
@@ -156,36 +165,29 @@ SEXP R_match_lcs(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistanc
   PROTECT(yy = allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
 
-  int *X, *T;
   double d = R_PosInf, d1 = R_PosInf;
-  int index, xNA, tNA;
+
+  int index, len_X, isna_X, len_T, isna_T;
 
   for ( int i=0; i<nx; i++){
     index = no_match;
 
-    X = INTEGER(VECTOR_ELT(x,i));
-    xNA = (X[0] == NA_INTEGER);
+
+    X = get_elem(x, i, bytes, &len_X, &isna_X, X);
     d1 = R_PosInf;
     for ( int j=0; j<ntable; j++){
 
-      T = INTEGER(VECTOR_ELT(table,j));
-      tNA = (T[0] == NA_INTEGER);
-
-      if ( !xNA && !tNA ){        // both are char (usual case)
+      T = get_elem(table, j, bytes, &len_T, &isna_T, T);
+      if ( !isna_X && !isna_T ){        // both are char (usual case)
         d = (double) lcs(
-          (unsigned int *) X, 
-          length(VECTOR_ELT(x,i)), 
-          (unsigned int *) T,
-          length(VECTOR_ELT(table,j)), 
-          max_dist,
-          scores
+          X, len_X, T, len_T, max_dist, work
         );
         if ( d > -1 && d < d1){ 
           index = j + 1;
           if ( d == 0.0  ) break;
           d1 = d;
         }
-      } else if ( xNA && tNA ) {  // both are NA
+      } else if ( isna_X && isna_T ) {  // both are NA
         index = match_na ? j + 1 : no_match;
         break;
       }
@@ -193,7 +195,8 @@ SEXP R_match_lcs(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistanc
     
     y[i] = index;
   }
-  free(scores);  
+  if ( bytes ) free(X);
+  free(work);  
   UNPROTECT(6);
   return(yy);
 }

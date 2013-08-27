@@ -75,7 +75,7 @@ test_that("simple test and multiple edge cases",{
 context("amatch: Longest Common Substring")
 
 test_that("simple test and multiple edge cases",{
-  expect_equal(amatch("aa", c("ba","bb"), method="lcs",maxDist=1L), 1L)
+  expect_equal(amatch("aa", c("ba","bb"), method="lcs",maxDist=2L), 1L)
   expect_equal(amatch("aa",c("bb","bb"), method="lcs",maxDist=1L), NA_integer_)
   expect_equal(amatch("aa",c("bbb"), method="lcs",maxDist=2L), NA_integer_)
   expect_equal(amatch("bbb",c("aa"), method="lcs",maxDist=2L), NA_integer_)
@@ -137,6 +137,8 @@ test_that("bytewise matching differs from character wise matching",{
   expect_equal(amatch(x, y, method='hamming',nomatch=0L,useBytes=TRUE), 0L);
   expect_equal(amatch(x, y, method='jw', maxDist=1.0, useBytes=TRUE), 2);
   expect_equal(amatch(x, y, method='jw', maxDist=jwdist-0.01, nomatch=0L, useBytes=TRUE), 0L);
+  expect_equal(amatch(x, y, method='lcs',maxDist=3, useBytes=TRUE),2L); 
+  expect_equal(amatch(x, y, method='lcs',maxDist=2, useBytes=TRUE, nomatch=0L), 0L);
 
 
 })
