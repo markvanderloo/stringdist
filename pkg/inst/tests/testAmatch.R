@@ -123,11 +123,16 @@ context("amatch: useBytes")
 test_that("bytewise matching differs from character wise matching",{
   x <- paste0('Mot',intToUtf8(0x00F6),'rhead') 
   y <- c('bastard','Motorhead') 
+  jwdist <- round(1-(1/3)*(8/9 + 8/10 + 1),3)
 
   expect_equal(amatch(x, y, method='dl', maxDist=2, useBytes=TRUE), 2);
   expect_equal(amatch(x, y, method='dl', maxDist=1, nomatch=0L, useBytes=TRUE), 0L);
   expect_equal(amatch(x, x, method='hamming',maxDist=1L, useBytes=TRUE),1); 
   expect_equal(amatch(x, y, method='hamming',nomatch=0L,useBytes=TRUE), 0L);
+  expect_equal(amatch(x, y, method='jw', maxDist=1, useBytes=TRUE), 2);
+  expect_equal(amatch(x, y, method='jw', maxDist=jwdist+0.2, nomatch=0L, useBytes=TRUE), 0L);
+
+
 })
 
 

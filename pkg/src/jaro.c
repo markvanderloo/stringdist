@@ -212,44 +212,49 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP max
   PROTECT(p);
   PROTECT(maxDist);
 
-  int nx = length(x), ntable = length(table);
-  int no_match = INTEGER(nomatch)[0];
-  int match_na = INTEGER(matchNA)[0];
+  int nx = length(x)
+    , ntable = length(table)
+    , no_match = INTEGER(nomatch)[0]
+    , match_na = INTEGER(matchNA)[0]
+    , bytes = IS_CHARACTER(x)
+    , ml_x = max_length(x)
+    , ml_t = max_length(table);
+
   double pp = REAL(p)[0];
   double max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
   
   // workspace for worker function
   int *work = (int *) malloc( sizeof(int) * max(nx,ntable) );
-  if ( work == NULL ){
-    UNPROTECT(5);
-    error("%s\n","unable to allocate enough memory");
+  unsigned int *X, *T;
+  if (bytes){
+    X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int));
+    T = X + ml_x;
+  }
+  if ( work == NULL | (bytes && X == NULL) ){
+    UNPROTECT(6); free(work); free(X);
+    error ("Unable to allocate enough memory\n");
   }
 
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
-  int *X, *T;
 
 
   double d = R_PosInf, d1 = R_PosInf;
-  int index, xNA, tNA, length_X,length_T;
+  int index, isna_X, isna_T, len_X,len_T;
+
 
   for ( int i=0; i<nx; i++){
     index = no_match;
-
-    X = INTEGER(VECTOR_ELT(x,i));
-    length_X = length(VECTOR_ELT(x,i));
-    xNA = (X[0] == NA_INTEGER);
-
+    X = get_elem(x, i, bytes, &len_X, &isna_X, X);
     for ( int j=0; j<ntable; j++){
 
-      T = INTEGER(VECTOR_ELT(table,j));
-      length_T = length(VECTOR_ELT(table,j));
-      tNA = (T[0] == NA_INTEGER);
 
-      if ( !xNA && !tNA ){        // both are char (usual case)
-        d = jaro_winkler(X, T, length_X, length_T, pp, work);
+      T = get_elem(table, j, bytes, &len_T, &isna_T, T);
+
+      if ( !isna_X && !isna_T ){        // both are char (usual case)
+        d = jaro_winkler(X, T, len_X, len_T, pp, work);
         if ( d > max_dist ){
           continue;
         } else if ( d > -1 && d < d1){ 
@@ -257,14 +262,19 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP max
           if ( abs(d) < 1e-14 ) break;
           d1 = d;
         }
-      } else if ( xNA && tNA ) {  // both are NA
+      } else if ( isna_X && isna_T ) {  // both are NA
         index = match_na ? j + 1 : no_match;
         break;
       }
     }
     
     y[i] = index;
-  }  
+  }   
+  if (bytes){ 
+    Rprintf("ok7a\n");
+      free(X); 
+    Rprintf("ok7b\n");
+  }
   free(work);
   UNPROTECT(7);
   return(yy);
