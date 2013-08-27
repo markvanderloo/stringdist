@@ -195,6 +195,7 @@ stringdist <- function(a, b,
 #' @export
 stringdistmatrix <- function(a, b, 
   method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw"), 
+  useBytes = FALSE,
   weight=c(d=1,i=1,s=1,t=1), 
   maxDist=Inf, q=1, p=0,
   ncores=1, cluster=NULL
@@ -213,8 +214,11 @@ stringdistmatrix <- function(a, b,
       p <= 0.25,
       p >= 0
   )
-  a <- char2int(a)
-  b <- lapply(char2int(b),list)
+  if (!useBytes){
+    a <- char2int(a)
+    b <- char2int(b)
+  }
+  b <- lapply(b,list)
   if (ncores==1){
     x <- sapply(b,do_dist,a,method,weight,maxDist, q, p)
   } else {
