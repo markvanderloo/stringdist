@@ -26,26 +26,26 @@
 #'    \code{jw} \tab Jaro, or Jaro-Winker distance.
 #' }
 #' The \bold{Hamming distance} (\code{hamming}) counts the number of character substitutions that turns 
-#' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters \code{Inf} is
-#' returned.
+#' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters or if \code{maxDist} is exceeded,
+#' \code{Inf} is returned.
 #'
 #' The \bold{Levenshtein distance} (\code{lv}) counts the number of deletions, insertions and substitutions necessary
 #' to turn \code{b} into \code{a}. This method is equivalent to \code{R}'s native \code{\link[utils]{adist}} function.
-#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{Inf}  is returned.
+#' If \code{maxDist} is exceeded \code{Inf}  is returned.
 #'
 #' The \bold{Optimal String Alignment distance} (\code{osa}) is like the Levenshtein distance but also 
 #' allows transposition of adjacent characters. Here, each substring  may be edited only once so a 
 #' character cannot be transposed twice. 
-#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{Inf}  is returned.
+#' If \code{maxDist} is exceeded \code{Inf}  is returned.
 #'
 #' The \bold{full Damerau-Levensthein distance} (\code{dl}) allows for multiple transpositions.
-#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{Inf}  is returned.
+#' If \code{maxDist} is exceeded \code{Inf}  is returned.
 #'
 #' The \bold{longest common substring} is defined as the longest string that can be obtained by pairing characters
 #' from \code{a} and \code{b} while keeping the order of characters intact. The lcs-distance is defined as the
 #' number of unpaired characters. The distance is equivalent to the edit distance allowing only deletions and
 #' insertions, each with weight one.
-#' The computation is aborted when \code{maxDist} is exceeded, in which case \code{Inf}  is returned.
+#' If \code{maxDist} is exceeded \code{Inf}  is returned.
 #'
 #' A \bold{\eqn{q}-gram} is a subsequence of \eqn{q} \emph{consecutive} characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
 #' of \eqn{q}-gram occurrences in \code{a} (\code{b}), the \bold{\eqn{q}-gram distance} is given by the sum over
@@ -57,14 +57,15 @@
 #' Let \eqn{X} be the set of unique \eqn{q}-grams in \code{a} and \eqn{Y} the set of unique \eqn{q}-grams in \code{b}. 
 #' The \bold{Jaccard distance} is given by \eqn{1-|X\cap Y|/|X\cup Y|}.
 #'
-#' The \bold{Jaro distance} (\code{method=jw}, \code{p=0}), is a number between 0 (exact match) and 1 (completely dissimilar) measuring 
+#' The \bold{Jaro distance} (\code{method='jw'}, \code{p=0}), is a number between 0 (exact match) and 1 (completely dissimilar) measuring 
 #' dissimilarity between strings.
 #' It is defined to be 0 when both strings have length 0, and 1 when  there are no character matches between \code{a} and \code{b}. 
 #' Otherwise, the Jaro distance is defined as \eqn{1-(1/3)(m/|a| + m/|b| + (m-t)/m)}. Here,\eqn{|a|} indicates the number of
 #' characters in \code{a}, \eqn{m} is the number of 
 #' character matches and \eqn{t} the number of transpositions of matching characters.
 #' A character \eqn{c} of \code{a} \emph{matches} a character from \code{b} when
-#' \eqn{c} occurs in \code{b}, and the index of \eqn{c} in \code{a} differs less than \eqn{\max(|a|,|b|)/2 -1} (where we use integer division).
+#' \eqn{c} occurs in \code{b}, and the index of \eqn{c} in \code{a} differs less than \eqn{\max(|a|,|b|)/2 -1} (where we use integer division)
+#' from the index of \eqn{c} in \code{b}.
 #' Two matching characters are transposed when they are matched but they occur in different order in string \code{a} and \code{b}.
 #'  
 #' The \bold{Jaro-Winkler distance} (\code{method=jw}, \code{0<p<=0.25}) adds a correction term to the Jaro-distance. It is defined as \eqn{d - l*p*d}, where
@@ -73,19 +74,31 @@
 #' is a penalty factor, which in the work of Winkler is often chosen \eqn{0.1}.
 #'
 #' @section Encoding issues:
-#' Input strings are re-encoded to \code{utf8} an then to \code{integer}
-#' vectors prior to the distance calculation (since the underlying \code{C}-code expects unsigned ints). 
+#' If \code{bytes=FALSE}, input strings are re-encoded to \code{utf8} an then to \code{integer}
+#' vectors prior to the distance calculation (since the underlying \code{C}-code expects \code{unsigned int}s). 
 #' This double conversion is necessary as it seems the only way to
 #' reliably convert (possibly multibyte) characters to integers on all systems
-#' supported by \code{R}.
-#' (\code{R}'s native \code{\link[utils]{adist}} function does this as well). 
-#' See \code{\link[base]{Encoding}} for further details.
+#' supported by \code{R}. \code{R}'s native \code{\link[utils]{adist}} function does this as well. 
+#'
+#' If \code{bytes=TRUE}, the input strings are treated as if each byte was a
+#' single character. This may be significantly faster since it avoids
+#' conversion through \code{utf8} (up to a factor of 3, for strings of 5-25 characters).
+#' However, results may depend on the (possibly multibyte)  character encoding scheme
+#' and note that \code{R}'s internal encoding scheme is OS-dependent. 
+#' If you're sure that all your input is \code{ASCII},  you can safely set 
+#' \code{useBytes=TRUE} to profit from the speed gain on any platform. 
+#'
+#' See base \code{R}'s \code{\link[base]{Encoding}} and \code{\link[base]{iconv}} documentation for details on how \code{R} handles character
+#' encoding. 
 #'
 #' @section Paralellization:
 #' The \code{stringdistmatrix} function uses \code{\link[parallel]{makeCluster}} to generate a cluster and compute the
-#' distance matrix in parallel.  As the cluster is local, the \code{ncores} parameter should not be larger than the number
+#' distance matrix in parallel when \code{ncores>1}. As the cluster is local, the \code{ncores} parameter should not be larger than the number
 #' of cores on your machine. Use \code{\link[parallel]{detectCores}} to check the number of cores available. Alternatively,
 #' you can create a cluster by yourself, using \code{\link[parallel]{makeCluster}} and pass that to \code{stringdistmatrix}.
+#' There is overhead in creating clusters, so creating the cluster yourself is a good choice if you want to call \code{stringdistmatrix} 
+#' multiple times, for example in a loop.
+#'
 #'
 #' @references
 #' \itemize{
@@ -103,10 +116,10 @@
 #'  A guided tour to approximate string matching, ACM Computing Surveys 33 31-88.
 #' }
 #' \item{
-#' Many algorithms are available in pseudocode from wikipedia: http://en.wikipedia.org/wiki/Damerau-Levenshtein_distance.
+#' Many algorithms are available in pseudocode from wikipedia: \url{http://en.wikipedia.org/wiki/Damerau-Levenshtein_distance}.
 #' }
-#' \item{The code for the full Damerau-Levenshtein distance was adapted from Nick Logan's public github repository:
-#'  \url{https://github.com/ugexe/Text--Levenshtein--Damerau--XS/blob/master/damerau-int.c}.
+#' \item{The code for the full Damerau-Levenshtein distance was adapted from Nick Logan's
+#'  \href{https://github.com/ugexe/Text--Levenshtein--Damerau--XS/blob/master/damerau-int.c}{public github repository}.
 #' }
 #'
 #' \item{
@@ -114,12 +127,18 @@
 #' Theoretical Computer Science, 92, 191-211.
 #' }
 #'
-#' \item{Wikipedia \code{http://en.wikipedia.org/wiki/Jaro\%E2\%80\%93Winkler_distance} describes the Jaro-Winker
+#' \item{\href{http://en.wikipedia.org/wiki/Jaro\%E2\%80\%93Winkler_distance}{Wikipedia} describes the Jaro-Winker
 #' distance used in this package. Unfortunately, there seems to be no single
 #'  definition for the Jaro distance in literature. For example Cohen, Ravikumar and Fienberg (Proceeedings of IIWEB03, Vol 47, 2003)
 #'  report a different matching window for characters in strings \code{a} and \code{b}. 
 #' }
 #'
+#' \item{Raffael Vogler wrote a nice 
+#' \href{http://www.joyofdata.de/blog/comparison-of-string-distance-algorithms/}{blog}
+#' comparing different string distances in this package.
+#'
+#'
+#'}
 #'
 #'}
 #'
@@ -128,16 +147,17 @@
 #' @param a R object (target); will be converted by \code{as.character}.
 #' @param b R object (source); will be converted by \code{as.character}.
 #' @param method Method for distance calculation. The default is \code{"osa"} (see details).
-#' @param useBytes If \code{TRUE}, use bytewise instead of characterwise comparison (see Encoding issues, below).
+#' @param useBytes Perform byte-wise comparison. \code{useBytes=TRUE} is faster but may yield different
+#' 	results depending on character encoding. See also below, under ``encoding issues''.
 #' @param weight The penalty for deletion, insertion, substitution and transposition, in that order.  
 #'   Weights must be positive and not exceed 1. \code{weight[4]} is ignored when \code{method='lv'} and \code{weight} is
 #'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'}, \code{'lcs'} or \code{'jw'}.
 #' @param maxDist  Maximum string distance for edit-like distances, in some cases computation is stopped when \code{maxDist} is reached. 
-#'    \code{maxDist=Inf} means calculation goes on untill the distance is computed. Ignored for \code{method='qgram'}, \code{'cosine'}, \code{'jaccard'} and
+#'    \code{maxDist=Inf} means calculation goes on untill the distance is computed. Only applies to \code{method='qgram'}, \code{'cosine'}, \code{'jaccard'} and
 #'    \code{method='jw'}.
-#' @param q  size of the \eqn{q}-gram, must be nonnegative. Ignored for all but \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
-#' @param p penalty factor for Jaro-Winkler distance. The valid range for \code{p} is \code{0<= p <= 0.25}. 
-#'  If \code{p=0} (default), the Jaro-distance is returned. Ignored for all methods except \code{'jw'}.
+#' @param q  Size of the \eqn{q}-gram; must be nonnegative. Only applies to \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
+#' @param p Penalty factor for Jaro-Winkler distance. The valid range for \code{p} is \code{0 <= p <= 0.25}. 
+#'  If \code{p=0} (default), the Jaro-distance is returned. Applies only to \code{method='jw'}.
 #'
 #'
 #'
@@ -182,10 +202,10 @@ stringdist <- function(a, b,
 }
 
 
-#' @param ncores number of cores to use. If \code{ncores>1}, a local cluster is
+#' @param ncores Number of cores to use. If \code{ncores>1}, a local cluster is
 #' created using \code{\link[parallel]{makeCluster}}. Parallelisation is over \code{b}, so 
 #' the speed gain by parallelisation is highest when \code{b} has less elements than \code{a}.
-#' @param cluster (optional) a custom cluster, created with
+#' @param cluster (Optional) a custom cluster, created with
 #' \code{\link[parallel]{makeCluster}}. If \code{cluster} is not \code{NULL},
 #' \code{ncores} is ignored.
 #'

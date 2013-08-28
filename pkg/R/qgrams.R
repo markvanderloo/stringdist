@@ -1,8 +1,8 @@
-#' Get a table of qgram counts from a character vector.
+#' Get a table of qgram counts from one or more character vectors.
 #'
 #' @section Details:
-#' The input is converted to \code{character}. Each element is converted to \code{utf8} and than to \code{integer}  
-#' as in \code{\link{stringdist}}. Next,the data is passed to the underlying routine. row names of the output 
+#' The input is converted to \code{character}. Each element is converted to \code{utf8} and then to \code{integer}  
+#' as in \code{\link{stringdist}} (when \code{useBytes=FALSE}). Next,the data is passed to the underlying routine. row names of the output 
 #' array (i.e. the qgrams) are encoded in \code{utf8}.
 #' 
 #' Strings with less than \code{q} characters and elements containing \code{NA} are skipped. Using \code{q=0} 
@@ -14,7 +14,7 @@
 #' @return A table with \eqn{q}-gram counts. Detected \eqn{q}-grams are column names and the argument names as row names.
 #' If no argument names were provided, they will be generated.
 #'
-#' @seealso \code{\link{stringdist}}. 
+#' @seealso \code{\link{stringdist}}, \code{\link{amatch}}
 #'
 #' @example ../examples/qgrams.R
 #' @export
