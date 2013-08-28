@@ -354,6 +354,10 @@ test_that("dimensions work out",{
         dim(stringdistmatrix(c("aa","bb","cc"),c("aa","cc"))),
         c(3,2)
     )
+    expect_equivalent(
+        dim(stringdistmatrix(c("aa","bb","cc"),c("aa","cc"),useBytes=TRUE)),
+        c(3,2)
+    )
 })
 
 
