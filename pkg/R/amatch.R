@@ -18,17 +18,17 @@
 #' is \code{NA}, the \code{nomatch} value is returned, regardless of whether \code{NA} is present in \code{table}.
 #'
 #'
-#' @param x vector: elements to be approximately matched
-#' @param table vector: lookup table for matching
-#' @param nomatch the value to be returned when no match is found. This is coerced to integer. \code{nomatch=0} 
+#' @param x vector: elements to be approximately matched: will be coerced to \code{character}.
+#' @param table vector: lookup table for matching. Will be coerced to \code{character}.
+#' @param nomatch The value to be returned when no match is found. This is coerced to integer. \code{nomatch=0} 
 #'  can be a useful option.
 #' @param matchNA Should \code{NA}'s be matched? Default behaviour mimics the
 #'   behaviour of base \code{\link[base]{match}}, meaning that \code{NA} matches
-#'   \code{NA} (which is inconsistent with \code{dist} or \code{stringdist}).
+#'   \code{NA} (see also the note on \code{NA} handling below).
 #' @param method Matching algorithm to use. See \code{\link{stringdist}}.
 #' @param useBytes Perform byte-wise comparison. \code{useBytes=TRUE} is faster but may yield different
-#' 	results depending on character encoding. For \code{ASCII} it is identical. See also \code{\link{strindist}}.
-#' @param weight parameters for matching algorithm See \code{\link{stringdist}}.
+#' 	results depending on character encoding. See also \code{\link{stringdist}}, under encoding issues.
+#' @param weight Weight parameters for matching algorithm See \code{\link{stringdist}}.
 #' @param maxDist Elements in \code{x} will not be matched with elements of
 #'  \code{table} if their distance is larger than \code{maxDist}. 
 #'   
@@ -82,6 +82,8 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE,
 }
 
 #' @param ... parameters to pass to \code{amatch} (except \code{nomatch})
+#'
+#'
 #' @rdname amatch
 #' @export 
 ain <- function(x,table,...){

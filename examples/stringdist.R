@@ -26,8 +26,8 @@ stringdist('abc','ca')
 stringdist('ca','abc',weight=c(0.5,1,1,1))
 stringdist('abc','ca',weight=c(0.5,1,1,1))
 
-# Hamming distance is undefined (or sometimes called infinite) for 
-# strings of unequal lengths  (stringdist returns Inf)
+# Hamming distance is undefined for 
+# strings of unequal lengths so stringdist returns Inf
 stringdist("ab","abc",method="h")
 # For strings of eqal length it counts the number of unequal characters as they occur
 # in the strings from beginning to end
