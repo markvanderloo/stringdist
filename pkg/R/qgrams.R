@@ -12,7 +12,7 @@
 #' @param ... any number of (named) arguments, that will be coerced to character with \code{as.character}.
 #' @param q size of q-gram, must be non-negative.
 #' @param useBytes Determine byte-wise qgrams. \code{useBytes=TRUE} is faster but may yield different
-#' 	results depending on character encoding. For \code{ASCII} it is identical. See also \code{\link{strindist}} under Encoding issues.
+#' 	results depending on character encoding. For \code{ASCII} it is identical. See also \code{\link{stringdist}} under Encoding issues.
 #' @param useNames Add q-grams as column names. If \code{useBytes=useNames=TRUE}, the q-byte sequences are represented as 2 hexadecimal numbers
 #'   per byte, separated by a vertical bar (\code{|}).
 #' @return A table with \eqn{q}-gram counts. Detected \eqn{q}-grams are column names and the argument names as row names.
