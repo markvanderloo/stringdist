@@ -16,7 +16,7 @@ qgrams(A = x, B = y, C = z,q=2)
 
 # a tonque twister, showing the effects of useBytes and useNames
 x <- "peter piper picked a peck of pickled peppers"
-qgrams(x, q=2, useNames=FALSE) 
+qgrams(x, q=2) 
 qgrams(x, q=2, useNames=FALSE) 
 qgrams(x, q=2, useBytes=TRUE)
 qgrams(x, q=2, useBytes=TRUE, useNames=TRUE)
