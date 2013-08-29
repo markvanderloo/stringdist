@@ -8,6 +8,11 @@ qgrams(rep('hello world',2),q=3)
 x <- c('hello', 'world')
 lapply(x,qgrams, q=3)
 
-
+# a tonque twister
+x <- "peter piper picked a peck of pickled peppers"
+qgrams(x, q=2, useNames=FALSE) 
+qgrams(x, q=2, useNames=FALSE) 
+qgrams(x, q=2, useBytes=TRUE)
+qgrams(x, q=2, useBytes=TRUE, useNames=TRUE)
 
 
