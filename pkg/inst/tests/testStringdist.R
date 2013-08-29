@@ -360,7 +360,28 @@ test_that("dimensions work out",{
     )
 })
 
+test_that('stringdistmatrix yields correct distances',{
+  x <- paste0('Mot',intToUtf8(0x00F6),'rhead') # correct spelling
+  y <- 'Motorhead' # Pissing off Lemmy.
+  v <- c(x,y)
+  d11 <- stringdist(x,x)
+  d12 <- stringdist(x,y)
+  d22 <- stringdist(y,y)
+  expect_equal(
+    stringdistmatrix(v,v)
+    , matrix(c(d11,d12,d12,d22),nrow=2,ncol=2)
+  )
+  d11 <- stringdist(x,x,useBytes=TRUE)
+  d12 <- stringdist(x,y,useBytes=TRUE)
+  d22 <- stringdist(y,y,useBytes=TRUE)
+  expect_equal(
+    stringdistmatrix(v,v,useBytes=TRUE)
+    , matrix(c(d11,d12,d12,d22),nrow=2,ncol=2)
+  )
 
+
+
+})
 context("stringdist: useBytes")
 test_that("useBytes gets NA",{
   expect_true(is.na(stringdist('a',NA,method='osa',useBytes=TRUE)))

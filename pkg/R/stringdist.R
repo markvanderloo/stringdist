@@ -236,11 +236,10 @@ stringdistmatrix <- function(a, b,
   )
   if (!useBytes){
     a <- char2int(a)
-    b <- char2int(b)
+    b <- lapply(char2int(b),list)
   }
-  b <- lapply(b,list)
   if (ncores==1){
-    x <- sapply(b,do_dist,a,method,weight,maxDist, q, p)
+    x <- sapply(b,do_dist, USE.NAMES=FALSE, a,method,weight,maxDist, q, p)
   } else {
     if ( is.null(cluster) ){
       cl <- makeCluster(ncores)
@@ -256,7 +255,7 @@ stringdistmatrix <- function(a, b,
 
 
 char2int <- function(x){
-  # For some OS's enc2utf8 has unexpected behavior for NA's,
+  # For some OS's enc2utf8 had unexpected behavior for NA's,
   # see https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=15201.
   # This is fixed for R >= 2.15.3.
   # i <- !is.na(x)
