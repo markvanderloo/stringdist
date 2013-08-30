@@ -2,6 +2,11 @@
 #'
 #' Approximate string matching equivalents of \code{R}'s native \code{\link[base]{match}} and \code{\%in\%}.
 #'
+#' \code{ain} is currently defined as 
+#' 
+#' \code{ain(x,table,...) <- function(x,table,...) amatch(x, table, nomatch=0,...) > 0}
+#'
+#'
 #' @section Note on \code{NA} handling:
 #' \code{R}'s native \code{\link[base]{match}} function matches \code{NA} with \code{NA}. This
 #' may feel inconsistent with \code{R}'s usual \code{NA} handling, since for example \code{NA==NA} yields
