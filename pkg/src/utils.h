@@ -20,7 +20,7 @@
 #ifndef sd_utils_h
 #define sd_utils_h
 
-/* integer recycling macro ( equals X % Y) */
+/* integer recycling macro  */
 #define RECYCLE(X,Y) ( (X) == (Y) ? 0 : (X) )
 
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))

@@ -91,37 +91,6 @@ typedef struct {
 // one shelve for all.
 static Shelve shelve;
 
-/* in case of emergency: break glass. 
-
-void print_qtree(qtree *Q){
-  if (Q==NULL) return;
-  Rprintf("qgram %d\n",Q->qgram[0]);
-  Rprintf("n     %g\n",Q->n[0]);
-  print_qtree(Q->left);
-  print_qtree(Q->right);
-}
-
-void print_box(Box *box){
-  Rprintf("qgram: ");
-  for (int i=0; i<shelve.q; i++ ){
-    Rprintf("%d,",  box->intblocks[i]);
-  }
-  Rprintf("\n");
-  Rprintf("count: ");
-  for (int i=0; i<shelve.nstr; i++ ){
-    Rprintf("%g",box->dblblocks[i]);
-  }  
-  Rprintf("\n");
-}
-
-void print_shelve(){
-  Rprintf("Shelve q    :%d\n",shelve.q);
-  Rprintf("Shelve nstr :%d\n",shelve.nstr);
-  Rprintf("Shelve nbox :%d\n",shelve.nboxes);
-  
-}
-*/
-
 static void init_shelve(int q, int nstr){
   shelve.q = q;
   shelve.nstr = nstr;
