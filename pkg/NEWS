@@ -2,6 +2,7 @@ version 0.7.0
 - added useBytes option: up to ~3-fold speed gain at the cost of possible encoding-dependent results.
 - new memory allocation method for q-grams increases speed between ~5% and ~30% depending on q and input string.
 - function 'qgrams' gains useNames option.
+- jaro-winkler distance gains weight argument.
 - C-code optimization in edit-based distances:  10~20% speed increase depending on input.
 - bugfix in amatch: sometimes NA was erroneously returned.
 - bugfix in amatch/lcs: hamming distance method was called erroneously.
