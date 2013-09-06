@@ -60,9 +60,10 @@
 #' The \bold{Jaro distance} (\code{method='jw'}, \code{p=0}), is a number between 0 (exact match) and 1 (completely dissimilar) measuring 
 #' dissimilarity between strings.
 #' It is defined to be 0 when both strings have length 0, and 1 when  there are no character matches between \code{a} and \code{b}. 
-#' Otherwise, the Jaro distance is defined as \eqn{1-(1/3)(m/|a| + m/|b| + (m-t)/m)}. Here,\eqn{|a|} indicates the number of
+#' Otherwise, the Jaro distance is defined as \eqn{1-(1/3)(w_1m/|a| + w_2m/|b| + w_3(m-t)/m)}. Here,\eqn{|a|} indicates the number of
 #' characters in \code{a}, \eqn{m} is the number of 
-#' character matches and \eqn{t} the number of transpositions of matching characters.
+#' character matches and \eqn{t} the number of transpositions of matching characters. The \eqn{w_i} are weights associated with the characters
+#' in \code{a}, characters in \code{b} and with transpositions.
 #' A character \eqn{c} of \code{a} \emph{matches} a character from \code{b} when
 #' \eqn{c} occurs in \code{b}, and the index of \eqn{c} in \code{a} differs less than \eqn{\max(|a|,|b|)/2 -1} (where we use integer division)
 #' from the index of \eqn{c} in \code{b}.
