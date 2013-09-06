@@ -76,6 +76,7 @@ static double jaro_winkler(
              int x,
              int y,
              double p,
+             double *w,
              int *work
         ){
 
@@ -122,7 +123,7 @@ static double jaro_winkler(
   if ( m < 1 ){
     d = 1.0;
   } else {
-    d = 1.0 - (1.0/3.0)*(m/x + m/y + (m-t)/m);
+    d = 1.0 - (1.0/3.0)*(w[0]*m/x + w[1]*m/y + w[2]*(m-t)/m);
   }
 
   // Winkler's penalty factor
@@ -137,10 +138,11 @@ static double jaro_winkler(
 
 /*----------- R interface ------------------------------------------------*/
 
-SEXP R_jw(SEXP a, SEXP b, SEXP p){
+SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight){
   PROTECT(a);
   PROTECT(b);
   PROTECT(p);
+  PROTECT(weight);
 
   // find the length of longest strings
   int ml_a = max_length(a)
@@ -150,7 +152,8 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p){
     , nt = MAX(na,nb)
     , bytes = IS_CHARACTER(a);
   
-  double pp = REAL(p)[0];
+  double pp = REAL(p)[0]
+    , *w = REAL(weight);
 
   // workspace for worker function
   int *work = (int *) malloc( sizeof(int) * MAX(ml_a,ml_b) );
@@ -183,7 +186,7 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p){
       y[k] = NA_REAL;
       continue;
     } else { // jaro-winkler distance
-      y[k] = jaro_winkler(s, t, len_s, len_t, pp, work);
+      y[k] = jaro_winkler(s, t, len_s, len_t, pp, w, work);
     } 
   }
     
@@ -196,7 +199,7 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p){
 
 //-- Match function interface with R
 
-SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP maxDist){
+SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP weight, SEXP maxDist){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
@@ -212,8 +215,9 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP max
     , ml_x = max_length(x)
     , ml_t = max_length(table);
 
-  double pp = REAL(p)[0];
-  double max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
+  double pp = REAL(p)[0]
+    , *w = REAL(weight)
+    , max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
   
   // workspace for worker function
   int *work = (int *) malloc( sizeof(int) * MAX(ml_x, ml_t) );
@@ -245,7 +249,7 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP max
       T = get_elem(table, j, bytes, &len_T, &isna_T, T);
 
       if ( !isna_X && !isna_T ){        // both are char (usual case)
-        d = jaro_winkler(X, T, len_X, len_T, pp, work);
+        d = jaro_winkler(X, T, len_X, len_T, pp, w, work);
         if ( d > max_dist ){
           continue;
         } else if ( d > -1.0 && d < d1){ 

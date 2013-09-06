@@ -149,9 +149,11 @@
 #' @param method Method for distance calculation. The default is \code{"osa"} (see details).
 #' @param useBytes Perform byte-wise comparison. \code{useBytes=TRUE} is faster but may yield different
 #' 	results depending on character encoding. See also below, under ``encoding issues''.
-#' @param weight The penalty for deletion, insertion, substitution and transposition, in that order.  
-#'   Weights must be positive and not exceed 1. \code{weight[4]} is ignored when \code{method='lv'} and \code{weight} is
-#'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'}, \code{'lcs'} or \code{'jw'}.
+#' @param weight For \code{method='osa'} or \code{'dl'}, the penalty for deletion, insertion, substitution and transposition, in that order.
+#'   When \code{method='lv'}, the penalty for transposition is ignored. When \code{method='jw'}, the weights associated with characters
+#'   of \code{a}, characters from \code{b} and the transposition weight, in that order.
+#'   Weights must be positive and not exceed 1. \code{weight} is
+#'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'}, or \code{'lcs'}. 
 #' @param maxDist  Maximum string distance for edit-like distances, in some cases computation is stopped when \code{maxDist} is reached. 
 #'    \code{maxDist=Inf} means calculation goes on untill the distance is computed. Only applies to \code{method='qgram'}, \code{'cosine'}, \code{'jaccard'} and
 #'    \code{method='jw'}.
@@ -186,18 +188,21 @@ stringdist <- function(a, b,
   method <- match.arg(method)
   
   stopifnot(
-      all(is.finite(weight)),
-      all(weight > 0),
-      all(weight <=1),
-      q >= 0,
-      p <= 0.25,
-      p >= 0,
-      is.logical(useBytes)
+      all(is.finite(weight))
+      , all(weight > 0)
+      , all(weight <=1)
+      , q >= 0
+      , p <= 0.25
+      , p >= 0
+      , is.logical(useBytes)
+      , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
+      , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
   )
   if (!useBytes){
     a <- char2int(a)
     b <- char2int(b)
   }
+  if (method == 'jw') weight <- weight[c(2,1,3)]
   do_dist(b, a, method, weight, maxDist, q, p)
 }
 
@@ -227,17 +232,21 @@ stringdistmatrix <- function(a, b,
   }
   method <- match.arg(method)
   stopifnot(
-      all(is.finite(weight)),
-      all(weight > 0),
-      all(weight <=1),
-      q >= 0,
-      p <= 0.25,
-      p >= 0
+      all(is.finite(weight))
+      , all(weight > 0)
+      , all(weight <=1)
+      , q >= 0
+      , p <= 0.25
+      , p >= 0
+      , is.logical(useBytes)
+      , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
+      , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
   )
   if (!useBytes){
     a <- char2int(a)
     b <- lapply(char2int(b),list)
   }
+  if (method == 'jw') weight <- weight[c(2,1,3)]
   if (ncores==1){
     x <- sapply(b,do_dist, USE.NAMES=FALSE, a,method,weight,maxDist, q, p)
   } else {
@@ -276,7 +285,7 @@ do_dist <- function(a, b, method, weight, maxDist, q, p){
     qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L),
     cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L),
     jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L),
-    jw      = .Call('R_jw'    , a, b, as.double(p))
+    jw      = .Call('R_jw'    , a, b, as.double(p), as.double(weight))
   )
 }
 

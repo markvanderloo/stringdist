@@ -82,7 +82,7 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE,
     qgram   = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 0L),
     cosine  = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 1L),
     jaccard = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 2L),
-    jw      = .Call('R_match_jw'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(p), as.double(maxDist))
+    jw      = .Call('R_match_jw'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(p), as.double(weight), as.double(maxDist))
   )
 }
 
