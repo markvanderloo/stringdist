@@ -300,6 +300,19 @@ test_that("Extended examples work",{
     round(1 - stringdist("crate","trace",metho='jw'),8),
     round((3/5 + 3/5 + (3-0)/3)/3,8)
   )
+  # idem, with weights
+  expect_equal(
+    round(1 - stringdist("crate","trace",metho='jw',weight=c(0.5,1,1)),8),
+    round((0.5*3/5 + 3/5 + (3-0)/3)/3,8)
+  )
+  expect_equal(
+    round(1 - stringdist("crate","trace",metho='jw',weight=c(1,0.5,1)),8),
+    round((3/5 + 0.5*3/5 + (3-0)/3)/3,8)
+  )
+  expect_equal(
+    round(1 - stringdist("crate","trace",metho='jw',weight=c(1,1,0.5)),8),
+    round((3/5 + 3/5 + 0.5*(3-0)/3)/3,8)
+  )
 
   # Other cases
   # 4 matches, no transpositions, short first string with non-matching character.

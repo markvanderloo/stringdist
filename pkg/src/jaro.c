@@ -163,7 +163,7 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight){
     t = s + ml_a;
   }
   if ( (work == NULL) | (bytes && s == NULL) ){
-     UNPROTECT(3); free(s); free(work);
+     UNPROTECT(4); free(s); free(work);
      error("Unable to allocate enough memory");
   }
 
@@ -192,7 +192,7 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight){
     
   free(work);
   if (bytes) free(s);
-  UNPROTECT(4);
+  UNPROTECT(5);
   return yy;
 }
 
@@ -205,6 +205,7 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP wei
   PROTECT(nomatch);
   PROTECT(matchNA);
   PROTECT(p);
+  PROTECT(weight);
   PROTECT(maxDist);
 
   int nx = length(x)
@@ -227,7 +228,7 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP wei
     T = X + ml_x;
   }
   if ( (work == NULL) | (bytes && X == NULL) ){
-    UNPROTECT(6); free(work); free(X);
+    UNPROTECT(7); free(work); free(X);
     error ("Unable to allocate enough memory\n");
   }
 
@@ -268,7 +269,7 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP wei
 
   if (bytes) free(X); 
   free(work);
-  UNPROTECT(7);
+  UNPROTECT(8);
   return(yy);
 }
 
