@@ -24,7 +24,7 @@
 #include "utils.h"
 
 /* Longest common substring
- * - basically edit distance, only allowing insertions and substitutions, at the cost of 1.
+ * - basically edit distance, only allowing insertions and deletions, at the cost of 1.
  */
 static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDistance, int *scores){
   if (!na){
