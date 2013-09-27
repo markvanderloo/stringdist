@@ -29,7 +29,7 @@
 #include <Rdefines.h>
 #include "utils.h"
 
-int hamming(unsigned int *a, unsigned int *b, int n, int maxDistance){
+static int hamming(unsigned int *a, unsigned int *b, int n, int maxDistance){
    int h=0;
    for(int i=0; i<n; ++i){
       if (a[i] != b[i]) h++;
