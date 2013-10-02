@@ -155,7 +155,7 @@ static double distance(
         scores[0 * (y + 2) + (j + 1)] = score_ceil;
       }
       targetCharCount = dict->value[which(dict, tgt[j-1])];
-      swapScore = scores[targetCharCount * (y + 2) + swapCount] + i - targetCharCount - 2 + j - swapCount + weight[3];
+      swapScore = scores[targetCharCount * (y + 2) + swapCount] + (i - targetCharCount - 1 + j - swapCount) *  weight[3];
 
       if(src[i-1] != tgt[j-1]){
         subScore = scores[i * (y + 2) + j] + weight[2];

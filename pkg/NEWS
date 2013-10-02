@@ -1,3 +1,6 @@
+version 0.7.1
+- bugfix in substitution weight of DL-distance (undercounted when w4 .neq. 1 in some cases)
+
 version 0.7.0
 - added useBytes option: up to ~3-fold speed gain at the cost of possible encoding-dependent results.
 - new memory allocation method for q-grams increases speed between ~5% and ~30% depending on q and input string.
