@@ -61,30 +61,3 @@ qgrams <- function(...,q=1L,useBytes=FALSE, useNames=!useBytes){
   )
 }
 
-#' Pad a string with q-1 characters.
-#'
-#' @section Details:
-#' In q-gram based distances, the first and last q-1 characters weigh in less than the middle characters
-#' since they appear in less consecutive q-grams. This can be remedied by padding q-1 characters that
-#' not apear elsewhere in the strings.
-#'
-#' @param s a character vector (or an object coercable to character)
-#' @param q The number of characters to pre- or postpend plus one (as in \code{\link{qgrams}}).
-#' @param char the padding character
-#' @param pad Which side to pad with q-1 characters.
-#' 
-#' @example ../examples/qpad.R
-#' @keywords internal
-qpad <- function(s,q=0,char="#",pad=c('left','right','both')){
-  stopifnot(q>=0,nchar(char) == 1)
-  if (q<=1) return(s)
-  pad <- match.arg(pad)
-  padstr <- paste(rep(char,q-1),collapse="")
-  switch(pad,
-    'left'  = paste0(padstr,s)
-  , 'right' = paste0(s,padstr)
-  , 'both'  = paste0(padstr,s,padstr)
-  )
-}
-
-

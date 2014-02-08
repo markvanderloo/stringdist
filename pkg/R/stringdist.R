@@ -242,6 +242,7 @@ stringdistmatrix <- function(a, b,
       , is.logical(useBytes)
       , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
+      , ncores > 0
   )
   if (!useBytes){
     a <- char2int(a)
@@ -252,13 +253,14 @@ stringdistmatrix <- function(a, b,
     x <- sapply(b,do_dist, USE.NAMES=FALSE, a,method,weight,maxDist, q, p)
   } else {
     if ( is.null(cluster) ){
-      cl <- makeCluster(ncores)
+      cluster <- makeCluster(ncores)
+      turn_cluster_off <- TRUE
     } else {
       stopifnot(inherits(cluster, 'cluster'))
-      cl <- cluster
+      turn_cluster_off <- FALSE
     }
     x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q, p)
-    if (is.null(cluster)) stopCluster(cl)
+    if (turn_cluster_off) stopCluster(cluster)
   }
   as.matrix(x)
 }
