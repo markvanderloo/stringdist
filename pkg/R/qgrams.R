@@ -15,6 +15,7 @@
 #' 	results depending on character encoding. For \code{ASCII} it is identical. See also \code{\link{stringdist}} under Encoding issues.
 #' @param useNames Add q-grams as column names. If \code{useBytes=useNames=TRUE}, the q-byte sequences are represented as 2 hexadecimal numbers
 #'   per byte, separated by a vertical bar (\code{|}).
+#' @param .list Will be concatenated with the \code{...} argument(s). Usefull for adding character vectors named \code{'q'} or \code{'useNames'}.
 #' @return A table with \eqn{q}-gram counts. Detected \eqn{q}-grams are column names and the argument names as row names.
 #' If no argument names were provided, they will be generated.
 #'
@@ -22,9 +23,12 @@
 #'
 #' @example ../examples/qgrams.R
 #' @export
-qgrams <- function(...,q=1L,useBytes=FALSE, useNames=!useBytes){
+qgrams <- function(..., .list=NULL,q=1L,useBytes=FALSE, useNames=!useBytes){
   q <- as.integer(q)
-  L <- lapply(list(...), as.character)
+
+  if (!is.null(.list) && length(.list) == 0) .list=NULL
+  L <- lapply(c(list(...),.list), as.character)
+  if (length(L) == 0) return(array(dim=c(0,0)))
 
   if ( is.null(names(L)) ){
     names(L) <- paste("V",1:length(L),sep="")

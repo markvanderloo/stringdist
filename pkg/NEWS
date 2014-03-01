@@ -1,4 +1,5 @@
 version 0.7.2
+- function 'qgrams' gains .list argument
 - bugfix in multicore option of stringdistmatrix
 
 version 0.7.1
