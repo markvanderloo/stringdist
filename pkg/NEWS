@@ -1,8 +1,6 @@
-version 0.7.2
+version 0.7.1
 - function 'qgrams' gains .list argument
 - bugfix in multicore option of stringdistmatrix
-
-version 0.7.1
 - bugfix in substitution weight of DL-distance (undercounted when w4 .neq. 1 in some cases)
 
 version 0.7.0
