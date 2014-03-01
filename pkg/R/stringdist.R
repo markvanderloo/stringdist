@@ -83,7 +83,7 @@
 #'
 #' If \code{bytes=TRUE}, the input strings are treated as if each byte was a
 #' single character. This may be significantly faster since it avoids
-#' conversion through \code{utf8} (up to a factor of 3, for strings of 5-25 characters).
+#' conversion of \code{utf8} to integer with \code{\link[base]{utf8ToInt}} (up to a factor of 3, for strings of 5-25 characters).
 #' However, results may depend on the (possibly multibyte)  character encoding scheme
 #' and note that \code{R}'s internal encoding scheme is OS-dependent. 
 #' If you're sure that all your input is \code{ASCII},  you can safely set 
@@ -93,10 +93,12 @@
 #' encoding. 
 #'
 #' @section Paralellization:
-#' The \code{stringdistmatrix} function uses \code{\link[parallel]{makeCluster}} to generate a cluster and compute the
-#' distance matrix in parallel when \code{ncores>1}. As the cluster is local, the \code{ncores} parameter should not be larger than the number
+#' The \code{stringdistmatrix} function uses \code{\link[parallel]{makeCluster}} to create a local cluster and compute the
+#' distance matrix in parallel when \code{ncores>1}. The cluster is terminated after the matrix has been computed. 
+#' As the cluster is local, the \code{ncores} parameter should not be larger than the number
 #' of cores on your machine. Use \code{\link[parallel]{detectCores}} to check the number of cores available. Alternatively,
-#' you can create a cluster by yourself, using \code{\link[parallel]{makeCluster}} and pass that to \code{stringdistmatrix}.
+#' you can create a cluster using \code{\link[parallel]{makeCluster}} and pass that to \code{stringdistmatrix} (through the \code{cluster} argument. 
+#' This allows you to reuse the cluster setup for other calculations.
 #' There is overhead in creating clusters, so creating the cluster yourself is a good choice if you want to call \code{stringdistmatrix} 
 #' multiple times, for example in a loop.
 #'
