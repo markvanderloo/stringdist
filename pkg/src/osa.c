@@ -103,13 +103,13 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   unsigned int *s = NULL, *t = NULL;
   if (bytes){
     s = (unsigned int *) malloc(( ml_a + ml_b) * sizeof(int));
-    t = s + ml_a;
   }
 
   if ( (scores == NULL) | (bytes && s == NULL) ){
     UNPROTECT(4); free(scores); free(s);
     error("Unable to allocate enough memory");
-  }
+  } 
+  t = s + ml_a;
     
 
   // output vector

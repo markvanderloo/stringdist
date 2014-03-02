@@ -1,7 +1,8 @@
-version 0.7.1
+version 0.7.2
 - function 'qgrams' gains .list argument
 - bugfix in multicore option of stringdistmatrix
-- bugfix in substitution weight of DL-distance (undercounted when w4 .neq. 1 in some cases)
+- bugfix in substitution weight of DL-distance (undercounted when w4 != 1 in some cases)
+- bugfix in dl.c: C-function read outside of array. 
 
 version 0.7.0
 - added useBytes option: up to ~3-fold speed gain at the cost of possible encoding-dependent results.

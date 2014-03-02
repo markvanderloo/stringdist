@@ -100,7 +100,7 @@ static unsigned int which(dictionary *d, unsigned int key){
 
 
 /* All calculations/work are done here */
-
+// note: src (tgt) will be indexed to their x + 1 (y+1).
 static double distance(
       unsigned int *src,
       unsigned int *tgt,
@@ -139,6 +139,7 @@ static double distance(
 
   uniquePush(dict,src[0]);
   uniquePush(dict,tgt[0]);
+
   /* work loops    */
   /* i = src index */
   /* j = tgt index */
@@ -167,10 +168,8 @@ static double distance(
         scores[(i+1) * (y + 2) + (j + 1)] = MIN(scores[i * (y + 2) + j], swapScore);
       }
     }
-    /* We will return -1 here if the */
-    /* current minimum > maxDistance   */
-
-      dict->value[which(dict,src[i-1])] = i;    
+    
+   dict->value[which(dict,src[i-1])] = i;    
   }
 
   double score = scores[(x+1) * (y + 2) + (y + 1)];
@@ -203,20 +202,20 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
 
   /* claim space for workhorse */
 
+  unsigned int *s=NULL, *t=NULL;
   dictionary *dict = new_dictionary( ml_a + ml_b + 1 );
+
   double *scores = (double *) malloc( (ml_a + 3) * (ml_b + 2) * sizeof(double) );
 
-  unsigned int *s=NULL, *t=NULL;
-  if ( bytes ){
-    s = (unsigned int *) malloc((ml_a + ml_b) * sizeof(int));
-    t = s + ml_a;
-  }
-  if ( (scores == NULL) | (bytes && s == NULL) ){
-    UNPROTECT(4);
-    free(scores);
-    free(s);
+  s = (unsigned int *) malloc((ml_a + ml_b + 2) * sizeof(int));
+
+  if ( (scores == NULL) | ( s == NULL ) ){
+    UNPROTECT(4); free(scores); free(s);
     error("Unable to allocate enough memory");
-  }
+  } 
+
+  t = s + ml_a + 1;
+  memset(s, 0, (ml_a + ml_b + 2)*sizeof(int));
 
 
   // output
@@ -224,14 +223,23 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   PROTECT(yy = allocVector(REALSXP, nt));
   double *y = REAL(yy);
 
-  int i=0, j=0, k=0, len_s, len_t, isna_s, isna_t;
-  for ( k=0; k < nt; ++k ){
-    s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-    t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+  int i=0, j=0, len_s, len_t, isna_s, isna_t;
+  unsigned int *s1, *t1;
+  for ( int k=0; k < nt; ++k ){
+    if (bytes){
+      s = get_elem(a, i, bytes, &len_s, &isna_s, s);
+      t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+    } else { // make sure there's an extra 0 at the end of the string.
+      s1 = get_elem(a, i, bytes, &len_s, &isna_s, s);
+      t1 = get_elem(b, j, bytes, &len_t, &isna_t, t);
+      memcpy(s,s1,len_s*sizeof(int));
+      memcpy(t,t1,len_t*sizeof(int));
+    }
     if ( isna_s || isna_t ){
       y[k] = NA_REAL;
       continue;
     }
+
     y[k] = distance(
      s, t, len_s, len_t,
      w, maxDist, dict, scores
@@ -243,9 +251,9 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   
   free_dictionary(dict);
   free(scores);
-  if ( bytes ){
+//  if ( bytes ){
     free(s);
-  } 
+//  } 
   UNPROTECT(5);
   return yy;
 } 
@@ -276,15 +284,17 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
   double *scores = (double *) malloc( (ml_x + 3) * (ml_t + 2) * sizeof(double) );
 
   unsigned int *X = NULL, *T = NULL;
-  if ( bytes ){
-    X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int) );
-    T = X + ml_x;
-  }
 
-  if ( (scores == NULL) | (bytes && X == NULL) ){
-    UNPROTECT(6); free(X); 
+  X = (unsigned int *) malloc( (ml_x + ml_t + 2) * sizeof(int) );
+
+  if ( (scores == NULL) |  X == NULL ){
+    UNPROTECT(6); free(X); free(scores); 
     error("Unable to allocate enough memory");
   }
+
+  T = X + ml_x + 1;
+  memset(X, 0, (ml_x + ml_t + 2)*sizeof(int));
+
 
   // output vector
   SEXP yy;
@@ -293,15 +303,24 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
 
   double d = R_PosInf, d1 = R_PosInf;
   int index, len_X, len_T, isna_X, isna_T;
-
+  int *X1, *T1;
   for ( int i=0; i<nx; i++){
     index = no_match;
-    X = get_elem(x, i , bytes, &len_X, &isna_X, X);
+    if ( bytes ){
+      X = get_elem(x, i , bytes, &len_X, &isna_X, X);
+    } else {
+      X1 = get_elem(x, i , bytes, &len_X, &isna_X, X);
+      memcpy(X, X1, len_X*sizeof(int));
+    }
     d1 = R_PosInf;
 
     for ( int j=0; j<ntable; j++){
-      T = get_elem(table, j, bytes, &len_T, &isna_T, T);
-
+      if ( bytes ){
+        T = get_elem(table, j, bytes, &len_T, &isna_T, T);
+      } else {
+        T1 = get_elem(table, j, bytes, &len_T, &isna_T, T);
+        memcpy(T, T1, len_T * sizeof(int));
+      }
       if ( !isna_X && !isna_T ){        // both are char (usual case)
         d = distance(
           X, T, len_X, len_T, w, maxDist, dict, scores
@@ -320,7 +339,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
     y[i] = index;
   }  
   UNPROTECT(7);
-  if (bytes) free(X);
+  free(X);
   free_dictionary(dict);
   free(scores);
   return(yy);
