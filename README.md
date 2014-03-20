@@ -3,7 +3,7 @@ stringdist
 
 Approximate matching and string distance calculations for R.
 
-Current CRAN version: 0.7.0 [NEWS](http://cran.r-project.org/web/packages/stringdist/NEWS)
+Current CRAN version: 0.7.2 [NEWS](http://cran.r-project.org/web/packages/stringdist/NEWS)
 
 String distance functions are scattered around R, and R's packages. Moreover,
 approximate string matching functions are scarce. The package offers four main functions:
@@ -26,7 +26,6 @@ distance functions. As of version `>0.5`, distance functions include:
 * Jaccard distance for q-gram count vectors (= 1-Jaccard similarity)
 * Jaro, and Jaro-Winker distance
 
-To my best knowledge, the latter six were not available before in R. 
 
 Besides the above the function `qgrams` tabulates the qgrams in a `charcter` vector.
 
