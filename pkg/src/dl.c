@@ -207,7 +207,8 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
 
   double *scores = (double *) malloc( (ml_a + 3) * (ml_b + 2) * sizeof(double) );
 
-  s = (unsigned int *) malloc((ml_a + ml_b + 2) * sizeof(int));
+  int slen = (ml_a + ml_b + 2) * sizeof(int);
+  s = (unsigned int *) malloc(slen);
 
   if ( (scores == NULL) | ( s == NULL ) ){
     UNPROTECT(4); free(scores); free(s);
@@ -215,7 +216,7 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   } 
 
   t = s + ml_a + 1;
-  memset(s, 0, (ml_a + ml_b + 2)*sizeof(int));
+  memset(s, 0, slen);
 
 
   // output
@@ -247,13 +248,12 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
     if (y[k] < 0 ) y[k] = R_PosInf;
     i = RECYCLE(i+1,na);
     j = RECYCLE(j+1,nb);
+    memset(s, 0, slen);
   }
   
   free_dictionary(dict);
   free(scores);
-//  if ( bytes ){
-    free(s);
-//  } 
+  free(s);
   UNPROTECT(5);
   return yy;
 } 
@@ -325,6 +325,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
         d = distance(
           X, T, len_X, len_T, w, maxDist, dict, scores
         );
+        memset(T,0, (ml_t+1)*sizeof(int));
         if ( d > -1 && d < d1){ 
           index = j + 1;
           if ( abs(d) < 1e-14 ) break;
@@ -337,6 +338,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
     }
     
     y[i] = index;
+    memset(X,0,(ml_x + 1)*sizeof(int));
   }  
   UNPROTECT(7);
   free(X);

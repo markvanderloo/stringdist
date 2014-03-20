@@ -1,3 +1,6 @@
+version 0.7.3
+- bugfix in dl distance: in some cases, distances could be one unit too high.
+
 version 0.7.2
 - function 'qgrams' gains .list argument
 - bugfix in multicore option of stringdistmatrix
