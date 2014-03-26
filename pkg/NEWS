@@ -1,4 +1,5 @@
 version 0.7.3
+- NOTE: Argument 'maxDist' will eventually be removed from 'stringdist' and 'stringdistmatrix' and now yields a warning when specified.
 - bugfix in dl distance: in some cases, distances could be one unit too high.
 
 version 0.7.2
