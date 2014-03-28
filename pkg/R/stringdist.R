@@ -5,6 +5,13 @@
 #' @useDynLib stringdist
 {}
 
+
+MDWARN = paste0(
+    "Argument 'maxDist' is deprecated for functions 'stringdist'"
+    , "and 'stringdistmatrix' and will be removed from version 0.8.0" 
+    , "of the package. Use e.g. stringdist(a,b) < M instead of stringdist(a,b.maxDist=M)"
+    , sep='\n'
+)
 #' Compute distance metrics between strings
 #'
 #' @section Details:
@@ -178,9 +185,7 @@ stringdist <- function(a, b,
   weight=c(d=1,i=1,s=1,t=1), 
   maxDist=Inf, q=1, p=0
 ){
-  if ( maxDist != Inf ){
-    warning("Argument 'maxDist' is deprecated for this function and will be removed in the next version of the package.")
-  } 
+  if ( maxDist != Inf ) warning(MDWARN)
 
   a <- as.character(a)
   b <- as.character(b)
@@ -230,9 +235,8 @@ stringdistmatrix <- function(a, b,
   maxDist=Inf, q=1, p=0,
   ncores=1, cluster=NULL
 ){
-  if ( maxDist != Inf ){
-    warning("Argument 'maxDist' is deprecated for this function and will be removed in the next version of the package.")
-  } 
+  if ( maxDist != Inf )  warning(MDWARN)
+  
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 

@@ -35,7 +35,7 @@ static int match_int(unsigned int a, unsigned int *b, int *guard, int width){
 
   int i = 0;
   while ( 
-      b[i] && 
+ //     b[i] && 
       ( i < width ) && 
       ( b[i] != a || (b[i] == a && guard[i])) 
   ){
