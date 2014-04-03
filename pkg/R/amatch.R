@@ -71,6 +71,8 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE,
       , matchNA %in% c(TRUE,FALSE)
       , maxDist > 0
       , is.logical(useBytes)
+      , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
+      , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
   )
   if (maxDist==Inf) maxDist <- 0L;
   switch(method,
