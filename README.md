@@ -26,6 +26,10 @@ distance functions. Distance functions include:
 * Jaccard distance for q-gram count vectors (= 1-Jaccard similarity)
 * Jaro, and Jaro-Winker distance
 
+Besides the above the functions, `qgrams` tabulates the qgrams in a `charcter` vector.
+
+
+
 Note: (possibly) breaking update at version 0.8.0
 -------
 The `stringdist` and `stringdistmatrix` functions have a `maxDist` argument
@@ -48,7 +52,6 @@ speed gain.
 
 
 
-Besides the above the function `qgrams` tabulates the qgrams in a `charcter` vector.
 
 Note to users: breaking update at version 0.5 (june 2013)
 -------------
