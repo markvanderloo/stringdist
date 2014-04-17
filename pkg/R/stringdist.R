@@ -6,12 +6,14 @@
 {}
 
 
-MDWARN = paste0(
-    "Argument 'maxDist' is deprecated for functions 'stringdist'"
-    , "and 'stringdistmatrix' and will be removed from version 0.8.0" 
-    , "of the package. Use e.g. stringdist(a,b) < M instead of stringdist(a,b.maxDist=M)"
-    , sep='\n'
-)
+MDWARN = 
+"NOTE:
+Argument 'maxDist' is deprecated for functions 'stringdist' and
+'stringdistmatrix' (but not for 'amatch' and 'ain') and will be removed as of
+version 0.8.0 of the package.  Use e.g. stringdist(a,b) < M instead of
+stringdist(a,b,maxDist=M) to test for (too) large distances.  See
+'?suppressMessages' if you want to suppress this message."
+  
 #' Compute distance metrics between strings
 #'
 #' @section Details:
@@ -185,7 +187,7 @@ stringdist <- function(a, b,
   weight=c(d=1,i=1,s=1,t=1), 
   maxDist=Inf, q=1, p=0
 ){
-  if ( maxDist != Inf ) warning(MDWARN)
+  if ( maxDist != Inf ) message(MDWARN)
 
   a <- as.character(a)
   b <- as.character(b)
@@ -235,7 +237,7 @@ stringdistmatrix <- function(a, b,
   maxDist=Inf, q=1, p=0,
   ncores=1, cluster=NULL
 ){
-  if ( maxDist != Inf )  warning(MDWARN)
+  if ( maxDist != Inf ) message(MDWARN)
   
   a <- as.character(a)
   b <- as.character(b)
