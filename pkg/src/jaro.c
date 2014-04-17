@@ -35,7 +35,6 @@ static int match_int(unsigned int a, unsigned int *b, int *guard, int width){
 
   int i = 0;
   while ( 
- //     b[i] && 
       ( i < width ) && 
       ( b[i] != a || (b[i] == a && guard[i])) 
   ){
@@ -110,7 +109,7 @@ static double jaro_winkler(
     if ( left >= y ){
       J = -1;
     } else {
-      right = MIN(y, i+M);
+      right = MIN(y-1, i+M);
       J =  match_int(a[i], b + left, work + left, right - left);
     }
     if ( J >= 0 ){
