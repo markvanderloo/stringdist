@@ -279,6 +279,8 @@ test_that("basic examples and edge cases work",{
   expect_equal(stringdist("a","b",method='jw'),1);
   expect_equal(stringdist("a","",method='jw'), 1);
   expect_equal(stringdist("","",method='jw'), 0);
+  # following test added after a bug report of Carol Gan:
+  expect_equal(stringdist("tire","tree",method="jw"),stringdist("tree","tire",method="jw"));
 })
 
 test_that("Extended examples work",{

@@ -291,6 +291,8 @@ char2int <- function(x){
 
 
 do_dist <- function(a, b, method, weight, maxDist, q, p){
+#print(a)
+#print(b)
   if (maxDist==Inf) maxDist <- 0L;
   switch(method,
     osa     = .Call('R_osa'   , a, b, as.double(weight), as.double(maxDist)),
