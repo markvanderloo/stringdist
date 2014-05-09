@@ -1,0 +1,9 @@
+bibentry(bibtype = "article",
+ title = "The stringdist package for approximate string matching"
+ , author = person("M.P.J.", "van der Loo")
+ , year = 2014
+ , journal = {"The {R} {J}ournal"}
+ , volume = 6
+ , issue  = 1
+ , url = "http://CRAN.R-project.org/package=stringdist"
+)
