@@ -26,20 +26,12 @@
 /* Longest common substring
  * - basically edit distance, only allowing insertions and deletions, at the cost of 1.
  */
-static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDistance, int *scores){
+static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int *scores){
   if (!na){
-    if ( maxDistance > 0 && maxDistance < nb ){
-      return -1.0;
-    } else {
-      return (double) nb;
-    }
+    return (double) nb;
   }
   if (!nb){
-    if (maxDistance > 0 && maxDistance < na){
-      return -1.0;
-    } else {
-      return (double) na;
-    }
+    return (double) na;
   }
 
   int i, j;
@@ -67,22 +59,20 @@ static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int maxDistance
     }
   }
   int score = scores[I*J - 1];
-  return (maxDistance > 0 && maxDistance < score )?(-1):score;
+  return score;
 }
 
 //-- interface with R
 
 
-SEXP R_lcs(SEXP a, SEXP b, SEXP maxDistance){
+SEXP R_lcs(SEXP a, SEXP b){
   PROTECT(a);
   PROTECT(b);
-  PROTECT(maxDistance);
 
   int na = length(a)
     , nb = length(b)
     , ml_a = max_length(a)
     , ml_b = max_length(b)
-    , maxDist = INTEGER(maxDistance)[0]
     , bytes = IS_CHARACTER(a);
 
   // space for the workfunction
@@ -96,7 +86,7 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP maxDistance){
   }
 
   if ( (scores == NULL) | (bytes && s == NULL) ){
-    UNPROTECT(3); free(scores); free(s);
+    UNPROTECT(2); free(scores); free(s);
     error("%s\n","unable to allocate enough memory for workspace");
   }
 
@@ -118,13 +108,13 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP maxDistance){
       y[k] = NA_REAL;
       continue;
     }
-    y[k] = lcs(s, len_s, t, len_t, maxDist, scores );
+    y[k] = lcs(s, len_s, t, len_t, scores );
     if (y[k] < 0 ) y[k] = R_PosInf;
   }
   
   free(scores);
   if (bytes) free(s);
-  UNPROTECT(4);
+  UNPROTECT(3);
   return(yy);
 }
 
@@ -180,9 +170,9 @@ SEXP R_match_lcs(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistanc
       T = get_elem(table, j, bytes, &len_T, &isna_T, T);
       if ( !isna_X && !isna_T ){        // both are char (usual case)
         d = (double) lcs(
-          X, len_X, T, len_T, max_dist, work
+          X, len_X, T, len_T, work
         );
-        if ( d > -1 && d < d1){ 
+        if ( d <= max_dist && d < d1){ 
           index = j + 1;
           if ( d == 0.0  ) break;
           d1 = d;

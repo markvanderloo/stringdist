@@ -29,30 +29,25 @@
 #include <Rdefines.h>
 #include "utils.h"
 
-static int hamming(unsigned int *a, unsigned int *b, int n, int maxDistance){
-   int h=0;
-   for(int i=0; i<n; ++i){
-      if (a[i] != b[i]) h++;
-      if ( maxDistance > 0 && maxDistance < h ){
-         return -1;
-      }
-   }
-   return h;
+static int hamming(unsigned int *a, unsigned int *b, int n){
+  int h=0;
+    for(int i=0; i<n; ++i){
+     if (a[i] != b[i]) h++;
+    }
+  return h;
 }
 
 
 // -- R interface
 
-SEXP R_hm(SEXP a, SEXP b, SEXP maxDistance){
+SEXP R_hm(SEXP a, SEXP b){
   PROTECT(a);
   PROTECT(b);
-  PROTECT(maxDistance);
 
   int na = length(a)
     , nb = length(b)
     , nt = ( na > nb) ? na : nb
     , bytes = IS_CHARACTER(a)
-    , maxDist = INTEGER(maxDistance)[0]
     , ml_a = max_length(a)
     , ml_b = max_length(b);
 
@@ -83,12 +78,11 @@ SEXP R_hm(SEXP a, SEXP b, SEXP maxDistance){
       y[k] = R_PosInf;
       continue;
     }
-    y[k] = (double) hamming(s, t, len_s, maxDist);
-    if (y[k] < 0) y[k] = R_PosInf;
+    y[k] = (double) hamming(s, t, len_s);
   }
 
   if (bytes) free(s);
-  UNPROTECT(4);
+  UNPROTECT(3);
   return yy;
 }
 
@@ -100,7 +94,6 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistance
   PROTECT(table);
   PROTECT(nomatch);
   PROTECT(matchNA);
-  PROTECT(maxDistance);
 
   int nx = length(x)
     , ntable = length(table)
@@ -139,8 +132,8 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistance
       if ( len_X != len_T ) continue;
 
       if ( !isna_X && !isna_T ){        // both are char (usual case)
-        d = (double) hamming( X, T, len_X, max_dist );
-        if ( d > -1 && d < d1){ 
+        d = (double) hamming( X, T, len_X );
+        if ( d <= max_dist && d < d1){ 
           index = j + 1;
           if ( d == 0.0 ) break;
           d1 = d;
@@ -153,7 +146,7 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistance
     
     y[i] = index;
   }  
-  UNPROTECT(6);
+  UNPROTECT(5);
   if (bytes) free(X);
   return(yy);
 }

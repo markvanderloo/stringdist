@@ -21,15 +21,15 @@ test_that("Edge cases in OSA method",{
    expect_equal(stringdist("a","a",method='osa'),0)
 })
 
-#test_that("max distance is obeyed",{
-#   expect_equal(stringdist("aa","bb",method='osa',maxDist=1), Inf)
-#   # Thanks to Daniel Deckhard pointing to this bug
-#   expect_equal(stringdist("abc","abc",method='osa',maxDist=1), 0)
-#   expect_equal(stringdist("aa","bbb",method='osa',maxDist=2), Inf)
-#   expect_equal(stringdist("bbb","aa",method='osa',maxDist=2), Inf)
-#   expect_equal(stringdist("","abc",method='osa',maxDist=1), Inf)
-#   expect_equal(stringdist("abc","",method='osa',maxDist=2), Inf)
-#})
+test_that("max distance is obeyed",{
+   expect_equal(stringdist("aa","bb",method='osa',maxDist=1), Inf)
+   # Thanks to Daniel Deckhard pointing to this bug
+   expect_equal(stringdist("abc","abc",method='osa',maxDist=1), 0)
+   expect_equal(stringdist("aa","bbb",method='osa',maxDist=2), Inf)
+   expect_equal(stringdist("bbb","aa",method='osa',maxDist=2), Inf)
+   expect_equal(stringdist("","abc",method='osa',maxDist=1), Inf)
+   expect_equal(stringdist("abc","",method='osa',maxDist=2), Inf)
+})
 
 test_that("transpositions are found",{
   expect_equal(stringdist("ab","ba",method='osa'),1)
@@ -72,14 +72,14 @@ test_that("Edge cases in Levenshtein method",{
    expect_equal(stringdist("a","a",method='lv'),0)
 })
 
-#test_that("max distance is obeyed",{
-#   expect_equal(stringdist("aa","bb",method='lv',maxDist=1), Inf)
-#   expect_equal(stringdist("abc","abc",method='lv',maxDist=1), 0)
-#   expect_equal(stringdist("","abc",method='lv',maxDist=1), Inf)
-#   expect_equal(stringdist("abc","",method='lv',maxDist=2), Inf)
-#   expect_equal(stringdist("aa","bbb",method='lv',maxDist=2), Inf)
-#   expect_equal(stringdist("bbb","aa",method='lv',maxDist=2), Inf)
-#})
+test_that("max distance is obeyed",{
+   expect_equal(stringdist("aa","bb",method='lv',maxDist=1), Inf)
+   expect_equal(stringdist("abc","abc",method='lv',maxDist=1), 0)
+   expect_equal(stringdist("","abc",method='lv',maxDist=1), Inf)
+   expect_equal(stringdist("abc","",method='lv',maxDist=2), Inf)
+   expect_equal(stringdist("aa","bbb",method='lv',maxDist=2), Inf)
+   expect_equal(stringdist("bbb","aa",method='lv',maxDist=2), Inf)
+})
 
 test_that("Shortest argument is recycled",{
    expect_equal(stringdist(c('a','b'),'a',method='lv'),c(0,1))
@@ -115,14 +115,14 @@ test_that("Edge cases in DL method",{
    expect_equal(stringdist("a","a",method='dl'),0)
 })
 
-#test_that("max distance is obeyed",{
-#   expect_equal(stringdist("aa","bb",method='dl',maxDist=1),Inf)
-#   expect_equal(stringdist("abc","abc",method='dl',maxDist=1), 0)
-#   expect_equal(stringdist("","abc",method='dl',maxDist=2), Inf)
-#   expect_equal(stringdist("abc","",method='dl',maxDist=2), Inf)
-#   expect_equal(stringdist("aa","bbb",method='dl',maxDist=2), Inf)
-#   expect_equal(stringdist("bbb","aa",method='dl',maxDist=2), Inf)
-#})
+test_that("max distance is obeyed",{
+   expect_equal(stringdist("aa","bb",method='dl',maxDist=1),Inf)
+   expect_equal(stringdist("abc","abc",method='dl',maxDist=1), 0)
+   expect_equal(stringdist("","abc",method='dl',maxDist=2), Inf)
+   expect_equal(stringdist("abc","",method='dl',maxDist=2), Inf)
+   expect_equal(stringdist("aa","bbb",method='dl',maxDist=2), Inf)
+   expect_equal(stringdist("bbb","aa",method='dl',maxDist=2), Inf)
+})
 
 test_that("Shortest argument is recycled",{
    expect_equal(stringdist(c('a','b'),'a',method='dl'),c(0,1))
@@ -160,14 +160,14 @@ test_that("Edge cases in LCS method",{
    expect_equal(stringdist("a","a",method='lcs'),0)
 })
 
-#test_that("max distance is obeyed",{
-#   expect_equal(stringdist("aa","bb",method='lcs',maxDist=1),Inf)
-#   expect_equal(stringdist("abc","abc",method='lcs',maxDist=1), 0)
-#   expect_equal(stringdist("","abc",method='lcs',maxDist=1), Inf)
-#   expect_equal(stringdist("abc","",method='lcs',maxDist=1), Inf)
-#   expect_equal(stringdist("aa","bbb",method='lcs',maxDist=2), Inf)
-#   expect_equal(stringdist("bbb","aa",method='lcs',maxDist=2), Inf)
-#})
+test_that("max distance is obeyed",{
+   expect_equal(stringdist("aa","bb",method='lcs',maxDist=1),Inf)
+   expect_equal(stringdist("abc","abc",method='lcs',maxDist=1), 0)
+   expect_equal(stringdist("","abc",method='lcs',maxDist=1), Inf)
+   expect_equal(stringdist("abc","",method='lcs',maxDist=1), Inf)
+   expect_equal(stringdist("aa","bbb",method='lcs',maxDist=2), Inf)
+   expect_equal(stringdist("bbb","aa",method='lcs',maxDist=2), Inf)
+})
 
 test_that("Shortest argument is recycled",{
    expect_equal(stringdist(c('a','b'),'a',method='lcs'),c(0,2))

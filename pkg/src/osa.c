@@ -28,21 +28,13 @@
  * - See pseudocode at http://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance
  * - Extended with custom weights and maxDistance
  */
-static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weight, double maxDistance, double *scores){
+static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weight, double *scores){
 
   if (!na){
-    if ( maxDistance > 0 && maxDistance < nb ){
-      return -1;
-    } else {
-      return (double) nb;
-    }
+    return (double) nb;
   }
   if (!nb){
-    if (maxDistance > 0 && maxDistance < na){
-      return -1;
-    } else {
-      return (double) na;
-    }
+    return (double) na;
   }
 
   int i, j;
@@ -56,39 +48,38 @@ static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weig
       scores[L] = j;
    }
 
-   for ( i = 1; i <= na; ++i ){
-      L = I; M = 0;
-      for ( j = 1; j <= nb; ++j, L += I, M += I ){
-         if (a[i-1] == b[j-1]){
-            sub = 0;
-            tran= 0;
-         } else {
-            sub = weight[2];
-            tran= weight[3];
-         }
-         
-         scores[i + L] = MIN(MIN( 
-            scores[i-1 + L] + weight[0],     // deletion
-            scores[i   + M] + weight[1]),    // insertion
-            scores[i-1 + M] + sub            // substitution
-         );
-         if ( i>1 && j>1 && a[i-1] == b[j-2] && a[i-2] == b[j-1] ){
-            scores[i + L] = MIN(scores[i + L], scores[i-2 + M-I]) + tran; // transposition
-         }
-      }
-   }
-   double score = scores[I*J-1];
-   return (maxDistance > 0 && maxDistance < score)?(-1):score;
+for ( i = 1; i <= na; ++i ){
+  L = I; M = 0;
+  for ( j = 1; j <= nb; ++j, L += I, M += I ){
+    if (a[i-1] == b[j-1]){
+      sub = 0;
+      tran= 0;
+    } else {
+      sub = weight[2];
+      tran= weight[3];
+    }
+
+    scores[i + L] = MIN(MIN( 
+      scores[i-1 + L] + weight[0],     // deletion
+      scores[i   + M] + weight[1]),    // insertion
+      scores[i-1 + M] + sub            // substitution
+    );
+    if ( i>1 && j>1 && a[i-1] == b[j-2] && a[i-2] == b[j-1] ){
+      scores[i + L] = MIN(scores[i + L], scores[i-2 + M-I]) + tran; // transposition
+    }
+  }
+}
+  double score = scores[I*J-1];
+  return score;
 }
 
 //-- Distance function interface with R
 
 
-SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
+SEXP R_osa(SEXP a, SEXP b, SEXP weight){
   PROTECT(a);
   PROTECT(b);
   PROTECT(weight);
-  PROTECT(maxDistance);
 
   int na = length(a)
     , nb = length(b)
@@ -96,7 +87,6 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
     , ml_a = max_length(a)
     , ml_b = max_length(b);
   double *scores, *w = REAL(weight);
-  double maxDist = REAL(maxDistance)[0];
 
   scores = (double *) malloc( (ml_a + 1) * (ml_b + 1) * sizeof(double)); 
 
@@ -106,7 +96,7 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   }
 
   if ( (scores == NULL) | (bytes && s == NULL) ){
-    UNPROTECT(4); free(scores); free(s);
+    UNPROTECT(3); free(scores); free(s);
     error("Unable to allocate enough memory");
   } 
   t = s + ml_a;
@@ -130,7 +120,7 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
     y[k] = osa(
        s, len_s 
      , t, len_t
-     , w, maxDist, scores
+     , w, scores
     );
     if ( y[k] < 0 ) y[k] = R_PosInf;
     i = RECYCLE(i+1,na);
@@ -139,7 +129,7 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
    
   free(scores);
   if (bytes) free(s);
-  UNPROTECT(5);
+  UNPROTECT(4);
 
   return(yy);
 }
@@ -199,12 +189,12 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SE
 
       T = get_elem(table, j, bytes, &len_T, &isna_T, T);
       
-
       if ( !isna_X && !isna_T ){        // both are char (usual case)
+
         d = osa(
-          X, len_X, T, len_T, w, maxDist, work
+          X, len_X, T, len_T, w, work
         );
-        if ( d > -1 && d < d1){ 
+        if ( d <= maxDist && d < d1){ 
           index = j + 1;
           if ( d == 0.0 ) break;
           d1 = d;

@@ -74,7 +74,7 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE,
       , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
   )
-  if (maxDist==Inf) maxDist <- 0L;
+  if (maxDist==Inf && !method %in% c('osa','lv','dl','hm','lcs') ) maxDist <- 0L;
   if (method == 'jw') weight <- weight[c(2,1,3)]
   switch(method,
     osa     = .Call('R_match_osa'       , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),

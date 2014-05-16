@@ -107,24 +107,15 @@ static double distance(
       unsigned int x,
       unsigned int y,
       double *weight,
-      double maxDistance,
       dictionary *dict,
       double *scores
     ){
 
   if (!x){
-    if ( maxDistance > 0 && maxDistance < y ){
-      return -1;
-    } else {
-      return (double) y;
-    }
+    return (double) y;
   }
   if (!y){
-    if (maxDistance > 0 && maxDistance < x){
-      return -1;
-    } else {
-      return (double) x;
-    }
+    return (double) x;
   }
 
   unsigned int swapCount, targetCharCount,i,j;
@@ -174,7 +165,7 @@ static double distance(
 
   double score = scores[(x+1) * (y + 2) + (y + 1)];
   reset_dictionary(dict);
-  return (maxDistance > 0 && maxDistance < score) ? (-1) : score;
+  return score;
 }
 
 /* End of workhorse */
@@ -182,10 +173,9 @@ static double distance(
 // -- interface with R 
 
 
-SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
+SEXP R_dl(SEXP a, SEXP b, SEXP weight){
   PROTECT(a);
   PROTECT(b);
-  PROTECT(maxDistance);
   PROTECT(weight);
    
   int na = length(a)
@@ -195,13 +185,9 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
     , ml_a = max_length(a)
     , ml_b = max_length(b);
   
-
-  double maxDist = REAL(maxDistance)[0];
   double *w = REAL(weight);
 
-
   /* claim space for workhorse */
-
   unsigned int *s=NULL, *t=NULL;
   dictionary *dict = new_dictionary( ml_a + ml_b + 1 );
 
@@ -211,7 +197,7 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   s = (unsigned int *) malloc(slen);
 
   if ( (scores == NULL) | ( s == NULL ) ){
-    UNPROTECT(4); free(scores); free(s);
+    UNPROTECT(3); free(scores); free(s);
     error("Unable to allocate enough memory");
   } 
 
@@ -243,7 +229,7 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
 
     y[k] = distance(
      s, t, len_s, len_t,
-     w, maxDist, dict, scores
+     w, dict, scores
     );
     if (y[k] < 0 ) y[k] = R_PosInf;
     i = RECYCLE(i+1,na);
@@ -254,7 +240,7 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
   free_dictionary(dict);
   free(scores);
   free(s);
-  UNPROTECT(5);
+  UNPROTECT(4);
   return yy;
 } 
 
@@ -323,10 +309,10 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
       }
       if ( !isna_X && !isna_T ){        // both are char (usual case)
         d = distance(
-          X, T, len_X, len_T, w, maxDist, dict, scores
+          X, T, len_X, len_T, w, dict, scores
         );
         memset(T,0, (ml_t+1)*sizeof(int));
-        if ( d > -1 && d < d1){ 
+        if ( d <= maxDist && d < d1){ 
           index = j + 1;
           if ( abs(d) < 1e-14 ) break;
           d1 = d;

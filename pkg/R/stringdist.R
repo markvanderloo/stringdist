@@ -182,7 +182,7 @@
 #'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'}, or \code{'lcs'}. 
 #' @param maxDist  [DEPRECATED AND MAY BE REMOVED FOR THIS FUNCTION] For the
 #' moment, this parameter is here only for backward compatibility. It does not
-#' offer any speed gain. 
+#' offer any speed gain. (In fact, it currently slows things down when set to anything different then \code{Inf}).
 #' @param q  Size of the \eqn{q}-gram; must be nonnegative. Only applies to \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
 #' @param p Penalty factor for Jaro-Winkler distance. The valid range for \code{p} is \code{0 <= p <= 0.25}. 
 #'  If \code{p=0} (default), the Jaro-distance is returned. Applies only to \code{method='jw'}.
@@ -305,20 +305,21 @@ char2int <- function(x){
 
 
 do_dist <- function(a, b, method, weight, maxDist, q, p){
-#print(a)
-#print(b)
-  if (maxDist==Inf) maxDist <- 0L;
-  switch(method,
-    osa     = .Call('R_osa'   , a, b, as.double(weight), as.double(maxDist)),
-    lv      = .Call('R_lv'    , a, b, as.double(weight), as.double(maxDist)),
-    dl      = .Call('R_dl'    , a, b, as.double(weight), as.double(maxDist)),
-    hamming = .Call('R_hm'    , a, b, as.integer(maxDist)),
-    lcs     = .Call('R_lcs'   , a, b, as.integer(maxDist)),
+  d <- switch(method,
+    osa     = .Call('R_osa'   , a, b, as.double(weight)),
+    lv      = .Call('R_lv'    , a, b, as.double(weight)),
+    dl      = .Call('R_dl'    , a, b, as.double(weight)),
+    hamming = .Call('R_hm'    , a, b),
+    lcs     = .Call('R_lcs'   , a, b),
     qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L),
     cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L),
     jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L),
     jw      = .Call('R_jw'    , a, b, as.double(p), as.double(weight))
   )
+  if (maxDist < Inf ){
+    d[!is.na(d) & d > maxDist] <- Inf
+  }
+  d
 }
 
 

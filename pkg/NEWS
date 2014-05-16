@@ -1,4 +1,5 @@
 version 0.7.4
+- code cleaning: somewhat better performance when maxDist is unspecified in stringdist.
 
 version 0.7.3
 - bugfix in jw-distance: out-of-range access in C-code caused R to crash in some cases (thanks to Carol Gan)

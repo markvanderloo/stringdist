@@ -33,21 +33,12 @@ static double lv(
   unsigned int *b, int nb, 
   int bytes,
   double *weight, 
-  double maxDistance, 
   double *scores){
   if (!na){
-    if ( maxDistance > 0 && maxDistance < nb ){
-      return -1;
-    } else {
-      return (double) nb;
-    }
+    return (double) nb;
   }
   if (!nb){
-    if (maxDistance > 0 && maxDistance < na){
-      return -1;
-    } else {
-      return (double) na;
-    }
+    return (double) na;
   }
 
   int i, j;
@@ -75,16 +66,15 @@ static double lv(
     }
   }
   double score = scores[I*J-1];
-  return (maxDistance > 0 && maxDistance < score)?(-1):score;
+  return score;
 }
 
 /* ------ interface with R -------- */
 
-SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
+SEXP R_lv(SEXP a, SEXP b, SEXP weight){
   PROTECT(a);
   PROTECT(b);
   PROTECT(weight);
-  PROTECT(maxDistance);
 
   int na = length(a)
     , nb = length(b)
@@ -94,9 +84,6 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
 
   double *scores, *w = REAL(weight);
 
-  double maxDist = REAL(maxDistance)[0];
-
-
   scores = (double *) malloc((ml_a + 1) * (ml_b + 1) * sizeof(double)); 
   unsigned int *s = NULL, *t = NULL;
   if ( bytes ){
@@ -104,7 +91,7 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
     t = s + ml_a;
   }
   if ( (scores == NULL) | (bytes && s == NULL) ){
-    UNPROTECT(4);
+    UNPROTECT(3);
     free(scores);
     free(s);
     error("Unable to allocate enough memory for workspace");
@@ -131,14 +118,14 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP maxDistance){
     y[k] = lv(
         s, len_s
       , t, len_t
-      , bytes, w, maxDist, scores 
+      , bytes, w, scores 
     );
     if (y[k] < 0 ) y[k] = R_PosInf;
   }
   
   free(scores);
   if ( bytes ) free(s); 
-  UNPROTECT(5);
+  UNPROTECT(4);
 
   return(yy);
 }
@@ -197,9 +184,9 @@ SEXP R_match_lv(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
 
       if ( !isna_X && !isna_T ){        // both are char (usual case)
         d = lv(
-          X, len_X, T, len_T, 0, w, maxDist, work
+          X, len_X, T, len_T, 0, w, work
         );
-        if ( d > -1 && d < d1){ 
+        if ( d <= maxDist && d < d1){ 
           index = j + 1;
           if ( d == 0.0 ) break;
           d1 = d;
