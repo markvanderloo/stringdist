@@ -6,13 +6,6 @@
 {}
 
 
-MDWARN = 
-"NOTE:
-Argument 'maxDist' is deprecated for functions 'stringdist' and
-'stringdistmatrix' (but not for 'amatch' and 'ain') and will be removed as of
-version 0.8.0 of the package.  Use e.g. stringdist(a,b) < M instead of
-stringdist(a,b,maxDist=M) to test for (too) large distances.  See
-'?suppressMessages' if you want to suppress this message."
   
 #' Compute distance metrics between strings
 #'
@@ -98,8 +91,16 @@ stringdist(a,b,maxDist=M) to test for (too) large distances.  See
 #' If you're sure that all your input is \code{ASCII},  you can safely set 
 #' \code{useBytes=TRUE} to profit from the speed gain on any platform. 
 #'
-#' See base \code{R}'s \code{\link[base]{Encoding}} and \code{\link[base]{iconv}} documentation for details on how \code{R} handles character
-#' encoding. 
+#' See base \code{R}'s \code{\link[base]{Encoding}} and
+#' \code{\link[base]{iconv}} documentation for details on how \code{R} handles
+#' character encoding. 
+#'
+#' @section Unicode normalisation:
+#' In \code{utf-8}, the same (accented) character may be represented as several byte sequences. For example, an u-umlaut
+#' can be represented with a single byte code or as a byte code representing \code{'u'} followed by a modifier byte code
+#' that adds the umlaut. The \href{http://cran.r-project.org/web/packages/stringi/}{stringi} package 
+#' of Gagolevski and Tartanus offers unicode normalisation tools. 
+#'
 #'
 #' @section Paralellization:
 #' The \code{stringdistmatrix} function uses \code{\link[parallel]{makeCluster}} to create a local cluster and compute the
@@ -111,8 +112,16 @@ stringdist(a,b,maxDist=M) to test for (too) large distances.  See
 #' There is overhead in creating clusters, so creating the cluster yourself is a good choice if you want to call \code{stringdistmatrix} 
 #' multiple times, for example in a loop.
 #'
+#' @section Citation:
+#' If you would like to cite this package, please cite the R-journal paper: 
+#' \itemize{
+#' \item{M.P.J. van der Loo (2014). The \code{stringdist} package for approximate string matching. 
+#'  R Journal 6 (accepted for publication)}
+#' }
+#' Or use \code{citation('stringdist')} to get a bibtex item.
 #'
 #' @references
+#'
 #' \itemize{
 #' \item{
 #'    R.W. Hamming (1950). Error detecting and Error Correcting codes, The Bell System Technical Journal 29, 147-160
@@ -122,6 +131,11 @@ stringdist(a,b,maxDist=M) to test for (too) large distances.  See
 #' }
 #' \item{
 #' F.J. Damerau (1964) A technique for computer detection and correction of spelling errors. Communications of the ACM 7 171-176.
+#' }
+#' \item{
+#'  An extensive overview of offline string matching algorithms is given by L. Boytsov (2011). Indexing
+#'  methods for approximate dictionary searching: comparative analyses. ACM Journal of experimental
+#'  algorithmics 16 1-88.
 #' }
 #' \item{
 #'  An extensive overview of (online) string matching algorithms is given by G. Navarro (2001). 
@@ -166,7 +180,9 @@ stringdist(a,b,maxDist=M) to test for (too) large distances.  See
 #'   of \code{a}, characters from \code{b} and the transposition weight, in that order.
 #'   Weights must be positive and not exceed 1. \code{weight} is
 #'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'}, or \code{'lcs'}. 
-#' @param maxDist  [DEPRECATED AND WILL BE REMOVED FOR THIS FUNCTION] 
+#' @param maxDist  [DEPRECATED AND MAY BE REMOVED FOR THIS FUNCTION] For the
+#' moment, this parameter is here only for backward compatibility. It does not
+#' offer any speed gain. 
 #' @param q  Size of the \eqn{q}-gram; must be nonnegative. Only applies to \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
 #' @param p Penalty factor for Jaro-Winkler distance. The valid range for \code{p} is \code{0 <= p <= 0.25}. 
 #'  If \code{p=0} (default), the Jaro-distance is returned. Applies only to \code{method='jw'}.
@@ -187,7 +203,6 @@ stringdist <- function(a, b,
   weight=c(d=1,i=1,s=1,t=1), 
   maxDist=Inf, q=1, p=0
 ){
-  if ( maxDist != Inf ) message(MDWARN)
 
   a <- as.character(a)
   b <- as.character(b)
@@ -237,7 +252,6 @@ stringdistmatrix <- function(a, b,
   maxDist=Inf, q=1, p=0,
   ncores=1, cluster=NULL
 ){
-  if ( maxDist != Inf ) message(MDWARN)
   
   a <- as.character(a)
   b <- as.character(b)

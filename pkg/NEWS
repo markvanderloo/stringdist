@@ -1,8 +1,8 @@
 version 0.7.3
-- NOTE: Argument 'maxDist' will eventually be removed from 'stringdist' and 'stringdistmatrix' and now yields a message when specified.
-- bugfix in jw-distance: memory leak in C-code caused R to crash in rare cases (thanks to Carol Gan)
+- bugfix in jw-distance: out-of-range access in C-code caused R to crash in some cases (thanks to Carol Gan)
 - bugfix in dl distance: in some cases, distances could be one unit too high.
-
+- Updated CITATION file: paper to appear in The R Journal vol 6 (2014).
+- Some updates in documentation.
 
 version 0.7.2
 - function 'qgrams' gains .list argument

@@ -3,7 +3,7 @@ stringdist
 
 Approximate matching and string distance calculations for R.
 
-Current CRAN version: **0.7.2** [NEWS](http://cran.r-project.org/web/packages/stringdist/NEWS)
+Current CRAN version: **0.7.3** [NEWS](http://cran.r-project.org/web/packages/stringdist/NEWS)
 
 String distance functions are scattered around R, and R's packages. Moreover,
 approximate string matching functions are scarce. The package offers four main functions:
@@ -26,30 +26,7 @@ distance functions. Distance functions include:
 * Jaccard distance for q-gram count vectors (= 1-Jaccard similarity)
 * Jaro, and Jaro-Winker distance
 
-Besides the above the functions, `qgrams` tabulates the qgrams in a `charcter` vector.
-
-
-
-Note: (possibly) breaking update at version 0.8.0
--------
-The `stringdist` and `stringdistmatrix` functions have a `maxDist` argument
-which is deprecated as of version 0.7.3.  This was already documented in
-earlier versions. If `maxDist` is specified, a message will be printed (to
-suppress it, see `?suppressMessages`). In upcoming versions the message will be
-upgraded to a warning and eventually the `maxDist` argument for `stringdist`
-and `stringdistmatrix` will be defunct. This means you should replace code like
-
-```
-stringdist('aa','bb',maxDist=1) == Inf
-```
-with something like
-
-```
-stringdist('aa','bb') > 1
-```
-to test for (too) large distance values. Specifying `maxDist` never yielded any
-speed gain.
-
+Besides the above the functions, `qgrams` tabulates the qgrams in a `character` vector.
 
 
 
