@@ -194,9 +194,9 @@ test_that("Unequal string lengths",{
   expect_equal(stringdist("a","aa",method="h"),Inf)
 })
 
-#test_that("max distance is obeyed",{
-#   expect_equal(stringdist("aa","bb",method='h',maxDist=1),Inf)
-#})
+test_that("max distance is obeyed",{
+   expect_equal(stringdist("aa","bb",method='h',maxDist=1),Inf)
+})
 
 test_that("Shortest argument is recycled",{
    expect_equal(stringdist(c('a','b'),'a',method='h'),c(0,1))
