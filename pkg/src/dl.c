@@ -303,7 +303,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
 
   double d = R_PosInf, d1 = R_PosInf;
   int index, len_X, len_T, isna_X, isna_T;
-  int *X1, *T1;
+  unsigned int *X1, *T1;
   for ( int i=0; i<nx; i++){
     index = no_match;
     if ( bytes ){
