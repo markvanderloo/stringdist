@@ -287,7 +287,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
 
   X = (unsigned int *) malloc( (ml_x + ml_t + 2) * sizeof(int) );
 
-  if ( (scores == NULL) |  X == NULL ){
+  if ( (scores == NULL) ||  (X == NULL) ){
     UNPROTECT(6); free(X); free(scores); 
     error("Unable to allocate enough memory");
   }

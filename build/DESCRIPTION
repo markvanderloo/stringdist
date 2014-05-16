@@ -7,7 +7,7 @@ Type: Package
 LazyLoad: yes
 Author: Mark van der Loo
 Description: Implements an approximate string matching version of R's native 'match' function. Can calculate various string distances based on edits (damerau-levenshtein, hamming, levenshtein, optimal sting alignment), qgrams (q-gram, cosine, jaccard distance) or heuristic metrics (jaro, jaro-winkler).
-Version: 0.7.3
+Version: 0.7.4
 Depends: R (>= 2.15.3), parallel
 URL: https://github.com/markvanderloo/stringdist
 Date: 2013-04-28
