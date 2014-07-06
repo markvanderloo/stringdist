@@ -1,4 +1,5 @@
 version 0.7.4
+- precision issue: cosine distance between equal strings would be O(1e-16) in stead of 0.0 (thanks to Ben Haller)
 - code cleaning: somewhat better performance when maxDist is unspecified in stringdist.
 
 version 0.7.3

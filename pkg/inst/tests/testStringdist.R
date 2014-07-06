@@ -255,6 +255,9 @@ test_that("cosine distance computes correctly",{
     round(stringdist("aaa","abc",method="cosine",q=2),8),
     1.0
   )
+  # numerical accuracy test (thanks to Ben Haller)
+  # note that 1 - 2/(sqrt(2)*sqrt(2)) != 0, so this used to give ~2.2E-16. 
+  expect_equal( stringdist("ab","ab",method="cosine"),0.0,tolerance=0.0 ) 
 })
 
 context("Jaccard distance")
