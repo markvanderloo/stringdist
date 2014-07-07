@@ -28,6 +28,10 @@ distance functions. Distance functions include:
 
 Besides the above the functions, `qgrams` tabulates the qgrams in a `character` vector.
 
+Resources
+----------
+* A [paper](http://journal.r-project.org/archive/accepted/loo.pdf) on stringdist has been accepted by the R-journal 
+* [Slides](http://www.slideshare.net/MarkVanDerLoo/stringdist-use-r2014) of te _useR!2014_ conference.
 
 
 Note to users: breaking update at version 0.5 (june 2013)
