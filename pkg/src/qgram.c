@@ -354,17 +354,14 @@ static double qgram_tree(
       break;
     case 1:
       getcosine(Q, dist);
-// TODO: write a function that takes care of both cases
-// this version works for numerator & denominator small ( < ~2e52)
-      dist[0] = 1.0 - sqrt( (dist[0] * dist[0])/(dist[1]*dist[2]) );
-// this version works for large numerator
-/*      if (dist[0]==dist[1] && dist[0]==dist[2]){
+      if (dist[0]==dist[1] && dist[0]==dist[2]){
         // strings are equal. Prevent machine rounding about 0.0
         dist[0] =  0.0;
       } else {
+        // there are several ways to express the rhs (including ones that give 0L 
+        // at equal strings) but this has least chance of overflow.
         dist[0] = 1.0 - dist[0]/(sqrt(dist[1]) * sqrt(dist[2]));
       }
-*/
       break;
     case 2:
       getjaccard(Q,dist);
