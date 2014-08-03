@@ -198,7 +198,7 @@
 #' @example ../examples/stringdist.R
 #' @export
 stringdist <- function(a, b, 
-  method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard", "jw"), 
+  method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw","soundex"), 
   useBytes = FALSE,
   weight=c(d=1,i=1,s=1,t=1), 
   maxDist=Inf, q=1, p=0
@@ -246,7 +246,7 @@ stringdist <- function(a, b,
 #' @rdname stringdist
 #' @export
 stringdistmatrix <- function(a, b, 
-  method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw"), 
+  method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex"), 
   useBytes = FALSE,
   weight=c(d=1,i=1,s=1,t=1), 
   maxDist=Inf, q=1, p=0,
@@ -314,7 +314,8 @@ do_dist <- function(a, b, method, weight, maxDist, q, p){
     qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L),
     cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L),
     jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L),
-    jw      = .Call('R_jw'    , a, b, as.double(p), as.double(weight))
+    jw      = .Call('R_jw'    , a, b, as.double(p), as.double(weight)),
+    soundex = .Call('R_soundex_dist', a, b)
   )
   if (maxDist < Inf ){
     d[!is.na(d) & d > maxDist] <- Inf
