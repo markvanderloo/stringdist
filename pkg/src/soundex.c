@@ -203,4 +203,59 @@ SEXP R_soundex_dist(SEXP a, SEXP b) {
   return yy;
 }
 
+SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA) {
+
+  int nx = length(x);
+  int ntable = length(table);
+  int no_match = INTEGER(nomatch)[0];
+  int match_na = INTEGER(matchNA)[0];
+  int bytes = IS_CHARACTER(x);
+
+  // when a and b are character vectors; create unsigned int vectors in which
+  // the elements of and b will be copied
+  unsigned int *s = NULL, *t = NULL;
+  if (bytes) {
+    int ml_x = max_length(x);
+    int ml_t = max_length(table);
+    s = (unsigned int *) malloc((ml_x + ml_t) * sizeof(unsigned int));
+    t = s + ml_x;
+    if (s == NULL) {
+       free(s);
+       error("Unable to allocate enough memory");
+    }
+  }
+
+  // output vector
+  SEXP yy = allocVector(INTSXP, nx);
+  PROTECT(yy);
+  int* y = INTEGER(yy);
+
+  int index, isna_s, isna_t, len_s, len_t;
+  double d;
+  for (int i=0; i<nx; ++i) {
+    index = no_match;
+    s = get_elem(x, i, bytes, &len_s, &isna_s, s);
+
+    for (int j=0; j<ntable; ++j) {
+      s = get_elem(table, j, bytes, &len_t, &isna_t, t);
+
+      if (!isna_s && !isna_t) {        // both are char (usual case)
+        d = soundex_dist(s, t, len_s, len_t);
+        if (d < 0.5) { // exact match as d can only take on values 0 and 1
+          index = j + 1;
+          break;
+        } 
+      } else if (isna_s && isna_t) {  // both are NA
+        index = match_na ? j + 1 : no_match;
+        break;
+      }
+    }
+    y[i] = index;
+  }   
+
+  if (bytes) free(s); 
+  UNPROTECT(1);
+  return(yy);
+}
+
 
