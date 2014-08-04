@@ -237,7 +237,7 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA) {
     s = get_elem(x, i, bytes, &len_s, &isna_s, s);
 
     for (int j=0; j<ntable; ++j) {
-      s = get_elem(table, j, bytes, &len_t, &isna_t, t);
+      t = get_elem(table, j, bytes, &len_t, &isna_t, t);
 
       if (!isna_s && !isna_t) {        // both are char (usual case)
         d = soundex_dist(s, t, len_s, len_t);
