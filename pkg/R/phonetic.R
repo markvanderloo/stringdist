@@ -44,7 +44,6 @@ phonetic <- function(x, method = c("soundex"), useBytes = FALSE) {
   x <- as.character(x)
   method <- match.arg(method)
   stopifnot(is.logical(useBytes))
-  if ( method == 'soundex' ) check_soundex(x)
   if (!useBytes) x <- char2int(x)
   if (method == "soundex") {
     .Call("R_soundex", x)

@@ -25,9 +25,3 @@ printable_ascii <- function(x){
 }
 
 
-check_soundex <- function(x){
-  i <- printable_ascii(x)
-  if ( !all(i) )
-    warning("Non-printable ASCII or non-ASCII characters detected.
-  Results may be unreliable. See '?printable_ascii'.")
-}
