@@ -25,7 +25,8 @@
 #'    \code{qgram} \tab \eqn{q}-gram distance. \cr
 #'    \code{cosine} \tab cosine distance between \eqn{q}-gram profiles \cr
 #'    \code{jaccard} \tab Jaccard distance between \eqn{q}-gram profiles \cr
-#'    \code{jw} \tab Jaro, or Jaro-Winker distance.
+#'    \code{jw} \tab Jaro, or Jaro-Winker distance.\cr
+#'    \code{soundex} \tab Distance based on soundex encoding (see below)
 #' }
 #' The \bold{Hamming distance} (\code{hamming}) counts the number of character substitutions that turns 
 #' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters or if \code{maxDist} is exceeded,
@@ -59,22 +60,33 @@
 #' Let \eqn{X} be the set of unique \eqn{q}-grams in \code{a} and \eqn{Y} the set of unique \eqn{q}-grams in \code{b}. 
 #' The \bold{Jaccard distance} is given by \eqn{1-|X\cap Y|/|X\cup Y|}.
 #'
-#' The \bold{Jaro distance} (\code{method='jw'}, \code{p=0}), is a number between 0 (exact match) and 1 (completely dissimilar) measuring 
-#' dissimilarity between strings.
-#' It is defined to be 0 when both strings have length 0, and 1 when  there are no character matches between \code{a} and \code{b}. 
-#' Otherwise, the Jaro distance is defined as \eqn{1-(1/3)(w_1m/|a| + w_2m/|b| + w_3(m-t)/m)}. Here,\eqn{|a|} indicates the number of
-#' characters in \code{a}, \eqn{m} is the number of 
-#' character matches and \eqn{t} the number of transpositions of matching characters. The \eqn{w_i} are weights associated with the characters
-#' in \code{a}, characters in \code{b} and with transpositions.
-#' A character \eqn{c} of \code{a} \emph{matches} a character from \code{b} when
-#' \eqn{c} occurs in \code{b}, and the index of \eqn{c} in \code{a} differs less than \eqn{\max(|a|,|b|)/2 -1} (where we use integer division)
-#' from the index of \eqn{c} in \code{b}.
-#' Two matching characters are transposed when they are matched but they occur in different order in string \code{a} and \code{b}.
+#' The \bold{Jaro distance} (\code{method='jw'}, \code{p=0}), is a number
+#' between 0 (exact match) and 1 (completely dissimilar) measuring 
+#' dissimilarity between strings.  It is defined to be 0 when both strings have
+#' length 0, and 1 when  there are no character matches between \code{a} and
+#' \code{b}.  Otherwise, the Jaro distance is defined as 
+#' \eqn{1-(1/3)(w_1m/|a| + w_2m/|b| + w_3(m-t)/m)}. 
+#' Here,\eqn{|a|} indicates the number of characters in \code{a}, \eqn{m} is
+#' the number of character matches and \eqn{t} the number of transpositions of
+#' matching characters. The \eqn{w_i} are weights associated with the characters
+#' in \code{a}, characters in \code{b} and with transpositions.  A character
+#' \eqn{c} of \code{a} \emph{matches} a character from \code{b} when \eqn{c}
+#' occurs in \code{b}, and the index of \eqn{c} in \code{a} differs less than
+#' \eqn{\max(|a|,|b|)/2 -1} (where we use integer division) from the index of
+#' \eqn{c} in \code{b}. Two matching characters are transposed when they are
+#' matched but they occur in different order in string \code{a} and \code{b}.
 #'  
-#' The \bold{Jaro-Winkler distance} (\code{method=jw}, \code{0<p<=0.25}) adds a correction term to the Jaro-distance. It is defined as \eqn{d - l*p*d}, where
-#' \eqn{d} is the Jaro-distance. Here,  \eqn{l} is obtained by counting, from the start of the input strings, after how many
-#' characters the first character mismatch between the two strings occurs, with a maximum of four. The factor \eqn{p}
-#' is a penalty factor, which in the work of Winkler is often chosen \eqn{0.1}.
+#' The \bold{Jaro-Winkler distance} (\code{method=jw}, \code{0<p<=0.25}) adds a
+#' correction term to the Jaro-distance. It is defined as \eqn{d - l*p*d}, where
+#' \eqn{d} is the Jaro-distance. Here,  \eqn{l} is obtained by counting, from
+#' the start of the input strings, after how many characters the first
+#' character mismatch between the two strings occurs, with a maximum of four. The
+#' factor \eqn{p} is a penalty factor, which in the work of Winkler is often
+#' chosen \eqn{0.1}.
+#'
+#' For the \bold{soundex} method, strings are translated to a soundex code. The
+#' distance between strings is 0 when they have the same soundex code,
+#' otherwise 1.
 #'
 #' @section Encoding issues:
 #' If \code{bytes=FALSE}, input strings are re-encoded to \code{utf8} an then to \code{integer}

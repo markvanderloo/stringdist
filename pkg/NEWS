@@ -1,4 +1,6 @@
-version 0.7.4
+version 0.8.0
+- Added soundex-based string distance (thanks to Jan van der Laan)
+- New function 'phonetic' translates strings to phonetic codes using soundex (ibid)
 - precision issue: cosine distance between equal strings would be O(1e-16) in stead of 0.0 (thanks to Ben Haller)
 - code cleaning: somewhat better performance when maxDist is unspecified in stringdist.
 
