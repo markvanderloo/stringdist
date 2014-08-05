@@ -11,7 +11,11 @@
 #'    information see the documentation of \code{\link{stringdist}}.
 #'
 #' @details
-#' Currently, only the soundex algorithm is implemented. 
+#' Currently, only the soundex algorithm is implemented. Note that soundex coding
+#' is only meaningful for characters in the ranges a-z and A-Z. Specifically, soundex
+#' coding of strings containing non-ascii characters may be system-dependent and should 
+#' not be trusted. 
+#' 
 #' 
 #' @return
 #' The returns value depends on the method used. However, all currently 
@@ -40,6 +44,7 @@ phonetic <- function(x, method = c("soundex"), useBytes = FALSE) {
   x <- as.character(x)
   method <- match.arg(method)
   stopifnot(is.logical(useBytes))
+  if ( method == 'soundex' ) check_soundex(x)
   if (!useBytes) x <- char2int(x)
   if (method == "soundex") {
     .Call("R_soundex", x)

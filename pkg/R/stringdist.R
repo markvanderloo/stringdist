@@ -86,7 +86,8 @@
 #'
 #' For the \bold{soundex} method, strings are translated to a soundex code. The
 #' distance between strings is 0 when they have the same soundex code,
-#' otherwise 1.
+#' otherwise 1. Note that soundex recoding is only meaningful for characters
+#' in the ranges a-z and A-Z. Also see \code{\link{phonetic}}.
 #'
 #' @section Encoding issues:
 #' If \code{bytes=FALSE}, input strings are re-encoded to \code{utf8} an then to \code{integer}
@@ -242,6 +243,10 @@ stringdist <- function(a, b,
     b <- char2int(b)
   }
   if (method == 'jw') weight <- weight[c(2,1,3)]
+  if ( method == 'soundex' ){ 
+    check_soundex(a)
+    check_soundex(b)
+  }
   do_dist(b, a, method, weight, maxDist, q, p)
 }
 
@@ -288,6 +293,10 @@ stringdistmatrix <- function(a, b,
     b <- lapply(char2int(b),list)
   }
   if (method == 'jw') weight <- weight[c(2,1,3)]
+  if ( method == 'soundex' ){ 
+    check_soundex(a)
+    check_soundex(b)
+  }
   if (ncores==1){
     x <- sapply(b,do_dist, USE.NAMES=FALSE, a,method,weight,maxDist, q, p)
   } else {
