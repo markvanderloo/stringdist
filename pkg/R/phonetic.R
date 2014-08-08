@@ -40,7 +40,7 @@
 #' }
 #'
 #' @export
-phonetic <- function(x, method = c("soundex", "soundex2"), useBytes = FALSE) {
+phonetic <- function(x, method = c("soundex"), useBytes = FALSE) {
   x <- as.character(x)
   method <- match.arg(method)
   stopifnot(is.logical(useBytes))
