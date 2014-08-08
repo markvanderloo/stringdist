@@ -3,8 +3,7 @@
 #' @section Details:
 #' The input is converted to \code{character}. If \code{useBytes=TRUE}, each element is 
 #' converted to \code{utf8} and then to \code{integer} as in \code{\link{stringdist}}. 
-#' Next,the data is passed to the underlying routine. row names of the output 
-#' array (i.e. the qgrams) are encoded in \code{utf8}.
+#' Next,the data is passed to the underlying routine.
 #' 
 #' Strings with less than \code{q} characters and elements containing \code{NA} are skipped. Using \code{q=0} 
 #' therefore counts the number of empty strings \code{""} occuring in each argument.
@@ -52,7 +51,7 @@ qgrams <- function(..., .list=NULL,q=1L,useBytes=FALSE, useNames=!useBytes){
       qgrams = if( useBytes ){
             apply(A,2,function(x) paste(as.raw(x),collapse="|")) 
           } else {
-            apply(A,2,intToUtf8)
+            enc2native(apply(A,2,intToUtf8))
           }
     }
   }

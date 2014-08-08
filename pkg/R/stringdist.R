@@ -10,10 +10,11 @@
 #' Compute distance metrics between strings
 #'
 #' @section Details:
-#' \code{stringdist} computes pairwise string distances between elements of \code{character} vectors \code{a} and \code{b},
-#' where the vector with less elements is recycled. \code{stringdistmatrix} computes the string distance matrix with rows according to
+#' \code{stringdist} computes pairwise string distances between elements of \code{character} vectors 
+#' \code{a} and \code{b}, where the vector with less elements is recycled. 
+#' 
+#' \code{stringdistmatrix} computes the string distance matrix with rows according to
 #' \code{a} and columns according to \code{b}.
-#'
 #' 
 #' Currently, the following distance metrics are supported:
 #' \tabular{ll}{
@@ -25,56 +26,80 @@
 #'    \code{qgram} \tab \eqn{q}-gram distance. \cr
 #'    \code{cosine} \tab cosine distance between \eqn{q}-gram profiles \cr
 #'    \code{jaccard} \tab Jaccard distance between \eqn{q}-gram profiles \cr
-#'    \code{jw} \tab Jaro, or Jaro-Winker distance.
+#'    \code{jw} \tab Jaro, or Jaro-Winker distance.\cr
+#'    \code{soundex} \tab Distance based on soundex encoding (see below)
 #' }
-#' The \bold{Hamming distance} (\code{hamming}) counts the number of character substitutions that turns 
-#' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters or if \code{maxDist} is exceeded,
-#' \code{Inf} is returned.
-#'
-#' The \bold{Levenshtein distance} (\code{lv}) counts the number of deletions, insertions and substitutions necessary
-#' to turn \code{b} into \code{a}. This method is equivalent to \code{R}'s native \code{\link[utils]{adist}} function.
-#' If \code{maxDist} is exceeded \code{Inf}  is returned.
-#'
-#' The \bold{Optimal String Alignment distance} (\code{osa}) is like the Levenshtein distance but also 
-#' allows transposition of adjacent characters. Here, each substring  may be edited only once so a 
-#' character cannot be transposed twice. 
-#' If \code{maxDist} is exceeded \code{Inf}  is returned.
-#'
-#' The \bold{full Damerau-Levensthein distance} (\code{dl}) allows for multiple transpositions.
-#' If \code{maxDist} is exceeded \code{Inf}  is returned.
-#'
-#' The \bold{longest common substring} is defined as the longest string that can be obtained by pairing characters
-#' from \code{a} and \code{b} while keeping the order of characters intact. The lcs-distance is defined as the
-#' number of unpaired characters. The distance is equivalent to the edit distance allowing only deletions and
-#' insertions, each with weight one.
-#' If \code{maxDist} is exceeded \code{Inf}  is returned.
-#'
-#' A \bold{\eqn{q}-gram} is a subsequence of \eqn{q} \emph{consecutive} characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
-#' of \eqn{q}-gram occurrences in \code{a} (\code{b}), the \bold{\eqn{q}-gram distance} is given by the sum over
-#' the absolute differences \eqn{|x_i-y_i|}.
-#' The computation is aborted when \code{q} is is larger than the length of any of the strings. In that case \code{Inf}  is returned.
-#'
-#' The \bold{cosine distance} is computed as \eqn{1-x\cdot y/(\|x\|\|y\|)}, where \eqn{x} and \eqn{y} were defined above.
 #' 
-#' Let \eqn{X} be the set of unique \eqn{q}-grams in \code{a} and \eqn{Y} the set of unique \eqn{q}-grams in \code{b}. 
-#' The \bold{Jaccard distance} is given by \eqn{1-|X\cap Y|/|X\cup Y|}.
+#' Precise descriptions of the algorithms are given in the R-journal paper (see Citation section).
+#' Below are some concise descriptions.
+#' 
+#' 
+#' The \bold{Hamming distance} (\code{hamming}) counts the number of 
+#' character substitutions that turns \code{b} into \code{a}. If \code{a} 
+#' and \code{b} have different number of characters or if \code{maxDist} is 
+#' exceeded, \code{Inf} is returned.
 #'
-#' The \bold{Jaro distance} (\code{method='jw'}, \code{p=0}), is a number between 0 (exact match) and 1 (completely dissimilar) measuring 
-#' dissimilarity between strings.
-#' It is defined to be 0 when both strings have length 0, and 1 when  there are no character matches between \code{a} and \code{b}. 
-#' Otherwise, the Jaro distance is defined as \eqn{1-(1/3)(w_1m/|a| + w_2m/|b| + w_3(m-t)/m)}. Here,\eqn{|a|} indicates the number of
-#' characters in \code{a}, \eqn{m} is the number of 
-#' character matches and \eqn{t} the number of transpositions of matching characters. The \eqn{w_i} are weights associated with the characters
-#' in \code{a}, characters in \code{b} and with transpositions.
-#' A character \eqn{c} of \code{a} \emph{matches} a character from \code{b} when
-#' \eqn{c} occurs in \code{b}, and the index of \eqn{c} in \code{a} differs less than \eqn{\max(|a|,|b|)/2 -1} (where we use integer division)
-#' from the index of \eqn{c} in \code{b}.
-#' Two matching characters are transposed when they are matched but they occur in different order in string \code{a} and \code{b}.
+#' The \bold{Levenshtein distance} (\code{lv}) counts the number of 
+#' deletions, insertions and substitutions necessary to turn \code{b} into 
+#' \code{a}. This method is equivalent to \code{R}'s native \code{\link[utils]{adist}} 
+#' function. If \code{maxDist} is exceeded \code{Inf}  is returned.
+#'
+#' The \bold{Optimal String Alignment distance} (\code{osa}) is like the Levenshtein 
+#' distance but also allows transposition of adjacent characters. Here, each 
+#' substring  may be edited only once. (For example, a character cannot be transposed twice
+#' to move it forward in the string). If \code{maxDist} is exceeded \code{Inf}  is returned.
+#'
+#' The \bold{full Damerau-Levensthein distance} (\code{dl}) allows for multiple 
+#' edits on substrings. If \code{maxDist} is exceeded \code{Inf}  is returned.
+#'
+#' The \bold{longest common substring} is defined as the longest string that can be 
+#' obtained by pairing characters from \code{a} and \code{b} while keeping the order 
+#' of characters intact. The \bold{lcs-distance} is defined as the number of unpaired characters. 
+#' The distance is equivalent to the edit distance allowing only deletions and insertions, 
+#' each with weight one. If \code{maxDist} is exceeded \code{Inf}  is returned.
+#'
+#' A \bold{\eqn{q}-gram} is a subsequence of \eqn{q} \emph{consecutive} 
+#' characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
+#' of \eqn{q}-gram occurrences in \code{a} (\code{b}), the \bold{\eqn{q}-gram distance} 
+#' is given by the sum over the absolute differences \eqn{|x_i-y_i|}.
+#' The computation is aborted when \code{q} is is larger than the length of 
+#' any of the strings. In that case \code{Inf}  is returned.
+#'
+#' The \bold{cosine distance} is computed as \eqn{1-x\cdot y/(\|x\|\|y\|)}, where \eqn{x} and 
+#' \eqn{y} were defined above.
+#' 
+#' Let \eqn{X} be the set of unique \eqn{q}-grams in \code{a} and \eqn{Y} the set of unique 
+#' \eqn{q}-grams in \code{b}. The \bold{Jaccard distance} is given by \eqn{1-|X\cap Y|/|X\cup Y|}.
+#'
+#' The \bold{Jaro distance} (\code{method='jw'}, \code{p=0}), is a number
+#' between 0 (exact match) and 1 (completely dissimilar) measuring 
+#' dissimilarity between strings.  It is defined to be 0 when both strings have
+#' length 0, and 1 when  there are no character matches between \code{a} and
+#' \code{b}.  Otherwise, the Jaro distance is defined as 
+#' \eqn{1-(1/3)(w_1m/|a| + w_2m/|b| + w_3(m-t)/m)}. 
+#' Here,\eqn{|a|} indicates the number of characters in \code{a}, \eqn{m} is
+#' the number of character matches and \eqn{t} the number of transpositions of
+#' matching characters. The \eqn{w_i} are weights associated with the characters
+#' in \code{a}, characters in \code{b} and with transpositions.  A character
+#' \eqn{c} of \code{a} \emph{matches} a character from \code{b} when \eqn{c}
+#' occurs in \code{b}, and the index of \eqn{c} in \code{a} differs less than
+#' \eqn{\max(|a|,|b|)/2 -1} (where we use integer division) from the index of
+#' \eqn{c} in \code{b}. Two matching characters are transposed when they are
+#' matched but they occur in different order in string \code{a} and \code{b}.
 #'  
-#' The \bold{Jaro-Winkler distance} (\code{method=jw}, \code{0<p<=0.25}) adds a correction term to the Jaro-distance. It is defined as \eqn{d - l*p*d}, where
-#' \eqn{d} is the Jaro-distance. Here,  \eqn{l} is obtained by counting, from the start of the input strings, after how many
-#' characters the first character mismatch between the two strings occurs, with a maximum of four. The factor \eqn{p}
-#' is a penalty factor, which in the work of Winkler is often chosen \eqn{0.1}.
+#' The \bold{Jaro-Winkler distance} (\code{method=jw}, \code{0<p<=0.25}) adds a
+#' correction term to the Jaro-distance. It is defined as \eqn{d - l*p*d}, where
+#' \eqn{d} is the Jaro-distance. Here,  \eqn{l} is obtained by counting, from
+#' the start of the input strings, after how many characters the first
+#' character mismatch between the two strings occurs, with a maximum of four. The
+#' factor \eqn{p} is a penalty factor, which in the work of Winkler is often
+#' chosen \eqn{0.1}.
+#'
+#' For the \bold{soundex} method, strings are translated to a soundex code (see \code{\link{phonetic}} for a specification). The
+#' distance between strings is 0 when they have the same soundex code,
+#' otherwise 1. Note that soundex recoding is only meaningful for characters
+#' in the ranges a-z and A-Z. A warning is emitted when non-printable or non-ascii
+#' characters are encountered. Also see \code{\link{printable_ascii}}.
 #'
 #' @section Encoding issues:
 #' If \code{bytes=FALSE}, input strings are re-encoded to \code{utf8} an then to \code{integer}
@@ -116,7 +141,7 @@
 #' If you would like to cite this package, please cite the R-journal paper: 
 #' \itemize{
 #' \item{M.P.J. van der Loo (2014). The \code{stringdist} package for approximate string matching. 
-#'  R Journal 6 (accepted for publication)}
+#'  R Journal 6(1) pp 111-122}
 #' }
 #' Or use \code{citation('stringdist')} to get a bibtex item.
 #'
@@ -180,9 +205,8 @@
 #'   of \code{a}, characters from \code{b} and the transposition weight, in that order.
 #'   Weights must be positive and not exceed 1. \code{weight} is
 #'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'}, or \code{'lcs'}. 
-#' @param maxDist  [DEPRECATED AND MAY BE REMOVED FOR THIS FUNCTION] For the
-#' moment, this parameter is here only for backward compatibility. It does not
-#' offer any speed gain. (In fact, it currently slows things down when set to anything different then \code{Inf}).
+#' @param maxDist  [DEPRECATED AND WILL BE REMOVED] Currently kept for backward compatibility. It does not
+#' offer any speed gain. (In fact, it currently slows things down when set to anything different from \code{Inf}).
 #' @param q  Size of the \eqn{q}-gram; must be nonnegative. Only applies to \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
 #' @param p Penalty factor for Jaro-Winkler distance. The valid range for \code{p} is \code{0 <= p <= 0.25}. 
 #'  If \code{p=0} (default), the Jaro-distance is returned. Applies only to \code{method='jw'}.
@@ -198,7 +222,7 @@
 #' @example ../examples/stringdist.R
 #' @export
 stringdist <- function(a, b, 
-  method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard", "jw"), 
+  method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw","soundex"), 
   useBytes = FALSE,
   weight=c(d=1,i=1,s=1,t=1), 
   maxDist=Inf, q=1, p=0
@@ -246,7 +270,7 @@ stringdist <- function(a, b,
 #' @rdname stringdist
 #' @export
 stringdistmatrix <- function(a, b, 
-  method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw"), 
+  method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex"), 
   useBytes = FALSE,
   weight=c(d=1,i=1,s=1,t=1), 
   maxDist=Inf, q=1, p=0,
@@ -314,7 +338,8 @@ do_dist <- function(a, b, method, weight, maxDist, q, p){
     qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L),
     cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L),
     jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L),
-    jw      = .Call('R_jw'    , a, b, as.double(p), as.double(weight))
+    jw      = .Call('R_jw'    , a, b, as.double(p), as.double(weight)),
+    soundex = .Call('R_soundex_dist', a, b)
   )
   if (maxDist < Inf ){
     d[!is.na(d) & d > maxDist] <- Inf

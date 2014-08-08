@@ -5,9 +5,10 @@ Title: Approximate string matching and string distance functions.
 LazyData: no
 Type: Package
 LazyLoad: yes
-Author: Mark van der Loo
-Description: Implements an approximate string matching version of R's native 'match' function. Can calculate various string distances based on edits (damerau-levenshtein, hamming, levenshtein, optimal sting alignment), qgrams (q-gram, cosine, jaccard distance) or heuristic metrics (jaro, jaro-winkler).
-Version: 0.7.4
+Authors@R: c( person("Mark", "van der Loo", role=c("aut","cre"),email="mark.vanderloo@gmail.com")
+            , person("Jan", "van der Laan", role="ctb"))
+Description: Implements an approximate string matching version of R's native 'match' function. Can calculate various string distances based on edits (damerau-levenshtein, hamming, levenshtein, optimal sting alignment), qgrams (q-gram, cosine, jaccard distance) or heuristic metrics (jaro, jaro-winkler). An implementation of soundex is provided as well.
+Version: 0.8.0
 Depends: R (>= 2.15.3), parallel
 URL: https://github.com/markvanderloo/stringdist
 Date: 2013-04-28

@@ -62,7 +62,10 @@ stringdist('MARTHA','MATHRA',method='jw',p=0.1)
 # or, as a similarity measure
 1 - stringdist('MARTHA','MATHRA',method='jw',p=0.1)
 
-
+# This gives distance 1 since Euler and Gauss translate to different soundex codes.
+stringdist('Euler','Gauss',method='soundex')
+# Euler and Ellery translate to the same code and have distance 0
+stringdist('Euler','Ellery',method='soundex')
 
 
 

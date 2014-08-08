@@ -453,3 +453,62 @@ test_that("useBytes really analyses bytes",{
 })
 
 
+
+### -------------------------------------------------------------
+context("Soundex distance")
+
+test_that("",{
+  expect_equal(stringdist("", "0000",method='soundex'),0)
+  expect_equal(stringdist("john","jan",method='soundex'),0)
+  expect_equal(stringdist("schoen","son",method='soundex'),0)
+  expect_equal(stringdist("ssssss","sa",method='soundex'),0)
+  expect_equal(stringdist("bfpv","ba",method='soundex'),0)
+  # cgjkqsxz receive same code
+  expect_equal(stringdist("cgjkqsxz","ca",method='soundex'),0)
+  # dt receive same code
+  expect_equal(stringdist("dt","da",method='soundex'),0)  
+  # mn receive same code; l has seperate code
+  expect_equal(stringdist("lmn","lam",method='soundex'),0)  
+  # h and w are ignored
+  expect_equal(stringdist("rhw","r",method='soundex'),0)  
+  # vowels are removed
+  expect_equal(stringdist("raeiouym","rm",method='soundex'),0)  
+  # non-letters are ignores
+  expect_equal(stringdist("r00d","rt",method='soundex'),0)  
+  # consonants are not merged when a vowel in between
+  expect_equal(stringdist("sock", "sck", method='soundex'),1)
+})
+
+test_that("Shortest argument is recycled",{
+  expect_equal(stringdist(c('a','b'),'a',method='soundex'),c(0,1))
+  expect_equal(stringdist('a',c('a','b'),method='soundex'),c(0,1))
+})
+
+test_that("NA's are handled correctly",{
+  expect_true(is.na(stringdist(NA ,'a',method='soundex')))
+  expect_true(is.na(stringdist('a',NA ,method='soundex')))
+  expect_true(is.na(stringdist(NA ,NA ,method='soundex')))
+})
+
+test_that("non-printable ascii and non-ascii encoding is detected",{
+  ouml <- intToUtf8("0x00F6")
+  # non-ascii within string
+  x <- paste0("Mot",ouml,"rhead")
+  y <- paste0(ouml,"zzy")
+  # non-printable ascii's in string
+  z <- paste0("\r","hello","\t")
+  # business as usual
+  expect_equal(stringdist('Ozzy','Lemmy',method='soundex'),1)
+  # first argument triggers warning
+  expect_warning(stringdist(x,'Lemmy',method='soundex'))
+  expect_warning(stringdist(y,'Ozzy',method='soundex'))
+  expect_warning(stringdist(z,'Ozzy',method='soundex'))
+  
+  # second argument triggers warning
+  expect_warning(stringdist('Lemmy',x,method='soundex'))
+  expect_warning(stringdist('Ozzy',y,method='soundex'))
+  expect_warning(stringdist('Ozzy',z,method='soundex'))
+})
+
+
+

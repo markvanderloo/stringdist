@@ -124,6 +124,25 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="qgram",matchNA=FALSE,nomatch=7L), 7L)
 })
 
+
+context("amatch: Soundex")
+
+test_that("simple test and multiple edge cases",{
+  expect_equal(amatch("smith", c("smyth","smelt"), method="soundex"), 1L)
+  expect_equal(amatch("smith",c("bb","bb"), method="soundex"), NA_integer_)
+  expect_equal(amatch("smith",c("whashington"), method="soundex"), NA_integer_)
+  expect_equal(amatch("washington",c("smith"), method="soundex"), NA_integer_)
+  expect_equal(amatch(NA,c(NA,NA),method="soundex"),1L)
+  expect_equal(amatch("","", method="soundex"), 1L)
+  expect_equal(amatch(NA,"a", method="soundex"), NA_integer_)
+  expect_equal(amatch(NA,"a", method="soundex",nomatch=0L), 0L)
+  expect_equal(amatch(NA,NA, method="soundex"), 1L)
+  expect_equal(amatch(NA,NA, method="soundex",matchNA=FALSE), NA_integer_)
+  expect_equal(amatch(NA,NA, method="soundex",matchNA=FALSE,nomatch=0L), 0L)
+  expect_equal(amatch(NA,NA, method="soundex",matchNA=FALSE,nomatch=7L), 7L)
+})
+
+
 context("amatch: useBytes")
 
 test_that("bytewise matching differs from character wise matching",{
