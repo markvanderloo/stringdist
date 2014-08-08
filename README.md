@@ -31,7 +31,7 @@ Besides the above the functions, `qgrams` tabulates the qgrams in a `character` 
 
 Resources
 ----------
-* A [paper](http://journal.r-project.org/archive/accepted/loo.pdf) on stringdist has been accepted by the R-journal 
+* A [paper](http://journal.r-project.org/archive/2014-1/loo.pdf) on stringdist has been published in the R-journal 
 * [Slides](http://www.slideshare.net/MarkVanDerLoo/stringdist-use-r2014) of te _useR!2014_ conference.
 
 
