@@ -11,22 +11,26 @@ RECYCLEWARNING <- NULL
 #' @param x a \code{character} vector
 #'
 #' @details
-#' Printable ASCII characters consist of \code{A-Z}, \code{a-z}, \code{0-9} and the characters
+#' Printable ASCII characters consist of space, \code{A-Z}, \code{a-z}, \code{0-9} and the characters
 #'
-#' \code{^ ( ) ! \" \\  # $ \%  & ' + * , . / : ; < = > ? @@} 
+#' \code{! "" # $ \% & ' ( ) * + , . / : ; < = > ? @@ [ ] \\ ^ _ ` { | } ~ -} 
 #'
-#' Although not formally printable, the space is included as a printable character as well (but not tab, since this is
-#' a control character).
+#' Note that this excludes tab (as it is a control character).
 #'
 #' @section Some tips on character encoding and transliteration:
 #' Some algorithms (like soundex) are defined only on the printable ASCII character set. This excludes any character
 #' with accents for example. Translating accented characters to the non-accented ones is a form of transliteration. On
-#' most systems running R you can achieve this with \code{iconv(x,"ASCII//TRANSLIT")}, where \code{x} is your character
-#' vector. See the documentation of \code{\link[base]{iconv}} for details.
+#' most systems running R you can achieve this with 
+#' 
+#' \code{iconv(x,"ASCII//TRANSLIT")}, 
+#' 
+#' where \code{x} is your character vector. See the documentation of \code{\link[base]{iconv}} for details.
 #'
 #' The \code{stringi} package (Gagolewski and Tartanus) should work on any system. The command 
 #' \code{stringi::stri_trans_general(x,"Latin-ASCII")} transliterates character vector \code{x} to ASCII.
 #' 
+#' @example ../examples/printable_ascii.R
+#'
 #'
 #' @return A \code{logical} indicating which elements consist solely of printable ASCII characters.
 #' @export 

@@ -1,8 +1,10 @@
 version 0.8.0
 - Added soundex-based string distance (thanks to Jan van der Laan)
-- New function 'phonetic' translates strings to phonetic codes using soundex (ibid)
-- precision issue: cosine distance between equal strings would be O(1e-16) in stead of 0.0 (thanks to Ben Haller)
-- code cleaning: somewhat better performance when maxDist is unspecified in stringdist.
+- New function 'phonetic' translates strings to phonetic codes using soundex (thanks to Jan van der Laan)
+- New function 'printable_ascii' detects non-printable ascii or non-ascii characters.
+- Precision issue: cosine distance between equal strings would be O(1e-16) in stead of 0.0 (thanks to Ben Haller)
+- Code cleaning: somewhat better performance when maxDist is unspecified in stringdist. It remains deprecated.
+- Row names in the output array of 'qgrams' are now in system native encoding (used to be utf8 for all systems).
 
 version 0.7.3
 - bugfix in jw-distance: out-of-range access in C-code caused R to crash in some cases (thanks to Carol Gan)

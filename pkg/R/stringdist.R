@@ -10,10 +10,11 @@
 #' Compute distance metrics between strings
 #'
 #' @section Details:
-#' \code{stringdist} computes pairwise string distances between elements of \code{character} vectors \code{a} and \code{b},
-#' where the vector with less elements is recycled. \code{stringdistmatrix} computes the string distance matrix with rows according to
+#' \code{stringdist} computes pairwise string distances between elements of \code{character} vectors 
+#' \code{a} and \code{b}, where the vector with less elements is recycled. 
+#' 
+#' \code{stringdistmatrix} computes the string distance matrix with rows according to
 #' \code{a} and columns according to \code{b}.
-#'
 #' 
 #' Currently, the following distance metrics are supported:
 #' \tabular{ll}{
@@ -28,6 +29,11 @@
 #'    \code{jw} \tab Jaro, or Jaro-Winker distance.\cr
 #'    \code{soundex} \tab Distance based on soundex encoding (see below)
 #' }
+#' 
+#' Precise descriptions of the algorithms are given in the R-journal paper (see Citation section).
+#' Below are some concise descriptions.
+#' 
+#' 
 #' The \bold{Hamming distance} (\code{hamming}) counts the number of 
 #' character substitutions that turns \code{b} into \code{a}. If \code{a} 
 #' and \code{b} have different number of characters or if \code{maxDist} is 
@@ -40,15 +46,15 @@
 #'
 #' The \bold{Optimal String Alignment distance} (\code{osa}) is like the Levenshtein 
 #' distance but also allows transposition of adjacent characters. Here, each 
-#' substring  may be edited only once so a character cannot be transposed twice. 
-#' If \code{maxDist} is exceeded \code{Inf}  is returned.
+#' substring  may be edited only once. (For example, a character cannot be transposed twice
+#' to move it forward in the string). If \code{maxDist} is exceeded \code{Inf}  is returned.
 #'
 #' The \bold{full Damerau-Levensthein distance} (\code{dl}) allows for multiple 
-#' transpositions. If \code{maxDist} is exceeded \code{Inf}  is returned.
+#' edits on substrings. If \code{maxDist} is exceeded \code{Inf}  is returned.
 #'
 #' The \bold{longest common substring} is defined as the longest string that can be 
 #' obtained by pairing characters from \code{a} and \code{b} while keeping the order 
-#' of characters intact. The lcs-distance is defined as the number of unpaired characters. 
+#' of characters intact. The \bold{lcs-distance} is defined as the number of unpaired characters. 
 #' The distance is equivalent to the edit distance allowing only deletions and insertions, 
 #' each with weight one. If \code{maxDist} is exceeded \code{Inf}  is returned.
 #'
@@ -89,7 +95,7 @@
 #' factor \eqn{p} is a penalty factor, which in the work of Winkler is often
 #' chosen \eqn{0.1}.
 #'
-#' For the \bold{soundex} method, strings are translated to a soundex code. The
+#' For the \bold{soundex} method, strings are translated to a soundex code (see \code{\link{phonetic}} for a specification). The
 #' distance between strings is 0 when they have the same soundex code,
 #' otherwise 1. Note that soundex recoding is only meaningful for characters
 #' in the ranges a-z and A-Z. A warning is emitted when non-printable or non-ascii
@@ -135,7 +141,7 @@
 #' If you would like to cite this package, please cite the R-journal paper: 
 #' \itemize{
 #' \item{M.P.J. van der Loo (2014). The \code{stringdist} package for approximate string matching. 
-#'  R Journal 6 (accepted for publication)}
+#'  R Journal 6(1) pp 111-122}
 #' }
 #' Or use \code{citation('stringdist')} to get a bibtex item.
 #'
@@ -199,9 +205,8 @@
 #'   of \code{a}, characters from \code{b} and the transposition weight, in that order.
 #'   Weights must be positive and not exceed 1. \code{weight} is
 #'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'}, or \code{'lcs'}. 
-#' @param maxDist  [DEPRECATED AND MAY BE REMOVED FOR THIS FUNCTION] For the
-#' moment, this parameter is here only for backward compatibility. It does not
-#' offer any speed gain. (In fact, it currently slows things down when set to anything different then \code{Inf}).
+#' @param maxDist  [DEPRECATED AND WILL BE REMOVED] Currently kept for backward compatibility. It does not
+#' offer any speed gain. (In fact, it currently slows things down when set to anything different from \code{Inf}).
 #' @param q  Size of the \eqn{q}-gram; must be nonnegative. Only applies to \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
 #' @param p Penalty factor for Jaro-Winkler distance. The valid range for \code{p} is \code{0 <= p <= 0.25}. 
 #'  If \code{p=0} (default), the Jaro-distance is returned. Applies only to \code{method='jw'}.

@@ -12,21 +12,24 @@
 #'
 #' @details
 #' Currently, only the soundex algorithm is implemented. Note that soundex coding
-#' is only meaningful for characters in the ranges a-z and A-Z. Specifically, soundex
-#' coding of strings containing non-ascii characters may be system-dependent and should 
-#' not be trusted. 
+#' is only meaningful for characters in the ranges a-z and A-Z. Soundex coding of strings 
+#' containing non-printable ascii or non-ascii characters may be system-dependent and should 
+#' not be trusted. If non-ascii or non-printable ascii charcters are encountered, a warning 
+#' is emitted.
+#' 
+#' @seealso \code{\link{printable_ascii}}
 #' 
 #' 
 #' @return
 #' The returns value depends on the method used. However, all currently 
 #' implemented methods return a character vector of the same length of the input
-#' vector. 
+#' vector. Output characters are in the system's native encoding.
 #'
 #' @section Citation:
 #' If you would like to cite this package, please cite the R-journal paper: 
 #' \itemize{
 #' \item{M.P.J. van der Loo (2014). The \code{stringdist} package for approximate string matching. 
-#'  R Journal 6 (accepted for publication)}
+#'  R Journal 6(1) pp. 111-122}
 #' }
 #' Or use \code{citation('stringdist')} to get a bibtex item.
 #' 
