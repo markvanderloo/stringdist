@@ -51,7 +51,7 @@ qgrams <- function(..., .list=NULL,q=1L,useBytes=FALSE, useNames=!useBytes){
       qgrams = if( useBytes ){
             apply(A,2,function(x) paste(as.raw(x),collapse="|")) 
           } else {
-            apply(A,2,int2char)
+            enc2native(apply(A,2,intToUtf8))
           }
     }
   }
