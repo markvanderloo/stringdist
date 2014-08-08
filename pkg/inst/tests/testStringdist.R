@@ -490,6 +490,25 @@ test_that("NA's are handled correctly",{
   expect_true(is.na(stringdist(NA ,NA ,method='soundex')))
 })
 
+test_that("non-printable ascii and non-ascii encoding is detected",{
+  ouml <- intToUtf8("0x00F6")
+  # non-ascii within string
+  x <- paste0("Mot",ouml,"rhead")
+  y <- paste0(ouml,"zzy")
+  # non-printable ascii's in string
+  z <- paste0("\r","hello","\t")
+  # business as usual
+  expect_equal(stringdist('Ozzy','Lemmy',method='soundex'),1)
+  # first argument triggers warning
+  expect_warning(stringdist(x,'Lemmy',method='soundex'))
+  expect_warning(stringdist(y,'Ozzy',method='soundex'))
+  expect_warning(stringdist(z,'Ozzy',method='soundex'))
+  
+  # second argument triggers warning
+  expect_warning(stringdist('Lemmy',x,method='soundex'))
+  expect_warning(stringdist('Ozzy',y,method='soundex'))
+  expect_warning(stringdist('Ozzy',z,method='soundex'))
+})
 
 
 

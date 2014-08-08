@@ -23,5 +23,16 @@ NA;NA"
 
 }) 
 
+test_that("soundex handles encoding",{
+  ouml <- intToUtf8("0x00F6")
+  # non-ascii within string
+  expect_warning(phonetic(paste0("Mot",ouml,"rhead"),method='soundex'))
+  # non-ascii at beginning of string
+  expect_warning(phonetic(paste0(ouml,"zzy"),method='soundex'))
+  # non-printable in string (carriage return)
+  cr <- "\r"
+  expect_warning(phonetic(paste0(cr,"hello"),method='soundex'))
+})
+
 
 

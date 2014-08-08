@@ -28,37 +28,42 @@
 #'    \code{jw} \tab Jaro, or Jaro-Winker distance.\cr
 #'    \code{soundex} \tab Distance based on soundex encoding (see below)
 #' }
-#' The \bold{Hamming distance} (\code{hamming}) counts the number of character substitutions that turns 
-#' \code{b} into \code{a}. If \code{a} and \code{b} have different number of characters or if \code{maxDist} is exceeded,
-#' \code{Inf} is returned.
+#' The \bold{Hamming distance} (\code{hamming}) counts the number of 
+#' character substitutions that turns \code{b} into \code{a}. If \code{a} 
+#' and \code{b} have different number of characters or if \code{maxDist} is 
+#' exceeded, \code{Inf} is returned.
 #'
-#' The \bold{Levenshtein distance} (\code{lv}) counts the number of deletions, insertions and substitutions necessary
-#' to turn \code{b} into \code{a}. This method is equivalent to \code{R}'s native \code{\link[utils]{adist}} function.
+#' The \bold{Levenshtein distance} (\code{lv}) counts the number of 
+#' deletions, insertions and substitutions necessary to turn \code{b} into 
+#' \code{a}. This method is equivalent to \code{R}'s native \code{\link[utils]{adist}} 
+#' function. If \code{maxDist} is exceeded \code{Inf}  is returned.
+#'
+#' The \bold{Optimal String Alignment distance} (\code{osa}) is like the Levenshtein 
+#' distance but also allows transposition of adjacent characters. Here, each 
+#' substring  may be edited only once so a character cannot be transposed twice. 
 #' If \code{maxDist} is exceeded \code{Inf}  is returned.
 #'
-#' The \bold{Optimal String Alignment distance} (\code{osa}) is like the Levenshtein distance but also 
-#' allows transposition of adjacent characters. Here, each substring  may be edited only once so a 
-#' character cannot be transposed twice. 
-#' If \code{maxDist} is exceeded \code{Inf}  is returned.
+#' The \bold{full Damerau-Levensthein distance} (\code{dl}) allows for multiple 
+#' transpositions. If \code{maxDist} is exceeded \code{Inf}  is returned.
 #'
-#' The \bold{full Damerau-Levensthein distance} (\code{dl}) allows for multiple transpositions.
-#' If \code{maxDist} is exceeded \code{Inf}  is returned.
+#' The \bold{longest common substring} is defined as the longest string that can be 
+#' obtained by pairing characters from \code{a} and \code{b} while keeping the order 
+#' of characters intact. The lcs-distance is defined as the number of unpaired characters. 
+#' The distance is equivalent to the edit distance allowing only deletions and insertions, 
+#' each with weight one. If \code{maxDist} is exceeded \code{Inf}  is returned.
 #'
-#' The \bold{longest common substring} is defined as the longest string that can be obtained by pairing characters
-#' from \code{a} and \code{b} while keeping the order of characters intact. The lcs-distance is defined as the
-#' number of unpaired characters. The distance is equivalent to the edit distance allowing only deletions and
-#' insertions, each with weight one.
-#' If \code{maxDist} is exceeded \code{Inf}  is returned.
+#' A \bold{\eqn{q}-gram} is a subsequence of \eqn{q} \emph{consecutive} 
+#' characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
+#' of \eqn{q}-gram occurrences in \code{a} (\code{b}), the \bold{\eqn{q}-gram distance} 
+#' is given by the sum over the absolute differences \eqn{|x_i-y_i|}.
+#' The computation is aborted when \code{q} is is larger than the length of 
+#' any of the strings. In that case \code{Inf}  is returned.
 #'
-#' A \bold{\eqn{q}-gram} is a subsequence of \eqn{q} \emph{consecutive} characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
-#' of \eqn{q}-gram occurrences in \code{a} (\code{b}), the \bold{\eqn{q}-gram distance} is given by the sum over
-#' the absolute differences \eqn{|x_i-y_i|}.
-#' The computation is aborted when \code{q} is is larger than the length of any of the strings. In that case \code{Inf}  is returned.
-#'
-#' The \bold{cosine distance} is computed as \eqn{1-x\cdot y/(\|x\|\|y\|)}, where \eqn{x} and \eqn{y} were defined above.
+#' The \bold{cosine distance} is computed as \eqn{1-x\cdot y/(\|x\|\|y\|)}, where \eqn{x} and 
+#' \eqn{y} were defined above.
 #' 
-#' Let \eqn{X} be the set of unique \eqn{q}-grams in \code{a} and \eqn{Y} the set of unique \eqn{q}-grams in \code{b}. 
-#' The \bold{Jaccard distance} is given by \eqn{1-|X\cap Y|/|X\cup Y|}.
+#' Let \eqn{X} be the set of unique \eqn{q}-grams in \code{a} and \eqn{Y} the set of unique 
+#' \eqn{q}-grams in \code{b}. The \bold{Jaccard distance} is given by \eqn{1-|X\cap Y|/|X\cup Y|}.
 #'
 #' The \bold{Jaro distance} (\code{method='jw'}, \code{p=0}), is a number
 #' between 0 (exact match) and 1 (completely dissimilar) measuring 
@@ -87,7 +92,8 @@
 #' For the \bold{soundex} method, strings are translated to a soundex code. The
 #' distance between strings is 0 when they have the same soundex code,
 #' otherwise 1. Note that soundex recoding is only meaningful for characters
-#' in the ranges a-z and A-Z. Also see \code{\link{phonetic}}.
+#' in the ranges a-z and A-Z. A warning is emitted when non-printable or non-ascii
+#' characters are encountered. Also see \code{\link{printable_ascii}}.
 #'
 #' @section Encoding issues:
 #' If \code{bytes=FALSE}, input strings are re-encoded to \code{utf8} an then to \code{integer}

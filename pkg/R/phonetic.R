@@ -39,6 +39,8 @@
 #' }
 #' }
 #'
+#' @example ../examples/phonetic.R
+#'
 #' @export
 phonetic <- function(x, method = c("soundex"), useBytes = FALSE) {
   x <- as.character(x)

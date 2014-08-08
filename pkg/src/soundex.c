@@ -29,7 +29,7 @@
 // translated to 'h'.
 // Upper and lower case ASCII characters are treated as separate cases,
 // avoiding the use of 'tolower' whose effect depends on locale.
-unsigned int translate_soundex(unsigned int c) {
+static unsigned int translate_soundex(unsigned int c) {
   switch ( c ) {
     case 'b':
     case 'f':
@@ -133,6 +133,7 @@ unsigned int translate_soundex(unsigned int c) {
     case '7':
     case '8':
     case '9':
+    case ' ':
       return 'h'; // ignored characters; voiceless symbols.
     default:
       return '?'; // other characters are ignored with a warning
@@ -147,7 +148,7 @@ unsigned int translate_soundex(unsigned int c) {
 //    should be a vector of a least length 4.
 // output: the number of non-ascii or non-printable ascii characters
 // encountered during translation.
-unsigned int soundex(const unsigned int* str, unsigned int str_len, unsigned int* result) {
+static unsigned int soundex(const unsigned int* str, unsigned int str_len, unsigned int* result) {
   if (!str || !result) return 0;
   if (str_len == 0) {
     unsigned int j;
@@ -158,7 +159,14 @@ unsigned int soundex(const unsigned int* str, unsigned int str_len, unsigned int
   unsigned int cj = translate_soundex(str[j]);
   // the first character is copied directly and not translated to a numerical
   // code
-  result[0] = str[0] < 128 ? toupper(str[0]) : str[0];
+  if ( cj == '?' ){
+    // the translated character is non-printable ASCII or non-ASCII.
+    ++nfail;
+    result[0] = str[0];
+  } else {
+    result[0] = toupper(str[0]);
+  }
+  //result[0] = str[0] < 128 ? toupper(str[0]) : str[0];
   for (i = 1; i < str_len && j < 3; ++i) {
     unsigned int ci = translate_soundex(str[i]);
     if (ci == 'a') {
@@ -184,7 +192,7 @@ unsigned int soundex(const unsigned int* str, unsigned int str_len, unsigned int
   return nfail;
 }
 
-double soundex_dist(unsigned int *a, unsigned int *b, unsigned int a_len, 
+static double soundex_dist(unsigned int *a, unsigned int *b, unsigned int a_len, 
     unsigned int b_len, unsigned int *nfail) {
   const unsigned int l = 4;
   unsigned int sa[l];
@@ -198,9 +206,11 @@ double soundex_dist(unsigned int *a, unsigned int *b, unsigned int a_len,
 
 // ================================ R INTERFACE ===============================
 
-void charwarning(unsigned int nfail){
-  warning("soundex encountered %d non-printable ASCII or non-ASCII"
-  "\n  characters. Results may be unreliable, see ?printable_ascii",nfail);
+static void check_fail(unsigned int nfail){
+  if ( nfail > 0 ){
+    warning("soundex encountered %d non-printable ASCII or non-ASCII"
+    "\n  characters. Results may be unreliable, see ?printable_ascii",nfail);
+  }
 }
 
 SEXP R_soundex(SEXP x) {
@@ -240,7 +250,7 @@ SEXP R_soundex(SEXP x) {
       } 
     }
     // cleanup and return
-    if ( nfail > 0 ) charwarning(nfail);
+    check_fail(nfail);
     free(s);
     UNPROTECT(1);
     return y;
@@ -268,7 +278,7 @@ SEXP R_soundex(SEXP x) {
       } 
     }
     // cleanup and return
-    if ( nfail > 0 ) charwarning(nfail);
+    check_fail(nfail);
     UNPROTECT(1);
     return y;
   }
@@ -313,7 +323,7 @@ SEXP R_soundex_dist(SEXP a, SEXP b) {
     } 
   }
   // cleanup and return
-  if ( nfail > 0 ) charwarning(nfail);
+  check_fail(nfail);
   if (bytes) free(s);
   UNPROTECT(1);
   return yy;
@@ -370,7 +380,7 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA) {
     y[i] = index;
   }   
   // cleanup and return
-  if ( nfail > 0 ) charwarning(nfail);
+  check_fail(nfail);
   if (bytes) free(s); 
   UNPROTECT(1);
   return(yy);
