@@ -40,13 +40,18 @@
 #' }
 #'
 #' @export
-phonetic <- function(x, method = c("soundex"), useBytes = FALSE) {
+phonetic <- function(x, method = c("soundex", "soundex2"), useBytes = FALSE) {
   x <- as.character(x)
   method <- match.arg(method)
   stopifnot(is.logical(useBytes))
   if (!useBytes) x <- char2int(x)
   if (method == "soundex") {
-    .Call("R_soundex", x)
-  }
+    r <- .Call("R_soundex", x)
+    if (!useBytes) int2char(r) else r
+  } 
+}
+
+int2char <- function(x) {
+  enc2native(sapply(x, intToUtf8))
 }
 

@@ -17,9 +17,6 @@
  *  You can contact the author at: mark _dot_ vanderloo _at_ gmail _dot_ com
  */
 
-/* This code is kindly contributed by Jan van der Laan (August 2014)
- */
-
 #define USE_RINTERNALS
 #include <R.h>
 #include <Rdefines.h>
@@ -138,7 +135,7 @@ unsigned int translate_soundex(unsigned int c) {
     case '9':
       return 'h'; // ignored characters; voiceless symbols.
     default:
-      return 'w'; // other characters are ignored with a warning
+      return '?'; // other characters are ignored with a warning
   }
 }
 
@@ -150,7 +147,7 @@ unsigned int translate_soundex(unsigned int c) {
 //    should be a vector of a least length 4.
 // output: the number of non-ascii or non-printable ascii characters
 // encountered during translation.
-unsigned int soundex(const unsigned int* str, unsigned int str_len, char* result) {
+unsigned int soundex(const unsigned int* str, unsigned int str_len, unsigned int* result) {
   if (!str || !result) return 0;
   if (str_len == 0) {
     unsigned int j;
@@ -158,15 +155,15 @@ unsigned int soundex(const unsigned int* str, unsigned int str_len, char* result
     return 0;
   }
   unsigned int i = 0, j = 0, nfail = 0;
-  char cj = translate_soundex(str[j]);
+  unsigned int cj = translate_soundex(str[j]);
   // the first character is copied directly and not translated to a numerical
   // code
-  result[0] = toupper(str[0]);
-  for (i = 1; i < str_len && j < 4; ++i) {
-    char ci = translate_soundex(str[i]);
+  result[0] = str[0] < 128 ? toupper(str[0]) : str[0];
+  for (i = 1; i < str_len && j < 3; ++i) {
+    unsigned int ci = translate_soundex(str[i]);
     if (ci == 'a') {
       // vowels are not added to the result; but we do set the previous
-      // character to the vowel because two consonants with a vowel in between
+      // character to the vower because two consonants with a vowel in between
       // are not merged
       cj = ci;
     } else if (ci != 'h') {
@@ -177,7 +174,7 @@ unsigned int soundex(const unsigned int* str, unsigned int str_len, char* result
         cj = ci;
       }
     }
-    if ( ci == 'w' ){
+    if ( ci == '?' ){
       // the translated character is non-printable ASCII or non-ASCII.
       ++nfail;
     }
@@ -189,12 +186,14 @@ unsigned int soundex(const unsigned int* str, unsigned int str_len, char* result
 
 double soundex_dist(unsigned int *a, unsigned int *b, unsigned int a_len, 
     unsigned int b_len, unsigned int *nfail) {
-  char sa[4];
-  char sb[4];
+  const unsigned int l = 4;
+  unsigned int sa[l];
+  unsigned int sb[l];
   (*nfail) += soundex(a, a_len, sa);
   (*nfail) += soundex(b, b_len, sb);
-  int c = strncmp(sa, sb, 4);
-  return (c != 0)*1.0;
+  for (unsigned int i = 0; i < l; ++i) 
+    if (sa[i] != sb[i]) return 1.0;
+  return 0.0;
 }
 
 // ================================ R INTERFACE ===============================
@@ -220,29 +219,59 @@ SEXP R_soundex(SEXP x) {
     }
   }
 
-  // create output variable
-  SEXP y = allocVector(STRSXP, n);
-  PROTECT(y);
-
-  // compute distances, skipping NA's
-  int len_s, isna_s;
-  unsigned int nfail = 0;
-  char sndx[5];
-  for (int i = 0; i < n; ++i) {
-    s = get_elem(x, i, bytes, &len_s, &isna_s, s);
-    if (isna_s) {
-      SET_STRING_ELT(y, i, R_NaString);
-    } else { 
-      nfail += soundex(s, len_s, sndx);
-      sndx[4] = 0;
-      SET_STRING_ELT(y, i, mkChar(sndx));
-    } 
+  if (bytes) {
+    // create output variable
+    SEXP y = allocVector(STRSXP, n);
+    PROTECT(y);
+    // compute soundexes, skipping NA's
+    unsigned int nfail = 0;
+    int len_s, isna_s;
+    char sndx[5];
+    unsigned int sndx_int[4];
+    for (int i = 0; i < n; ++i) {
+      s = get_elem(x, i, bytes, &len_s, &isna_s, s);
+      if (isna_s) {
+        SET_STRING_ELT(y, i, R_NaString);
+      } else { 
+        nfail += soundex(s, len_s, sndx_int);
+        for (unsigned int j = 0; j < 4; ++j) sndx[j] = sndx_int[j];
+        sndx[4] = 0;
+        SET_STRING_ELT(y, i, mkChar(sndx));
+      } 
+    }
+    // cleanup and return
+    if ( nfail > 0 ) charwarning(nfail);
+    free(s);
+    UNPROTECT(1);
+    return y;
+  } else {
+    // create output variable
+    SEXP y = allocVector(VECSXP, n);
+    PROTECT(y);
+    // compute soundexes, skipping NA's
+    unsigned int nfail = 0;
+    int len_s, isna_s;
+    for (int i = 0; i < n; ++i) {
+      s = get_elem(x, i, bytes, &len_s, &isna_s, s);
+      if (isna_s) {
+        SEXP sndx = allocVector(INTSXP, 1);
+        PROTECT(sndx);
+        INTEGER(sndx)[0] = NA_INTEGER;
+        SET_VECTOR_ELT(y, i, sndx);
+        UNPROTECT(1);
+      } else { 
+        SEXP sndx = allocVector(INTSXP, 4);
+        PROTECT(sndx);
+        nfail += soundex(s, len_s, (unsigned int *)INTEGER(sndx));
+        SET_VECTOR_ELT(y, i, sndx);
+        UNPROTECT(1);
+      } 
+    }
+    // cleanup and return
+    if ( nfail > 0 ) charwarning(nfail);
+    UNPROTECT(1);
+    return y;
   }
-  if ( nfail > 0 ) charwarning(nfail);
-  // cleanup and return
-  if (bytes) free(s);
-  UNPROTECT(1);
-  return y;
 }
 
 
@@ -272,8 +301,8 @@ SEXP R_soundex_dist(SEXP a, SEXP b) {
   double *y = REAL(yy);
 
   // compute distances, skipping NA's
-  int len_s, len_t, isna_s, isna_t;
   unsigned int nfail = 0;
+  int len_s, len_t, isna_s, isna_t;
   for (int k=0; k < nt; ++k, ++y) {
     s = get_elem(a, k % na, bytes, &len_s, &isna_s, s);
     t = get_elem(b, k % nb, bytes, &len_t, &isna_t, t);
@@ -283,10 +312,8 @@ SEXP R_soundex_dist(SEXP a, SEXP b) {
       (*y) = soundex_dist(s, t, len_s, len_t, &nfail);
     } 
   }
-
-  if ( nfail > 0 ) charwarning(nfail);
-
   // cleanup and return
+  if ( nfail > 0 ) charwarning(nfail);
   if (bytes) free(s);
   UNPROTECT(1);
   return yy;
@@ -342,7 +369,7 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA) {
     }
     y[i] = index;
   }   
-
+  // cleanup and return
   if ( nfail > 0 ) charwarning(nfail);
   if (bytes) free(s); 
   UNPROTECT(1);
