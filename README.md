@@ -1,12 +1,12 @@
 stringdist
 ==========
 
-Approximate matching and string distance calculations for R.
+* Approximate matching and string distance calculations for R. 
+* All distance and matching operations are system- and encoding-independent.
 
 Current CRAN version: **0.8.0** [NEWS](http://cran.r-project.org/web/packages/stringdist/NEWS)
 
-String distance functions are scattered around R, and R's packages. Moreover,
-approximate string matching functions are scarce. The package offers four main functions:
+The package offers four main functions:
 
 * `stringdist`  computes pairwise distances between two input character vectors (shorter one is recycled)
 * `stringdistmatrix` computes the distance matrix between two input character vectors, optionally running in parallel.
@@ -31,7 +31,7 @@ Besides the above the functions, `qgrams` tabulates the qgrams in a `character` 
 
 Resources
 ----------
-* A [paper](http://journal.r-project.org/archive/accepted/loo.pdf) on stringdist has been accepted by the R-journal 
+* A [paper](http://journal.r-project.org/archive/2014-1/loo.pdf) on stringdist has been published in the R-journal 
 * [Slides](http://www.slideshare.net/MarkVanDerLoo/stringdist-use-r2014) of te _useR!2014_ conference.
 
 
