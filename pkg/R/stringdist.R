@@ -3,6 +3,7 @@
 #' @name stringdist-package
 #' @docType package
 #' @useDynLib stringdist
+#' @import parallel
 {}
 
 
