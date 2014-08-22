@@ -1,5 +1,5 @@
 version 0.8.1
-- Package now imports parallel explicitly (this gave a NOTE on CRAN checks)
+- Package now 'Imports' parallel rather than 'Depends' on it.
 
 version 0.8.0
 - Added soundex-based string distance (thanks to Jan van der Laan)

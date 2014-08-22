@@ -9,7 +9,8 @@ Authors@R: c( person("Mark", "van der Loo", role=c("aut","cre"),email="mark.vand
             , person("Jan", "van der Laan", role="ctb"))
 Description: Implements an approximate string matching version of R's native 'match' function. Can calculate various string distances based on edits (damerau-levenshtein, hamming, levenshtein, optimal sting alignment), qgrams (q-gram, cosine, jaccard distance) or heuristic metrics (jaro, jaro-winkler). An implementation of soundex is provided as well.
 Version: 0.8.1
-Depends: R (>= 2.15.3), parallel
+Depends: R (>= 2.15.3)
+Imports: parallel
 URL: https://github.com/markvanderloo/stringdist
 Date: 2013-04-28
 Suggests: testthat
