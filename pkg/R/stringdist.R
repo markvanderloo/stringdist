@@ -281,7 +281,7 @@ stringdistmatrix <- function(a, b,
   a <- as.character(a)
   b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
-   return(numeric(0))
+    return(structure(numeric(), dim = c(length(a), length(b))))
   }
   method <- match.arg(method)
   stopifnot(
