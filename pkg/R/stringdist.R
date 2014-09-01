@@ -278,10 +278,16 @@ stringdistmatrix <- function(a, b,
   ncores=1, cluster=NULL
 ){
   
-  a <- as.character(a)
-  b <- as.character(b)
+  orig_a <- a <- as.character(a)
+  orig_b <- b <- as.character(b)
   if (length(a) == 0 || length(b) == 0){ 
-    return(structure(numeric(), dim = c(length(a), length(b))))
+    return(
+      structure(
+        numeric(), 
+        dim      = c(length(a), length(b)),
+        dimnames = list(a, b)
+      )
+    )
   }
   method <- match.arg(method)
   stopifnot(
@@ -314,6 +320,8 @@ stringdistmatrix <- function(a, b,
     x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q, p)
     if (turn_cluster_off) stopCluster(cluster)
   }
+  rownames(x) <- orig_a
+  colnames(x) <- orig_b
   as.matrix(x)
 }
 
