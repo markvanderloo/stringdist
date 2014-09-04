@@ -259,6 +259,7 @@ stringdist <- function(a, b,
 }
 
 
+#' @param useNames Use input vectors as row and column names?
 #' @param ncores Number of cores to use. If \code{ncores>1}, a local cluster is
 #' created using \code{\link[parallel]{makeCluster}}. Parallelisation is over \code{b}, so 
 #' the speed gain by parallelisation is highest when \code{b} has less elements than \code{a}.
@@ -273,16 +274,22 @@ stringdist <- function(a, b,
 stringdistmatrix <- function(a, b, 
   method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex"), 
   useBytes = FALSE,
-  weight=c(d=1,i=1,s=1,t=1), 
-  maxDist=Inf, q=1, p=0,
-  ncores=1, cluster=NULL
+  weight=c(d=1,i=1,s=1,t=1),  maxDist=Inf, q=1, p=0,
+  useNames=FALSE, ncores=1, cluster=NULL
 ){
   
   a <- as.character(a)
   b <- as.character(b)
+ 
   if (length(a) == 0 || length(b) == 0){ 
-   return(numeric(0))
+   return(matrix(numeric(0)))
   }
+
+  if (useNames){
+   rowns <- a
+   colns <- b
+  }
+
   method <- match.arg(method)
   stopifnot(
       all(is.finite(weight))
@@ -314,7 +321,7 @@ stringdistmatrix <- function(a, b,
     x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q, p)
     if (turn_cluster_off) stopCluster(cluster)
   }
-  as.matrix(x)
+  if (!useNames)  as.matrix(x) else structure(as.matrix(x), dimnames=list(rowns,colns))
 }
 
 
