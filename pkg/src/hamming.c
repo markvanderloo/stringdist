@@ -28,6 +28,9 @@
 #include <R.h>
 #include <Rdefines.h>
 #include "utils.h"
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 static int hamming(unsigned int *a, unsigned int *b, int n){
   int h=0;
@@ -51,37 +54,39 @@ SEXP R_hm(SEXP a, SEXP b){
     , ml_a = max_length(a)
     , ml_b = max_length(b);
 
-  unsigned int *s = NULL, *t = NULL;
-  if ( bytes ){
-    s = (unsigned int *) malloc( (ml_a + ml_b) * sizeof(int));
-    if ( s == NULL ) error("Unable to allocate enough memory");
-    t = s + ml_a;
-  }
 
+  // create answer vector.
   SEXP yy;
   PROTECT(yy = allocVector(REALSXP,nt));
   double *y = REAL(yy);
-
-  int i=0, j=0, k=0, len_s, len_t, isna_s, isna_t;
-  for ( k=0; k<nt; 
-        ++k
-      , i = RECYCLE(i+1,na)
-      , j = RECYCLE(j+1,nb) ){
-
-    s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-    t = get_elem(b, j, bytes, &len_t, &isna_t, t);
-    if ( isna_s || isna_t ){
-      y[k] = NA_REAL;
-      continue;         
+  
+  #pragma omp parallel default(none) \
+      shared(y, R_PosInf, NA_REAL, bytes, na, nb, ml_a, ml_b, nt, a, b)
+  {
+    unsigned int *s = NULL, *t = NULL;
+    if ( bytes ){
+      s = (unsigned int *) malloc( (ml_a + ml_b) * sizeof(int));
+      if ( s == NULL ) error("Unable to allocate enough memory");
+      t = s + ml_a;
     }
-    if ( len_s != len_t ){
-      y[k] = R_PosInf;
-      continue;
+    int k, len_s, len_t, isna_s, isna_t;
+    #pragma omp for 
+    for ( k=0; k<nt; k++ ){
+
+      s = get_elem(a, k % na, bytes, &len_s, &isna_s, s);
+      t = get_elem(b, k % nb, bytes, &len_t, &isna_t, t);
+      if ( isna_s || isna_t ){
+        y[k] = NA_REAL;
+        continue;         
+      }
+      if ( len_s != len_t ){
+        y[k] = R_PosInf;
+        continue;
+      }
+      y[k] = (double) hamming(s, t, len_s);
     }
-    y[k] = (double) hamming(s, t, len_s);
+    if (bytes) free(s);
   }
-
-  if (bytes) free(s);
   UNPROTECT(3);
   return yy;
 }
