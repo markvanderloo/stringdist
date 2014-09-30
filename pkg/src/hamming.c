@@ -40,19 +40,20 @@ static int hamming(unsigned int *a, unsigned int *b, int n){
   return h;
 }
 
-
 // -- R interface
 
-SEXP R_hm(SEXP a, SEXP b){
+SEXP R_hm(SEXP a, SEXP b, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
+  PROTECT(nthrd);
 
   int na = length(a)
     , nb = length(b)
     , nt = ( na > nb) ? na : nb
     , bytes = IS_CHARACTER(a)
     , ml_a = max_length(a)
-    , ml_b = max_length(b);
+    , ml_b = max_length(b)
+    , nthreads = INTEGER(nthrd)[0];
 
 
   // create answer vector.
@@ -60,7 +61,7 @@ SEXP R_hm(SEXP a, SEXP b){
   PROTECT(yy = allocVector(REALSXP,nt));
   double *y = REAL(yy);
   
-  #pragma omp parallel default(none) \
+  #pragma omp parallel num_threads(nthreads) default(none) \
       shared(y, R_PosInf, NA_REAL, bytes, na, nb, ml_a, ml_b, nt, a, b)
   {
     unsigned int *s = NULL, *t = NULL;
@@ -69,12 +70,15 @@ SEXP R_hm(SEXP a, SEXP b){
       if ( s == NULL ) error("Unable to allocate enough memory");
       t = s + ml_a;
     }
-    int k, len_s, len_t, isna_s, isna_t;
-    #pragma omp for 
-    for ( k=0; k<nt; k++ ){
-
-      s = get_elem(a, k % na, bytes, &len_s, &isna_s, s);
-      t = get_elem(b, k % nb, bytes, &len_t, &isna_t, t);
+    
+    int k, len_s, len_t, isna_s, isna_t, i, j;
+    int ID = omp_get_thread_num()
+      , num_threads = omp_get_num_threads();
+    i = ID;
+    j = ID;
+    for ( k = ID; k < nt; k += num_threads ){
+      s = get_elem(a, i, bytes, &len_s, &isna_s, s);
+      t = get_elem(b, j, bytes, &len_t, &isna_t, t);
       if ( isna_s || isna_t ){
         y[k] = NA_REAL;
         continue;         
@@ -84,10 +88,12 @@ SEXP R_hm(SEXP a, SEXP b){
         continue;
       }
       y[k] = (double) hamming(s, t, len_s);
+      i = recycle(i, num_threads, na);
+      j = recycle(j, num_threads, nb);
     }
     if (bytes) free(s);
   }
-  UNPROTECT(3);
+  UNPROTECT(4);
   return yy;
 }
 

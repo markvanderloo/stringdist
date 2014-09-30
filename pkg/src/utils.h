@@ -47,4 +47,27 @@ unsigned int max_length(SEXP);
  */
 unsigned int *get_elem(SEXP x, int i, int bytes, int *len, int *isna, unsigned int *c);
 
+
+/* (mutlithreaded) recycling.
+ *
+ * This avoids having to compute i % ni at every iteration while
+ * recycling over a vector.
+ *
+ * Input:
+ * i : integer, current index.
+ * nthreads : number of threads working on the vector.
+ * ni : vector length
+ *
+ *
+ */
+static inline int recycle(int i, int nthreads, int ni){
+  i += nthreads;
+  if ( i >= ni )
+    i -= ni;
+  return i;
+}
+
+
+
+
 #endif
