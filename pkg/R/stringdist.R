@@ -349,7 +349,7 @@ do_dist <- function(a, b, method, weight, maxDist, q, p, nthread=1L){
     cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L),
     jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L),
     jw      = .Call('R_jw'    , a, b, as.double(p), as.double(weight), nthread),
-    soundex = .Call('R_soundex_dist', a, b)
+    soundex = .Call('R_soundex_dist', a, b, nthread)
   )
   if (maxDist < Inf ){
     d[!is.na(d) & d > maxDist] <- Inf

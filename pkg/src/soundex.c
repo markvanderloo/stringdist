@@ -22,7 +22,9 @@
 #include <Rdefines.h>
 #include "utils.h"
 #include <ctype.h>
-
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 // Translate similar sounding consonants to numeric codes; vowels are all 
 // translated to 'a' and voiceless characters (and other characters) are 
@@ -285,47 +287,86 @@ SEXP R_soundex(SEXP x) {
 }
 
 
-SEXP R_soundex_dist(SEXP a, SEXP b) {
-  int na = length(a);
-  int nb = length(b);
-  int nt = MAX(na,nb);
-  int bytes = IS_CHARACTER(a);
+SEXP R_soundex_dist(SEXP a, SEXP b, SEXP nthrd) {
+  PROTECT(a);
+  PROTECT(b);
+  PROTECT(nthrd);
 
-  // when a and b are character vectors; create unsigned int vectors in which
-  // the elements of and b will be copied
-  unsigned int *s = NULL, *t = NULL;
-  if (bytes) {
-    int ml_a = max_length(a);
-    int ml_b = max_length(b);
-    s = (unsigned int *) malloc((ml_a + ml_b) * sizeof(unsigned int));
-    t = s + ml_a;
-    if (s == NULL) {
-       free(s);
-       error("Unable to allocate enough memory");
-    }
-  }
+  int na = length(a)
+    , nb = length(b)
+    , nt = MAX(na,nb)
+    , bytes = IS_CHARACTER(a);
 
   // create output variable
   SEXP yy = allocVector(REALSXP, nt);
   PROTECT(yy);
   double *y = REAL(yy);
 
-  // compute distances, skipping NA's
+  // Counter for the number of non-printable ascii or non-ascii characters.
   unsigned int nfail = 0;
-  int len_s, len_t, isna_s, isna_t;
-  for (int k=0; k < nt; ++k, ++y) {
-    s = get_elem(a, k % na, bytes, &len_s, &isna_s, s);
-    t = get_elem(b, k % nb, bytes, &len_t, &isna_t, t);
-    if (isna_s || isna_t) {
-      (*y) = NA_REAL;
-    } else { 
-      (*y) = soundex_dist(s, t, len_s, len_t, &nfail);
-    } 
-  }
-  // cleanup and return
+  
+
+  #ifdef _OPENMP 
+  int  nthreads = INTEGER(nthrd)[0];
+  omp_lock_t writelock;
+  omp_init_lock(&writelock);
+  #pragma omp parallel num_threads(nthreads) default(none) \
+      shared(y, nfail, writelock, R_PosInf, NA_REAL, bytes, na, nb, nt, a, b)
+  #endif
+  {
+    // when a and b are character vectors; create unsigned int vectors in which
+    // the elements of and b will be copied
+    unsigned int *s = NULL, *t = NULL;
+    if (bytes) {
+      int ml_a = max_length(a);
+      int ml_b = max_length(b);
+      s = (unsigned int *) malloc((ml_a + ml_b) * sizeof(unsigned int));
+      t = s + ml_a;
+      if (s == NULL) {
+         free(s);
+         error("Unable to allocate enough memory");
+      }
+    }
+
+    unsigned int ifail;
+    // compute distances, skipping NA's
+    int k, len_s, len_t, isna_s, isna_t
+      , i = 0, j = 0, ID = 0, num_threads = 1;
+    
+    #ifdef _OPENMP
+    ID = omp_get_thread_num();
+    num_threads = omp_get_num_threads();
+    i = recycle(ID-num_threads, num_threads, na);
+    j = recycle(ID-num_threads, num_threads, nb);
+    #endif
+  
+    for ( k=ID; k < nt; k += num_threads ) {
+      s = get_elem(a, i, bytes, &len_s, &isna_s, s);
+      t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+      if (isna_s || isna_t) {
+        y[k] = NA_REAL;
+      } else { 
+        y[k] = soundex_dist(s, t, len_s, len_t, &ifail);
+      } 
+      i = recycle(i, num_threads, na);
+      j = recycle(j, num_threads, nb);
+    }
+    // cleanup and return
+    if (bytes) free(s);
+    #ifdef _OPENMP
+    omp_set_lock(&writelock);
+    #endif
+    nfail += ifail;
+    #ifdef _OPENMP
+    omp_unset_lock(&writelock);
+    #endif
+  } // end of parallel region.
+  
   check_fail(nfail);
-  if (bytes) free(s);
-  UNPROTECT(1);
+  #ifdef _OPENMP
+  omp_destroy_lock(&writelock);
+  #endif
+  UNPROTECT(4);
   return yy;
 }
 
