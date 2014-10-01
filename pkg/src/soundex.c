@@ -328,7 +328,7 @@ SEXP R_soundex_dist(SEXP a, SEXP b, SEXP nthrd) {
       }
     }
 
-    unsigned int ifail;
+    unsigned int ifail = 0;
     // compute distances, skipping NA's
     int k, len_s, len_t, isna_s, isna_t
       , i = 0, j = 0, ID = 0, num_threads = 1;
@@ -362,10 +362,10 @@ SEXP R_soundex_dist(SEXP a, SEXP b, SEXP nthrd) {
     #endif
   } // end of parallel region.
   
-  check_fail(nfail);
   #ifdef _OPENMP
   omp_destroy_lock(&writelock);
   #endif
+  check_fail(nfail);
   UNPROTECT(4);
   return yy;
 }
