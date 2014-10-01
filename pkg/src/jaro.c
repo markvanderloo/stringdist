@@ -177,7 +177,7 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight, SEXP nthrd){
     }
     if ( (work == NULL) | (bytes && s == NULL) ){
        // This most probably gives a stack inbalance when called from parallel region
-       // TODO: I probably need to protected this with a locked flag.
+       // TODO: I probably need to protect this with a locked flag.
        UNPROTECT(6); free(s); free(work);
        error("Unable to allocate enough memory");
     }
