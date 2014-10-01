@@ -51,7 +51,17 @@ unsigned int *get_elem(SEXP x, int i, int bytes, int *len, int *isna, unsigned i
 /* (mutlithreaded) recycling.
  *
  * This avoids having to compute i % ni at every iteration while
- * recycling over a vector.
+ * recycling over a vector. 
+ *
+ * In the default case, the counter i starts at omp_thread_num() and
+ * is increased with omp_get_num_threads() (round robin parallelization).
+ * If a counter is increased to above the length of a vector, it's value
+ * is decreased with the vector length (recycling).
+ *
+ * There is an edge case when omp_get_num_threads() is less than the
+ * vector's length. In that case, when i > the vector length, the 
+ * modulus is computed anyway.
+ *
  *
  * Input:
  * i : integer, current index.

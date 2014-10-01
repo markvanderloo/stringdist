@@ -22,7 +22,9 @@
 #include <Rdefines.h>
 #include "utils.h"
 #include <string.h>
-
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 
 
@@ -32,7 +34,6 @@
  * matching two instances of the same character to the same position in b (which we treat read-only).
  */
 static int match_int(unsigned int a, unsigned int *b, int *guard, int width, int m){
-//Rprintf("width : %d \n",width);
   int i = 0;
   while ( 
       ( i < width ) && 
@@ -42,7 +43,6 @@ static int match_int(unsigned int a, unsigned int *b, int *guard, int width, int
   }
   // ugly edge case workaround
   if ( !(m && i==width) && b[i] == a ){
-//Rprintf("  guard[%d] %d b[%d]: %d\n",i,guard[i],i,b[i]);
     guard[i] = 1;
     return i;
   } 
@@ -112,7 +112,6 @@ static double jaro_winkler(
       // ugly workaround: I should rewrite match_int.
       max_reached = (right == y) ? 1 : 0;
       J =  match_int(a[i], b + left, work + left, right - left, max_reached);
-//Rprintf("i:%d, a[i] :%d, left - right: %d - %d, J: %d\n",i,a[i],left,right,J);
     }
 
     if ( J >= 0 ){
@@ -140,11 +139,12 @@ static double jaro_winkler(
 
 /*----------- R interface ------------------------------------------------*/
 
-SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight){
+SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
   PROTECT(p);
   PROTECT(weight);
+  PROTECT(nthrd);
 
   // find the length of longest strings
   int ml_a = max_length(a)
@@ -154,47 +154,62 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight){
     , nt = MAX(na,nb)
     , bytes = IS_CHARACTER(a);
   
-  double pp = REAL(p)[0]
-    , *w = REAL(weight);
-
-  // workspace for worker function
-  int *work = (int *) malloc( sizeof(int) * MAX(ml_a,ml_b) );
-  unsigned int *s = NULL, *t = NULL;
-  if (bytes){
-    s = (unsigned int *) malloc((ml_a + ml_b) * sizeof(int));
-    t = s + ml_a;
-  }
-  if ( (work == NULL) | (bytes && s == NULL) ){
-     UNPROTECT(4); free(s); free(work);
-     error("Unable to allocate enough memory");
-  }
-
   // output variable
   SEXP yy;
   PROTECT(yy = allocVector(REALSXP,nt));
-  double *y = REAL(yy);
+  double *y = REAL(yy)
+    , pp = REAL(p)[0]
+    , *w = REAL(weight);
 
-  // compute distances, skipping NA's
-  int i=0,j=0, len_s, len_t, isna_s, isna_t;
 
-  for ( int k=0; k < nt; 
-      ++k 
-    , i = RECYCLE(i+1,na)
-    , j = RECYCLE(j+1,nb) ){
+  #ifdef _OPENMP 
+  int  nthreads = INTEGER(nthrd)[0];
+  #pragma omp parallel num_threads(nthreads) default(none) \
+      shared(y, w, pp, R_PosInf, NA_REAL, bytes, na, nb, ml_a, ml_b, nt, a, b)
+  #endif
+  {
+    // workspace for worker function
+    int *work = (int *) malloc( sizeof(int) * MAX(ml_a,ml_b) );
+    unsigned int *s = NULL, *t = NULL;
+    if (bytes){
+      s = (unsigned int *) malloc((ml_a + ml_b) * sizeof(int));
+      t = s + ml_a;
+    }
+    if ( (work == NULL) | (bytes && s == NULL) ){
+       // This most probably gives a stack inbalance when called from parallel region
+       // TODO: I probably need to protected this with a locked flag.
+       UNPROTECT(6); free(s); free(work);
+       error("Unable to allocate enough memory");
+    }
 
-    s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-    t = get_elem(b, j, bytes, &len_t, &isna_t, t);
-    if ( isna_s || isna_t ){
-      y[k] = NA_REAL;
-      continue;
-    } else { // jaro-winkler distance
-      y[k] = jaro_winkler(s, t, len_s, len_t, pp, w, work);
-    } 
+
+    // compute distances, skipping NA's
+    int len_s, len_t, isna_s, isna_t
+      , i = 0, j = 0, ID = 0, num_threads = 1;
+
+    #ifdef _OPENMP
+    ID = omp_get_thread_num();
+    num_threads = omp_get_num_threads();
+    i = recycle(ID-num_threads, num_threads, na);
+    j = recycle(ID-num_threads, num_threads, nb);
+    #endif
+    for ( int k = ID; k < nt; k += num_threads){
+      s = get_elem(a, i, bytes, &len_s, &isna_s, s);
+      t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+      if ( isna_s || isna_t ){
+        y[k] = NA_REAL;
+        continue;
+      } else { // jaro-winkler distance
+        y[k] = jaro_winkler(s, t, len_s, len_t, pp, w, work);
+      }
+      i = recycle(i, num_threads, na);
+      j = recycle(j, num_threads, nb); 
+    }
+      
+    free(work);
+    if (bytes) free(s);
   }
-    
-  free(work);
-  if (bytes) free(s);
-  UNPROTECT(5);
+  UNPROTECT(6);
   return yy;
 }
 
