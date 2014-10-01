@@ -38,7 +38,9 @@
 #include <R.h>
 #include <Rdefines.h>
 #include "utils.h"
-
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 /* Our unsorted dictionary  */
 /* Note we use character ints, not chars. */
@@ -173,10 +175,11 @@ static double distance(
 // -- interface with R 
 
 
-SEXP R_dl(SEXP a, SEXP b, SEXP weight){
+SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
   PROTECT(weight);
+  PROTECT(nthrd);
    
   int na = length(a)
     , nb = length(b)
@@ -187,60 +190,79 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight){
   
   double *w = REAL(weight);
 
-  /* claim space for workhorse */
-  unsigned int *s=NULL, *t=NULL;
-  dictionary *dict = new_dictionary( ml_a + ml_b + 1 );
-
-  double *scores = (double *) malloc( (ml_a + 3) * (ml_b + 2) * sizeof(double) );
-
-  int slen = (ml_a + ml_b + 2) * sizeof(int);
-  s = (unsigned int *) malloc(slen);
-
-  if ( (scores == NULL) | ( s == NULL ) ){
-    UNPROTECT(3); free(scores); free(s);
-    error("Unable to allocate enough memory");
-  } 
-
-  t = s + ml_a + 1;
-  memset(s, 0, slen);
-
-
   // output
   SEXP yy; 
   PROTECT(yy = allocVector(REALSXP, nt));
   double *y = REAL(yy);
 
-  int i=0, j=0, len_s, len_t, isna_s, isna_t;
-  unsigned int *s1, *t1;
-  for ( int k=0; k < nt; ++k ){
-    if (bytes){
-      s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-      t = get_elem(b, j, bytes, &len_t, &isna_t, t);
-    } else { // make sure there's an extra 0 at the end of the string.
-      s1 = get_elem(a, i, bytes, &len_s, &isna_s, s);
-      t1 = get_elem(b, j, bytes, &len_t, &isna_t, t);
-      memcpy(s,s1,len_s*sizeof(int));
-      memcpy(t,t1,len_t*sizeof(int));
-    }
-    if ( isna_s || isna_t ){
-      y[k] = NA_REAL;
-      continue;
-    }
 
-    y[k] = distance(
-     s, t, len_s, len_t,
-     w, dict, scores
-    );
-    if (y[k] < 0 ) y[k] = R_PosInf;
-    i = RECYCLE(i+1,na);
-    j = RECYCLE(j+1,nb);
+
+  #ifdef _OPENMP 
+  int  nthreads = INTEGER(nthrd)[0];
+  #pragma omp parallel num_threads(nthreads) default(none) \
+      shared(y, w, R_PosInf, NA_REAL, bytes, na, nb, ml_a, ml_b, nt, a, b)
+  #endif
+  {
+    /* claim space for workhorse */
+    unsigned int *s=NULL, *t=NULL;
+    dictionary *dict = new_dictionary( ml_a + ml_b + 1 );
+
+    double *scores = (double *) malloc( (ml_a + 3) * (ml_b + 2) * sizeof(double) );
+
+    int slen = (ml_a + ml_b + 2) * sizeof(int);
+    s = (unsigned int *) malloc(slen);
+
+    if ( (scores == NULL) | ( s == NULL ) ){
+      UNPROTECT(5); free(scores); free(s);
+      error("Unable to allocate enough memory");
+    } 
+
+    t = s + ml_a + 1;
     memset(s, 0, slen);
+
+    /* start working */
+    
+    unsigned int *s1, *t1;
+    int k, len_s, len_t, isna_s, isna_t
+      , i = 0, j = 0, ID = 0, num_threads = 1;
+
+    #ifdef _OPENMP
+    ID = omp_get_thread_num();
+    num_threads = omp_get_num_threads();
+    i = recycle(ID-num_threads, num_threads, na);
+    j = recycle(ID-num_threads, num_threads, nb);
+    #endif
+
+    for ( k=ID; k < nt; k += num_threads ){
+      if (bytes){
+        s = get_elem(a, i, bytes, &len_s, &isna_s, s);
+        t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+      } else { // make sure there's an extra 0 at the end of the string.
+        s1 = get_elem(a, i, bytes, &len_s, &isna_s, s);
+        t1 = get_elem(b, j, bytes, &len_t, &isna_t, t);
+        memcpy(s,s1,len_s*sizeof(int));
+        memcpy(t,t1,len_t*sizeof(int));
+      }
+      if ( isna_s || isna_t ){
+        y[k] = NA_REAL;
+        continue;
+      }
+
+      y[k] = distance(
+       s, t, len_s, len_t,
+       w, dict, scores
+      );
+      if (y[k] < 0 ) y[k] = R_PosInf;
+      i = recycle(i, num_threads, na);
+      j = recycle(j, num_threads, nb);
+      memset(s, 0, slen);
+    }
+    
+    free_dictionary(dict);
+    free(scores);
+    free(s);
   }
-  
-  free_dictionary(dict);
-  free(scores);
-  free(s);
-  UNPROTECT(4);
+  UNPROTECT(5);
   return yy;
 } 
 

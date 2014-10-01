@@ -77,7 +77,7 @@ SEXP R_hm(SEXP a, SEXP b, SEXP nthrd){
     }
     
     int k, len_s, len_t, isna_s, isna_t
-      , i=0, j=0, ID=0, num_threads = 1;
+      , i = 0, j = 0, ID = 0, num_threads = 1;
 
     #ifdef _OPENMP
     ID = omp_get_thread_num();
