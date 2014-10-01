@@ -341,7 +341,7 @@ char2int <- function(x){
 do_dist <- function(a, b, method, weight, maxDist, q, p, nthread=1L){
   d <- switch(method,
     osa     = .Call('R_osa'   , a, b, as.double(weight)),
-    lv      = .Call('R_lv'    , a, b, as.double(weight)),
+    lv      = .Call('R_lv'    , a, b, as.double(weight), nthread),
     dl      = .Call('R_dl'    , a, b, as.double(weight), nthread),
     hamming = .Call('R_hm'    , a, b, nthread),
     lcs     = .Call('R_lcs'   , a, b, nthread),
