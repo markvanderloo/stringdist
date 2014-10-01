@@ -22,6 +22,9 @@
 #include <R.h>
 #include <Rdefines.h>
 #include "utils.h"
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 /* Optimal string alignment algorithm. 
  * Computes Damerau-Levenshtein distance, restricted to single transpositions.
@@ -76,60 +79,79 @@ for ( i = 1; i <= na; ++i ){
 //-- Distance function interface with R
 
 
-SEXP R_osa(SEXP a, SEXP b, SEXP weight){
+SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
   PROTECT(weight);
+  PROTECT(nthrd);
 
   int na = length(a)
     , nb = length(b)
     , bytes = IS_CHARACTER(a)
     , ml_a = max_length(a)
-    , ml_b = max_length(b);
-  double *scores, *w = REAL(weight);
-
-  scores = (double *) malloc( (ml_a + 1) * (ml_b + 1) * sizeof(double)); 
-
-  unsigned int *s = NULL, *t = NULL;
-  if (bytes){
-    s = (unsigned int *) malloc(( ml_a + ml_b) * sizeof(int));
-  }
-
-  if ( (scores == NULL) | (bytes && s == NULL) ){
-    UNPROTECT(3); free(scores); free(s);
-    error("Unable to allocate enough memory");
-  } 
-  t = s + ml_a;
-    
+    , ml_b = max_length(b)
+    , nt = (na > nb) ? na : nb;
+  
+  double *w = REAL(weight);
 
   // output vector
-  int nt = (na > nb) ? na : nb;   
   SEXP yy;
   PROTECT(yy = allocVector(REALSXP, nt));
-  double *y = REAL(yy);   
-   
-  int i=0, j=0, len_s, len_t, isna_s, isna_t;
-  for ( int k=0; k < nt; ++k ){
-    s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-    t = get_elem(b, j, bytes, &len_t, &isna_t, t);
- 
-    if (isna_s || isna_t){
-      y[k] = NA_REAL;
-      continue;
+  double *y = REAL(yy);
+
+
+  #ifdef _OPENMP 
+  int  nthreads = INTEGER(nthrd)[0];
+  #pragma omp parallel num_threads(nthreads) default(none) \
+      shared(y, w, R_PosInf, NA_REAL, bytes, na, nb, ml_a, ml_b, nt, a, b)
+  #endif
+  {
+    double *scores = (double *) malloc( (ml_a + 1) * (ml_b + 1) * sizeof(double)); 
+
+    unsigned int *s = NULL, *t = NULL;
+    if (bytes){
+      s = (unsigned int *) malloc(( ml_a + ml_b) * sizeof(int));
     }
-    y[k] = osa(
-       s, len_s 
-     , t, len_t
-     , w, scores
-    );
-    if ( y[k] < 0 ) y[k] = R_PosInf;
-    i = RECYCLE(i+1,na);
-    j = RECYCLE(j+1,nb);
-  }
+
+    if ( (scores == NULL) | (bytes && s == NULL) ){
+      UNPROTECT(5); free(scores); free(s);
+      error("Unable to allocate enough memory");
+    } 
+    t = s + ml_a;
+      
+    int len_s, len_t, isna_s, isna_t
+      , i = 0, j = 0, ID = 0, num_threads = 1;
+
+    #ifdef _OPENMP
+    ID = omp_get_thread_num();
+    num_threads = omp_get_num_threads();
+    i = recycle(ID-num_threads, num_threads, na);
+    j = recycle(ID-num_threads, num_threads, nb);
+    #endif
+
+    for ( int k=ID; k < nt; k += num_threads ){
+      s = get_elem(a, i, bytes, &len_s, &isna_s, s);
+      t = get_elem(b, j, bytes, &len_t, &isna_t, t);
    
-  free(scores);
-  if (bytes) free(s);
-  UNPROTECT(4);
+      if (isna_s || isna_t){
+        y[k] = NA_REAL;
+        continue;
+      }
+      y[k] = osa(
+         s, len_s 
+       , t, len_t
+       , w, scores
+      );
+      if ( y[k] < 0 ) y[k] = R_PosInf;
+      i = recycle(i, num_threads, na);
+      j = recycle(j, num_threads, nb);
+    }
+     
+    free(scores);
+    if (bytes) free(s);
+  } // end of parallel region
+
+  UNPROTECT(5);
 
   return(yy);
 }
