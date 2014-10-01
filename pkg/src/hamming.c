@@ -74,8 +74,8 @@ SEXP R_hm(SEXP a, SEXP b, SEXP nthrd){
     int k, len_s, len_t, isna_s, isna_t, i, j;
     int ID = omp_get_thread_num()
       , num_threads = omp_get_num_threads();
-    i = ID;
-    j = ID;
+    i = recycle(ID-num_threads, num_threads, na);
+    j = recycle(ID-num_threads, num_threads, nb);
     for ( k = ID; k < nt; k += num_threads ){
       s = get_elem(a, i, bytes, &len_s, &isna_s, s);
       t = get_elem(b, j, bytes, &len_t, &isna_t, t);

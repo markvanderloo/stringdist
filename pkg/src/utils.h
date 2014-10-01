@@ -63,7 +63,7 @@ unsigned int *get_elem(SEXP x, int i, int bytes, int *len, int *isna, unsigned i
 static inline int recycle(int i, int nthreads, int ni){
   i += nthreads;
   if ( i >= ni )
-    i -= ni;
+    i = (nthreads < ni) ? (i - ni) : (i % ni);
   return i;
 }
 
