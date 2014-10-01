@@ -211,7 +211,7 @@
 #' @param q  Size of the \eqn{q}-gram; must be nonnegative. Only applies to \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
 #' @param p Penalty factor for Jaro-Winkler distance. The valid range for \code{p} is \code{0 <= p <= 0.25}. 
 #'  If \code{p=0} (default), the Jaro-distance is returned. Applies only to \code{method='jw'}.
-#'
+#' @param nthread (positive integer) Number of threads to use.
 #'
 #'
 #' @return For \code{stringdist},  a vector with string distances of size \code{max(length(a),length(b))}.
@@ -222,11 +222,12 @@
 #'  
 #' @example ../examples/stringdist.R
 #' @export
-stringdist <- function(a, b, 
-  method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw","soundex"), 
-  useBytes = FALSE,
-  weight=c(d=1,i=1,s=1,t=1), 
-  maxDist=Inf, q=1, p=0
+stringdist <- function(a, b
+  , method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw","soundex")
+  , useBytes = FALSE
+  , weight=c(d=1,i=1,s=1,t=1) 
+  , maxDist=Inf, q=1, p=0
+  , nthread = 1L
 ){
 
   a <- as.character(a)
@@ -238,7 +239,7 @@ stringdist <- function(a, b,
     warning(RECYCLEWARNING)
   }
   method <- match.arg(method)
-  
+  nthread <- as.integer(nthread)
   stopifnot(
       all(is.finite(weight))
       , all(weight > 0)
@@ -249,13 +250,14 @@ stringdist <- function(a, b,
       , is.logical(useBytes)
       , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
+      , nthread > 0
   )
   if (!useBytes){
     a <- char2int(a)
     b <- char2int(b)
   }
   if (method == 'jw') weight <- weight[c(2,1,3)]
-  do_dist(b, a, method, weight, maxDist, q, p)
+  do_dist(b, a, method, weight, maxDist, q, p, nthread)
 }
 
 
@@ -336,12 +338,12 @@ char2int <- function(x){
 
 
 
-do_dist <- function(a, b, method, weight, maxDist, q, p){
+do_dist <- function(a, b, method, weight, maxDist, q, p, nthread=1L){
   d <- switch(method,
     osa     = .Call('R_osa'   , a, b, as.double(weight)),
     lv      = .Call('R_lv'    , a, b, as.double(weight)),
     dl      = .Call('R_dl'    , a, b, as.double(weight)),
-    hamming = .Call('R_hm'    , a, b),
+    hamming = .Call('R_hm'    , a, b, nthread),
     lcs     = .Call('R_lcs'   , a, b),
     qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L),
     cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L),

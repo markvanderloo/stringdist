@@ -52,17 +52,22 @@ SEXP R_hm(SEXP a, SEXP b, SEXP nthrd){
     , nt = ( na > nb) ? na : nb
     , bytes = IS_CHARACTER(a)
     , ml_a = max_length(a)
-    , ml_b = max_length(b)
-    , nthreads = INTEGER(nthrd)[0];
-
+    , ml_b = max_length(b);
 
   // create answer vector.
   SEXP yy;
   PROTECT(yy = allocVector(REALSXP,nt));
   double *y = REAL(yy);
-  
+
+  /* formally, the pragma statement need not be included in the #ifdef, but 
+   * at least in gcc it generates warning (hence CRAN-trouble) when not 
+   * recognized.
+   */
+  #ifdef _OPENMP 
+  int  nthreads = INTEGER(nthrd)[0];
   #pragma omp parallel num_threads(nthreads) default(none) \
       shared(y, R_PosInf, NA_REAL, bytes, na, nb, ml_a, ml_b, nt, a, b)
+  #endif
   {
     unsigned int *s = NULL, *t = NULL;
     if ( bytes ){
@@ -71,11 +76,16 @@ SEXP R_hm(SEXP a, SEXP b, SEXP nthrd){
       t = s + ml_a;
     }
     
-    int k, len_s, len_t, isna_s, isna_t, i, j;
-    int ID = omp_get_thread_num()
-      , num_threads = omp_get_num_threads();
+    int k, len_s, len_t, isna_s, isna_t
+      , i=0, j=0, ID=0, num_threads = 1;
+
+    #ifdef _OPENMP
+    ID = omp_get_thread_num();
+    num_threads = omp_get_num_threads();
     i = recycle(ID-num_threads, num_threads, na);
     j = recycle(ID-num_threads, num_threads, nb);
+    #endif
+
     for ( k = ID; k < nt; k += num_threads ){
       s = get_elem(a, i, bytes, &len_s, &isna_s, s);
       t = get_elem(b, j, bytes, &len_t, &isna_t, t);
