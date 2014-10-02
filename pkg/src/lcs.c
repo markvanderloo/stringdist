@@ -78,7 +78,7 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP nthrd){
     , ml_a = max_length(a)
     , ml_b = max_length(b)
     , bytes = IS_CHARACTER(a)
-    , nt = (na > nb) ? na : nb;   
+    , nt = (na > nb) ? na : nb;
 
   // output vector
   SEXP yy;
@@ -100,13 +100,9 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP nthrd){
       s = (unsigned int *) malloc( (ml_a + ml_b) * sizeof(int));
       t = s + ml_a; 
     }
+    // no memory = no joy = no looping.
+    if ( (scores == NULL) | (bytes && s == NULL) ) nt = -1;
 
-    if ( (scores == NULL) | (bytes && s == NULL) ){
-      UNPROTECT(4); free(scores); free(s);
-      error("%s\n","unable to allocate enough memory for workspace");
-    }
-
-    
     int len_s, len_t, isna_s, isna_t
       , i = 0, j = 0, ID = 0, num_threads=1;
 
@@ -134,6 +130,7 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP nthrd){
   } // end parallel region
 
   UNPROTECT(4);
+  if (nt < 0)  error("Unable to allocate enough memory");
   return(yy);
 }
 

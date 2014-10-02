@@ -108,12 +108,7 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP nthrd){
       s = (unsigned int *) malloc( (ml_a + ml_b) * sizeof(int));
       t = s + ml_a;
     }
-    if ( (scores == NULL) | (bytes && s == NULL) ){
-      UNPROTECT(5);
-      free(scores);
-      free(s);
-      error("Unable to allocate enough memory for workspace");
-    }
+    if ( (scores == NULL) | (bytes && s == NULL) ) nt = -1;
 
     
     int len_s, len_t, isna_s, isna_t
@@ -147,7 +142,7 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP nthrd){
     if ( bytes ) free(s);
   } // end of parallel region
   UNPROTECT(5);
-
+  if (nt < 0) error("Unable to allocate enough memory");
   return(yy);
 }
 

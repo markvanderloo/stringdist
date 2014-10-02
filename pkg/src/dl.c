@@ -200,7 +200,7 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP nthrd){
   #ifdef _OPENMP 
   int  nthreads = INTEGER(nthrd)[0];
   #pragma omp parallel num_threads(nthreads) default(none) \
-      shared(y, w, R_PosInf, NA_REAL, bytes, na, nb, ml_a, ml_b, nt, a, b)
+      shared(y, w, R_PosInf, NA_REAL, bytes, na, nb, nt, ml_a, ml_b, a, b)
   #endif
   {
     /* claim space for workhorse */
@@ -213,13 +213,11 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP nthrd){
     s = (unsigned int *) malloc(slen);
 
     if ( (scores == NULL) | ( s == NULL ) ){
-      UNPROTECT(5); free(scores); free(s);
-      error("Unable to allocate enough memory");
-    } 
-
-    t = s + ml_a + 1;
-    memset(s, 0, slen);
-
+      nt = -1;
+    } else {
+      t = s + ml_a + 1;
+      memset(s, 0, slen);
+    }
     /* start working */
     
     unsigned int *s1, *t1;
@@ -263,6 +261,8 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP nthrd){
     free(s);
   }
   UNPROTECT(5);
+  if (nt < 0)  error("Unable to allocate enough memory");
+ 
   return yy;
 } 
 

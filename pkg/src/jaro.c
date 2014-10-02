@@ -175,12 +175,7 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight, SEXP nthrd){
       s = (unsigned int *) malloc((ml_a + ml_b) * sizeof(int));
       t = s + ml_a;
     }
-    if ( (work == NULL) | (bytes && s == NULL) ){
-       // This most probably gives a stack inbalance when called from parallel region
-       // TODO: I probably need to protect this with a locked flag.
-       UNPROTECT(6); free(s); free(work);
-       error("Unable to allocate enough memory");
-    }
+    if ( (work == NULL) | (bytes && s == NULL) ) nt = -1;
 
 
     // compute distances, skipping NA's
@@ -210,6 +205,7 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight, SEXP nthrd){
     if (bytes) free(s);
   }
   UNPROTECT(6);
+  if ( nt < 0 ) error("Unable to allocate enough memory");
   return yy;
 }
 
