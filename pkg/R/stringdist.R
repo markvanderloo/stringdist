@@ -283,6 +283,7 @@ stringdistmatrix <- function(a, b,
   useBytes = FALSE,
   weight=c(d=1,i=1,s=1,t=1),  maxDist=Inf, q=1, p=0,
   useNames=FALSE, ncores=1, cluster=NULL
+  ,nthread = 1L
 ){
   
   a <- as.character(a)
@@ -298,6 +299,7 @@ stringdistmatrix <- function(a, b,
   }
 
   method <- match.arg(method)
+  nthread <- as.integer(nthread)
   stopifnot(
       all(is.finite(weight))
       , all(weight > 0)
@@ -309,6 +311,7 @@ stringdistmatrix <- function(a, b,
       , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
       , ncores > 0
+      , nthread > 0
   )
   if (!useBytes){
     a <- char2int(a)
@@ -316,7 +319,7 @@ stringdistmatrix <- function(a, b,
   }
   if (method == 'jw') weight <- weight[c(2,1,3)]
   if (ncores==1){
-    x <- sapply(b,do_dist, USE.NAMES=FALSE, a,method,weight,maxDist, q, p)
+    x <- sapply(b,do_dist, USE.NAMES=FALSE, a,method,weight,maxDist, q, p,nthread)
   } else {
     if ( is.null(cluster) ){
       cluster <- makeCluster(ncores)
@@ -325,7 +328,7 @@ stringdistmatrix <- function(a, b,
       stopifnot(inherits(cluster, 'cluster'))
       turn_cluster_off <- FALSE
     }
-    x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q, p)
+    x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q, p, nthread)
     if (turn_cluster_off) stopCluster(cluster)
   }
   if (!useNames)  as.matrix(x) else structure(as.matrix(x), dimnames=list(rowns,colns))
