@@ -345,9 +345,9 @@ do_dist <- function(a, b, method, weight, maxDist, q, p, nthread=1L){
     dl      = .Call('R_dl'    , a, b, as.double(weight), nthread),
     hamming = .Call('R_hm'    , a, b, nthread),
     lcs     = .Call('R_lcs'   , a, b, nthread),
-    qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L),
-    cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L),
-    jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L),
+    qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L, nthread),
+    cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L, nthread),
+    jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L, nthread),
     jw      = .Call('R_jw'    , a, b, as.double(p), as.double(weight), nthread),
     soundex = .Call('R_soundex_dist', a, b, nthread)
   )
