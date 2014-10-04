@@ -4,7 +4,9 @@ RECYCLEWARNING <- NULL
 
 .onLoad <- function(libname, pkgname){
   RECYCLEWARNING <<- gettext(tryCatch( (1:2)+(1:3),warning=function(w) w$message ))
+  options(sd_num_thread=parallel::detectCores())
 }
+
 
 #' Detect the presence of non-printable or non-ascii characters
 #' 

@@ -135,7 +135,7 @@
 #'    \code{soundex} \tab Distance based on soundex encoding (see below)
 #' }
 #' 
-#' A short description of these algorithms is proveded \link[=stringdist-package]{here}, or
+#' A short description of these algorithms is provided \link[=stringdist-package]{here}, or
 #' see the \href{http://journal.r-project.org/archive/2014-1/loo.pdf}{R Journal Paper} (external link) for
 #' more formal descriptions.
 #' 
@@ -166,14 +166,23 @@
 #'
 #'
 #' @section Paralellization:
-#' The \code{stringdistmatrix} function uses \code{\link[parallel]{makeCluster}} to create a local cluster and compute the
-#' distance matrix in parallel when \code{ncores>1}. The cluster is terminated after the matrix has been computed. 
-#' As the cluster is local, the \code{ncores} parameter should not be larger than the number
-#' of cores on your machine. Use \code{\link[parallel]{detectCores}} to check the number of cores available. Alternatively,
-#' you can create a cluster using \code{\link[parallel]{makeCluster}} and pass that to \code{stringdistmatrix} (through the \code{cluster} argument. 
-#' This allows you to reuse the cluster setup for other calculations.
-#' There is overhead in creating clusters, so creating the cluster yourself is a good choice if you want to call \code{stringdistmatrix} 
-#' multiple times, for example in a loop.
+#'
+#' By default \code{stringdist} and \code{stringdistmatrix} will use \code{getOption("sd_num_thread")} threads.
+#' When the package is loaded, this option is set to the number of available cores, as detected by 
+#' \code{parallel::detectCores}. If you're using R on a single machine, you probably do not need to alter this.
+#' 
+#' In older versions (<0.9) of \code{stringdist}, the \code{cluster} and \code{ncores} argument were the only 
+#' paralellization options. These options are based on the parallel package which starts multiple R-sessions
+#' to run R code in parallel. If you're running R on a single machine it is most probably faster to use the default
+#' multithreading (so do not specify \code{ncores} or \code{cluster}).
+#'
+#' As of the introduction of the \code{nthreads} argument, the \code{ncores} is mostly useless, although it still works.
+#' If \code{ncores>0}, a local cluster of running R-sessions is set up automatically. Each R-session will use \code{nthread}
+#' threads.
+#'
+#' The \code{cluster} argument is only interesting when the cluster is set up over different physical nodes. For example when
+#' setting up a network of nodes accross physically different machines. In each node, \code{nthread} threads will be used.
+#'
 #'
 #' @section Acknowledgement:
 #' The code for the full Damerau-Levenshtein distance was adapted from Nick Logan's
@@ -216,7 +225,8 @@
 #' @param q  Size of the \eqn{q}-gram; must be nonnegative. Only applies to \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
 #' @param p Penalty factor for Jaro-Winkler distance. The valid range for \code{p} is \code{0 <= p <= 0.25}. 
 #'  If \code{p=0} (default), the Jaro-distance is returned. Applies only to \code{method='jw'}.
-#' @param nthread (positive integer) Number of threads to use.
+#' @param nthread (positive integer) Number of threads used by the underlying C-code. The default is the number of cores
+#'  detected by \code{\link[parallel]{detectCores}}.
 #'
 #'
 #' @return For \code{stringdist},  a vector with string distances of size \code{max(length(a),length(b))}.
@@ -232,7 +242,7 @@ stringdist <- function(a, b
   , useBytes = FALSE
   , weight=c(d=1,i=1,s=1,t=1) 
   , maxDist=Inf, q=1, p=0
-  , nthread = 1L
+  , nthread = getOption("sd_num_thread")
 ){
 
   a <- as.character(a)
@@ -278,12 +288,12 @@ stringdist <- function(a, b
 #'
 #' @rdname stringdist
 #' @export
-stringdistmatrix <- function(a, b, 
-  method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex"), 
-  useBytes = FALSE,
-  weight=c(d=1,i=1,s=1,t=1),  maxDist=Inf, q=1, p=0,
-  useNames=FALSE, ncores=1, cluster=NULL
-  ,nthread = 1L
+stringdistmatrix <- function(a, b
+  , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex")
+  , useBytes = FALSE
+  , weight=c(d=1,i=1,s=1,t=1),  maxDist=Inf, q=1, p=0
+  , useNames=FALSE, ncores=1, cluster=NULL
+  , nthread = getOption("sd_num_thread")
 ){
   
   a <- as.character(a)
