@@ -24,7 +24,9 @@
 #include <R.h>
 #include <Rdefines.h>
 #include "utils.h"
-
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 /* binary tree; dictionary of qgrams */
 
@@ -38,15 +40,17 @@ typedef struct qnode {
 
 
 
+
 /* -- Simple memory allocator to store nodes of the qtree -- */
 
 
-/* Nodes are stored in boxes which are stored on a shelve.
- * Every time a new box is added to the shelve, the capacity 
+/* Nodes are stored in boxes which are stored on a shelf.
+ * Every time a new box is added to the shelf, the capacity 
  * for node storage doubles, unless MAXBOXES is surpassed.
  */
-#define MAXBOXES 20           // max number of boxes
-#define MIN_BOX_SIZE (1<<10)  // nr of nodes in initial box
+#define MAXBOXES 20             // max number of boxes
+#define MIN_BOX_SIZE (1<<10)    // nr of nodes in initial box
+#define MAX_NUM_THREADS (1<<10) // nr of threads for which alocator is thread-safe.
 
 // A Box of nodes.
 typedef struct {
@@ -80,26 +84,40 @@ static void free_box(Box *box){
   free( box);
 }
 
-// A shelve can store up to MAXBOXES Boxes.
+// A shelf can store up to MAXBOXES Boxes.
 typedef struct {
   Box *box[MAXBOXES];
   int nboxes;         // number of boxes on the shelf
   int q;              // the q in q-gram
   int nstr;           // the number of stings compared
-} Shelve;
+} Shelf;
 
-// one shelve for all.
-static Shelve shelve;
+// A wall with shelfs: one for each thread.
+static Shelf wall[MAX_NUM_THREADS];
 
-static void init_shelve(int q, int nstr){
-  shelve.q = q;
-  shelve.nstr = nstr;
-  shelve.nboxes = 0L;
-  for ( int i=0; i<MAXBOXES; i++ )
-    shelve.box[i] = NULL;
+// When multithreaded, check what shelf we're storing stuff.
+static inline int get_shelf_num(){
+  int thread_num=0;
+  #ifdef _OPENMP
+  thread_num = omp_get_thread_num();
+  #endif
+  return thread_num;
 }
 
-/* add box to shelve
+
+
+static void init_shelf(int q, int nstr){
+
+  Shelf *shelf = &wall[get_shelf_num()];
+
+  shelf->q = q;
+  shelf->nstr = nstr;
+  shelf->nboxes = 0L;
+  for ( int i=0; i<MAXBOXES; i++ )
+    shelf->box[i] = NULL;
+}
+
+/* add box to shelf
  *
  * return values:
  * 0: okidoki
@@ -108,13 +126,14 @@ static void init_shelve(int q, int nstr){
  */
 static int add_box(int nnodes){
 
+  Shelf *shelf = &wall[get_shelf_num()];
   // is there room for another box?
-  if ( shelve.nboxes >= MAXBOXES ) return 1;
+  if ( shelf->nboxes >= MAXBOXES ) return 1;
 
-  Box *b = new_box(nnodes, shelve.q, shelve.nstr);
+  Box *b = new_box(nnodes, shelf->q, shelf->nstr);
   if ( b != NULL ){
-    shelve.box[shelve.nboxes] = b;
-    shelve.nboxes++;
+    shelf->box[shelf->nboxes] = b;
+    shelf->nboxes++;
     return 1L;
   } else {
     return 0L;
@@ -122,11 +141,12 @@ static int add_box(int nnodes){
   
 }
 
-static void clear_shelve(){
-  for ( int i = 0; i < shelve.nboxes; i++ ){
-    free_box(shelve.box[i]);
+static void clear_shelf(){
+  Shelf *shelf = &wall[get_shelf_num()];
+  for ( int i = 0; i < shelf->nboxes; i++ ){
+    free_box(shelf->box[i]);
   }
-  shelve.nboxes=0L;
+  shelf->nboxes=0L;
 }
 
 /* the allocator can store ints (q-grams), doubles (counts, per string) 
@@ -137,28 +157,29 @@ typedef enum { uInt, Double, Qtree } type;
 
 // cf. n1256.pdf (C99 std) sect 6.3.2.3 for pointer conversion.
 static void *alloc(type t){
+  Shelf *shelf = &wall[get_shelf_num()];
 
   if ( 
-    shelve.nboxes == 0L &&
+    shelf->nboxes == 0L &&
     !add_box(MIN_BOX_SIZE)
   ) return NULL;
 
-  Box *box = shelve.box[shelve.nboxes-1L];
+  Box *box = shelf->box[shelf->nboxes-1L];
   if ( box->nalloc == box->nnodes ){
     // add box such that storage size is doubled.
     if (
-      !add_box( (1 << (shelve.nboxes-1L)) * MIN_BOX_SIZE )
+      !add_box( (1 << (shelf->nboxes-1L)) * MIN_BOX_SIZE )
     ) return NULL;
-    box = shelve.box[shelve.nboxes-1L];
+    box = shelf->box[shelf->nboxes-1L];
   }
 
   void *x;
   switch ( t){
     case uInt:
-      x = (void *) (box->intblocks + box->nalloc * shelve.q);
+      x = (void *) (box->intblocks + box->nalloc * shelf->q);
       break;
     case Double:
-      x = (void *) (box->dblblocks + box->nalloc * shelve.nstr);
+      x = (void *) (box->dblblocks + box->nalloc * shelf->nstr);
       break;
     case Qtree:
 
@@ -192,12 +213,12 @@ static int compare(unsigned int *q1, unsigned int *q2, int q){
 
 // helper functions
 static qtree *new_qtree(int q, int nstr){
-  init_shelve(q, nstr);
+  init_shelf(q, nstr);
   return NULL;
 }
 
 static void free_qtree(){
-  clear_shelve();
+  clear_shelf();
 }
 
 
