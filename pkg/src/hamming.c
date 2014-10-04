@@ -110,65 +110,72 @@ SEXP R_hm(SEXP a, SEXP b, SEXP nthrd){
 
 //-- Match function interface with R
 
-SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistance){
+SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
+    , SEXP maxDistance, SEXP nthrd){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
   PROTECT(matchNA);
+  PROTECT(nthrd);
 
   int nx = length(x)
     , ntable = length(table)
     , no_match = INTEGER(nomatch)[0]
     , match_na = INTEGER(matchNA)[0]
     , max_dist = INTEGER(maxDistance)[0]
-    , bytes = IS_CHARACTER(x);
-
-
-  unsigned int *X = NULL, *T = NULL;
-  if ( bytes ){
-    int ml_x = max_length(x);
-    X = (unsigned int *) malloc((ml_x + max_length(table)) * sizeof(int));
-    T = X + ml_x;
-    if ( X == NULL ){
-      UNPROTECT(5);
-      error("Unable to allocate enough memory");
-    }
-  }
+    , bytes = IS_CHARACTER(x)
+    , nthreads = INTEGER(nthrd)[0];
 
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
 
-
-  double d = R_PosInf, d1 = R_PosInf;
-  int index, isna_X, isna_T, len_X, len_T;
-
-  for ( int i=0; i<nx; i++){
-    index = no_match;
-    X = get_elem(x, i, bytes, &len_X, &isna_X, X);
-    d1 = R_PosInf;
-    for ( int j=0; j<ntable; j++){
-      T = get_elem(table, j, bytes, &len_T, &isna_T, T);
-      if ( len_X != len_T ) continue;
-
-      if ( !isna_X && !isna_T ){        // both are char (usual case)
-        d = (double) hamming( X, T, len_X );
-        if ( d <= max_dist && d < d1){ 
-          index = j + 1;
-          if ( d == 0.0 ) break;
-          d1 = d;
-        }
-      } else if ( isna_X && isna_T ) {  // both are NA
-        index = match_na ? j + 1 : no_match;
-        break;
-      }
+  #ifdef _OPENMP
+  #pragma omp parallel num_threads(nthreads) default(none) \
+    shared(x,table, y, R_PosInf, nx, ntable, no_match, match_na, bytes, max_dist)
+  #endif
+  {
+    unsigned int *X = NULL, *T = NULL;
+    if ( bytes ){
+      int ml_x = max_length(x);
+      X = (unsigned int *) malloc((ml_x + max_length(table)) * sizeof(int));
+      T = X + ml_x;
+      if ( X == NULL ) nx = -1;
     }
-    
-    y[i] = index;
-  }  
-  UNPROTECT(5);
-  if (bytes) free(X);
+    double d = R_PosInf, d1 = R_PosInf;
+    int index, isna_X, isna_T, len_X, len_T;
+
+    #ifdef _OPENMP
+    #pragma omp for
+    #endif
+    for ( int i=0; i<nx; i++){
+      index = no_match;
+      X = get_elem(x, i, bytes, &len_X, &isna_X, X);
+      d1 = R_PosInf;
+      for ( int j=0; j<ntable; j++){
+        T = get_elem(table, j, bytes, &len_T, &isna_T, T);
+        if ( len_X != len_T ) continue;
+
+        if ( !isna_X && !isna_T ){        // both are char (usual case)
+          d = (double) hamming( X, T, len_X );
+          if ( d <= max_dist && d < d1){ 
+            index = j + 1;
+            if ( d == 0.0 ) break;
+            d1 = d;
+          }
+        } else if ( isna_X && isna_T ) {  // both are NA
+          index = match_na ? j + 1 : no_match;
+          break;
+        }
+      }
+      
+      y[i] = index;
+    }  
+    if (bytes) free(X);
+  } // end of parallel region
+  UNPROTECT(6);
+  if (nx < 0 ) error("Unable to allocate enough memory");
   return(yy);
 }
 

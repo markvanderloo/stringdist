@@ -307,10 +307,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
 
     X = (unsigned int *) malloc( (ml_x + ml_t + 2) * sizeof(int) );
 
-    if ( (scores == NULL) ||  (X == NULL) ){
-      UNPROTECT(6); free(X); free(scores); 
-      error("Unable to allocate enough memory");
-    }
+    if ( (scores == NULL) ||  (X == NULL) ) nx = -1;
 
     T = X + ml_x + 1;
     memset(X, 0, (ml_x + ml_t + 2)*sizeof(int));
@@ -318,7 +315,9 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
     double d = R_PosInf, d1 = R_PosInf;
     int index, len_X, len_T, isna_X, isna_T;
     unsigned int *X1, *T1;
+    #ifdef _OPENMP
     #pragma omp for
+    #endif
     for ( int i=0; i<nx; i++){
       index = no_match;
       if ( bytes ){
@@ -360,5 +359,6 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
     free(scores);
   } // end of parallel region
   UNPROTECT(8);
+  if (nx < 0) error("Unable to allocate enough memory");
   return(yy);
 }
