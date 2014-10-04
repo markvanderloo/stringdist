@@ -123,8 +123,7 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
     , no_match = INTEGER(nomatch)[0]
     , match_na = INTEGER(matchNA)[0]
     , max_dist = INTEGER(maxDistance)[0]
-    , bytes = IS_CHARACTER(x)
-    , nthreads = INTEGER(nthrd)[0];
+    , bytes = IS_CHARACTER(x);
 
   // output vector
   SEXP yy;
@@ -132,6 +131,7 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
   int *y = INTEGER(yy);
 
   #ifdef _OPENMP
+  int nthreads = INTEGER(nthrd)[0];
   #pragma omp parallel num_threads(nthreads) default(none) \
     shared(x,table, y, R_PosInf, nx, ntable, no_match, match_na, bytes, max_dist)
   #endif

@@ -474,7 +474,8 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance, SEXP nthrd){
 
 //-- Match function interface with R
 
-SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq, SEXP maxDist, SEXP distance){
+SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
+    , SEXP maxDist, SEXP distance, SEXP nthrd){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
@@ -482,6 +483,7 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq,
   PROTECT(qq);
   PROTECT(maxDist);
   PROTECT(distance);
+  PROTECT(nthrd);
 
   double max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
   
@@ -496,62 +498,67 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq,
     , ml_x = max_length(x)
     , ml_t = max_length(table);
   
-  // set up a qtree;
-  qtree *Q = new_qtree(q, 2);
-
-  unsigned int *X = NULL, *T = NULL;
-  if (bytes){
-    X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int));
-    if ( X == NULL){
-      UNPROTECT(7);
-      error("Unable to allocate enough memory");
-    }
-    T = X + ml_x;
-  }
-
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
 
+  
+  #ifdef _OPENMP
+  int nthreads = INTEGER(nthrd)[0];
+  #pragma omp parallel num_threads(nthreads) default(none) \
+    shared(x,table, y, R_PosInf, nx, ntable, no_match, match_na, bytes, ml_x, ml_t, q, dist, max_dist)
+  #endif
+  {
+    // set up a qtree;
+    qtree *Q = new_qtree(q, 2);
 
-  double d = R_PosInf, d1 = R_PosInf;
-  int index, isna_X, isna_T, len_X, len_T;
-
-  for ( int i=0; i<nx; i++){
-    index = no_match;
-    X = get_elem(x, i, bytes, &len_X, &isna_X, X);
-    d1 = R_PosInf;
-    for ( int j=0; j<ntable; j++){
-
-      T = get_elem(table, j, bytes, &len_T, &isna_T,T);
-
-      if ( !isna_X && !isna_T ){        // both are char (usual case)
-        d = qgram_tree(
-          X, T, len_X, len_T, q, Q, dist
-        );
-        if ( d == -2.0 ){
-          UNPROTECT(7);
-          error("Unable to allocate enough memory for qgram storage");
-        }
-        if ( d > max_dist ){
-          continue;
-        } else if ( d > -1 && d < d1){ 
-          index = j + 1;
-          if ( abs(d) < 1e-14 ) break; 
-          d1 = d;
-        }
-      } else if ( isna_X && isna_T ) {  // both are NA
-        index = match_na ? j + 1 : no_match;
-        break;
-      }
+    unsigned int *X = NULL, *T = NULL;
+    if (bytes){
+      X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int));
+      if ( X == NULL ) nx = -1;
+      T = X + ml_x;
     }
-    
-    y[i] = index;
-  } 
-  if ( bytes ) free(X);
-  free_qtree();
-  UNPROTECT(8);
+
+    double d = R_PosInf, d1 = R_PosInf;
+    int index, isna_X, isna_T, len_X, len_T;
+
+    #ifdef _OPENMP
+    #pragma omp for
+    #endif
+    for ( int i=0; i<nx; i++){
+      index = no_match;
+      X = get_elem(x, i, bytes, &len_X, &isna_X, X);
+      d1 = R_PosInf;
+      for ( int j=0; j<ntable; j++){
+
+        T = get_elem(table, j, bytes, &len_T, &isna_T,T);
+
+        if ( !isna_X && !isna_T ){        // both are char (usual case)
+          d = qgram_tree(
+            X, T, len_X, len_T, q, Q, dist
+          );
+          if ( d == -2.0 ) nx = -1;
+          if ( d > max_dist ){
+            continue;
+          } else if ( d > -1 && d < d1){ 
+            index = j + 1;
+            if ( abs(d) < 1e-14 ) break; 
+            d1 = d;
+          }
+        } else if ( isna_X && isna_T ) {  // both are NA
+          index = match_na ? j + 1 : no_match;
+          break;
+        }
+      }
+      
+      y[i] = index;
+    } 
+    if ( bytes ) free(X);
+    free_qtree();
+  } // end of parallel region
+  UNPROTECT(9);
+  if (nx < 0 ) error("Unable to allocate enough memory");
   return(yy);
 }
 

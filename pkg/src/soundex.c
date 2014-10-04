@@ -370,7 +370,13 @@ SEXP R_soundex_dist(SEXP a, SEXP b, SEXP nthrd) {
   return yy;
 }
 
-SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA) {
+SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP nthrd) {
+  PROTECT(x);
+  PROTECT(table);
+  PROTECT(nomatch);
+  PROTECT(matchNA);
+  PROTECT(nthrd);
+  
 
   int nx = length(x);
   int ntable = length(table);
@@ -378,52 +384,62 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA) {
   int match_na = INTEGER(matchNA)[0];
   int bytes = IS_CHARACTER(x);
 
-  // when a and b are character vectors; create unsigned int vectors in which
-  // the elements of and b will be copied
-  unsigned int *s = NULL, *t = NULL;
-  if (bytes) {
-    int ml_x = max_length(x);
-    int ml_t = max_length(table);
-    s = (unsigned int *) malloc((ml_x + ml_t) * sizeof(unsigned int));
-    t = s + ml_x;
-    if (s == NULL) {
-       free(s);
-       error("Unable to allocate enough memory");
-    }
-  }
-
   // output vector
   SEXP yy = allocVector(INTSXP, nx);
   PROTECT(yy);
   int* y = INTEGER(yy);
 
-  int index, isna_s, isna_t, len_s, len_t;
-  unsigned int nfail = 0;
-  double d;
-  for (int i=0; i<nx; ++i) {
-    index = no_match;
-    s = get_elem(x, i, bytes, &len_s, &isna_s, s);
-
-    for (int j=0; j<ntable; ++j) {
-      t = get_elem(table, j, bytes, &len_t, &isna_t, t);
-
-      if (!isna_s && !isna_t) {        // both are char (usual case)
-        d = soundex_dist(s, t, len_s, len_t, &nfail);
-        if (d < 0.5) { // exact match as d can only take on values 0 and 1
-          index = j + 1;
-          break;
-        } 
-      } else if (isna_s && isna_t) {  // both are NA
-        index = match_na ? j + 1 : no_match;
-        break;
-      }
+  #ifdef _OPENMP
+  int nthreads = INTEGER(nthrd)[0];
+  #pragma omp parallel num_threads(nthreads) default(none) \
+    shared(x,table, y, R_PosInf, nx, ntable, no_match, match_na, bytes)
+  #endif
+  {
+    // when a and b are character vectors; create unsigned int vectors in which
+    // the elements of and b will be copied
+    unsigned int *s = NULL, *t = NULL;
+    if (bytes) {
+      int ml_x = max_length(x);
+      int ml_t = max_length(table);
+      s = (unsigned int *) malloc((ml_x + ml_t) * sizeof(unsigned int));
+      t = s + ml_x;
+      if (s == NULL) nx = -1;
     }
-    y[i] = index;
-  }   
-  // cleanup and return
-  check_fail(nfail);
-  if (bytes) free(s); 
-  UNPROTECT(1);
+
+
+    int index, isna_s, isna_t, len_s, len_t;
+    unsigned int nfail = 0;
+    double d;
+
+    #ifdef _OPENMP
+    #pragma omp for
+    #endif
+    for (int i=0; i<nx; ++i) {
+      index = no_match;
+      s = get_elem(x, i, bytes, &len_s, &isna_s, s);
+
+      for (int j=0; j<ntable; ++j) {
+        t = get_elem(table, j, bytes, &len_t, &isna_t, t);
+
+        if (!isna_s && !isna_t) {        // both are char (usual case)
+          d = soundex_dist(s, t, len_s, len_t, &nfail);
+          if (d < 0.5) { // exact match as d can only take on values 0 and 1
+            index = j + 1;
+            break;
+          } 
+        } else if (isna_s && isna_t) {  // both are NA
+          index = match_na ? j + 1 : no_match;
+          break;
+        }
+      }
+      y[i] = index;
+    }   
+    // cleanup and return
+    check_fail(nfail);
+    if (bytes) free(s); 
+  } // end of parallel region
+  UNPROTECT(6);
+  if (nx < 0) error("Unable to allocate enough memory");
   return(yy);
 }
 

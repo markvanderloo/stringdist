@@ -80,16 +80,16 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   if (maxDist==Inf && !method %in% c('osa','lv','dl','hm','lcs') ) maxDist <- 0L;
   if (method == 'jw') weight <- weight[c(2,1,3)]
   switch(method,
-    osa     = .Call('R_match_osa'       , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),
-    lv      = .Call('R_match_lv'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),
+    osa     = .Call('R_match_osa'       , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist), as.integer(nthread)),
+    lv      = .Call('R_match_lv'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist), as.integer(nthread)),
     dl      = .Call('R_match_dl'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist), as.integer(nthread)),
     hamming = .Call('R_match_hm'        , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist),as.integer(nthread)),
-    lcs     = .Call('R_match_lcs'        , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist)),
-    qgram   = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 0L),
-    cosine  = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 1L),
-    jaccard = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 2L),
-    jw      = .Call('R_match_jw'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(p), as.double(weight), as.double(maxDist)),
-    soundex = .Call('R_match_soundex'   , x, table, as.integer(nomatch), as.integer(matchNA))
+    lcs     = .Call('R_match_lcs'        , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist), as.integer(nthread)),
+    qgram   = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 0L, as.integer(nthread)),
+    cosine  = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 1L, as.integer(nthread)),
+    jaccard = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 2L, as.integer(nthread)),
+    jw      = .Call('R_match_jw'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(p), as.double(weight), as.double(maxDist),as.integer(nthread)),
+    soundex = .Call('R_match_soundex'   , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(nthread))
   )
 }
 

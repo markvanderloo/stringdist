@@ -212,7 +212,8 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight, SEXP nthrd){
 
 //-- Match function interface with R
 
-SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP weight, SEXP maxDist){
+SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p
+    , SEXP weight, SEXP maxDist, SEXP nthrd){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
@@ -220,6 +221,7 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP wei
   PROTECT(p);
   PROTECT(weight);
   PROTECT(maxDist);
+  PROTECT(nthrd);
 
   int nx = length(x)
     , ntable = length(table)
@@ -227,62 +229,69 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP wei
     , match_na = INTEGER(matchNA)[0]
     , bytes = IS_CHARACTER(x)
     , ml_x = max_length(x)
-    , ml_t = max_length(table);
+    , ml_t = max_length(table)
+    , nthreads = INTEGER(nthrd)[0];
 
   double pp = REAL(p)[0]
     , *w = REAL(weight)
     , max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
   
-  // workspace for worker function
-  int *work = (int *) malloc( sizeof(int) * MAX(ml_x, ml_t) );
-  unsigned int *X = NULL, *T = NULL;
-  if (bytes){
-    X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int));
-    T = X + ml_x;
-  }
-  if ( (work == NULL) | (bytes && X == NULL) ){
-    UNPROTECT(7); free(work); free(X);
-    error ("Unable to allocate enough memory\n");
-  }
-
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
 
 
-  double d = R_PosInf, d1 = R_PosInf;
-  int index, isna_X, isna_T, len_X,len_T;
-
-
-  for ( int i=0; i<nx; i++){
-    index = no_match;
-    X = get_elem(x, i, bytes, &len_X, &isna_X, X);
-    d1 = R_PosInf;
-    for ( int j=0; j<ntable; j++){
-      T = get_elem(table, j, bytes, &len_T, &isna_T, T);
-
-      if ( !isna_X && !isna_T ){        // both are char (usual case)
-        d = jaro_winkler(X, T, len_X, len_T, pp, w, work);
-        if ( d > max_dist ){
-          continue;
-        } else if ( d > -1.0 && d < d1){ 
-          index = j + 1;
-          if ( ABS(d) < 1e-14 ) break; // exact match
-          d1 = d;
-        }
-      } else if ( isna_X && isna_T ) {  // both are NA
-        index = match_na ? j + 1 : no_match;
-        break;
-      }
+  #ifdef _OPENMP
+  #pragma omp parallel num_threads(nthreads) default(none) \
+    shared(x,table, y, R_PosInf, nx, ntable, no_match, match_na, bytes,ml_x,ml_t,pp,w, max_dist)
+  #endif
+  {
+    // workspace for worker function
+    int *work = (int *) malloc( sizeof(int) * MAX(ml_x, ml_t) );
+    unsigned int *X = NULL, *T = NULL;
+    if (bytes){
+      X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int));
+      T = X + ml_x;
     }
-    
-    y[i] = index;
-  }   
+    if ( (work == NULL) | (bytes && X == NULL) ) nx = -1;
 
-  if (bytes) free(X); 
-  free(work);
+    double d = R_PosInf, d1 = R_PosInf;
+    int index, isna_X, isna_T, len_X,len_T;
+
+
+    #ifdef _OPENMP
+    #pragma omp for
+    #endif
+    for ( int i=0; i<nx; i++){
+      index = no_match;
+      X = get_elem(x, i, bytes, &len_X, &isna_X, X);
+      d1 = R_PosInf;
+      for ( int j=0; j<ntable; j++){
+        T = get_elem(table, j, bytes, &len_T, &isna_T, T);
+
+        if ( !isna_X && !isna_T ){        // both are char (usual case)
+          d = jaro_winkler(X, T, len_X, len_T, pp, w, work);
+          if ( d > max_dist ){
+            continue;
+          } else if ( d > -1.0 && d < d1){ 
+            index = j + 1;
+            if ( ABS(d) < 1e-14 ) break; // exact match
+            d1 = d;
+          }
+        } else if ( isna_X && isna_T ) {  // both are NA
+          index = match_na ? j + 1 : no_match;
+          break;
+        }
+      }
+      
+      y[i] = index;
+    }   
+    if (bytes) free(X); 
+    free(work);
+  } // end of parallel region
   UNPROTECT(8);
+  if ( nx < 0 ) error ("Unable to allocate enough memory");
   return(yy);
 }
 

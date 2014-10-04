@@ -284,8 +284,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
     , match_na = INTEGER(matchNA)[0]
     , bytes = IS_CHARACTER(x)
     , ml_x = max_length(x)
-    , ml_t = max_length(table)
-    , nthreads = INTEGER(nthrd)[0];
+    , ml_t = max_length(table);
 
   double *w = REAL(weight);
   double maxDist = REAL(maxDistance)[0];
@@ -295,6 +294,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
   PROTECT(yy = allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
   #ifdef _OPENMP
+  int nthreads = INTEGER(nthrd)[0];
   #pragma omp parallel num_threads(nthreads) default(none) \
     shared(x,table, y, w, R_PosInf, nx, ntable, no_match, match_na, bytes, ml_x, ml_t, maxDist)
   #endif
