@@ -268,13 +268,15 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP nthrd){
 
 //-- Match function interface with R
 
-SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEXP maxDistance){
+SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
+    , SEXP weight, SEXP maxDistance, SEXP nthrd){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
   PROTECT(matchNA);
   PROTECT(weight);
   PROTECT(maxDistance);
+  PROTECT(nthrd);
 
   int nx = length(x)
     , ntable = length(table)
@@ -282,75 +284,81 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEX
     , match_na = INTEGER(matchNA)[0]
     , bytes = IS_CHARACTER(x)
     , ml_x = max_length(x)
-    , ml_t = max_length(table);
+    , ml_t = max_length(table)
+    , nthreads = INTEGER(nthrd)[0];
 
   double *w = REAL(weight);
   double maxDist = REAL(maxDistance)[0];
   
-  /* claim space for workhorse */
-  dictionary *dict = new_dictionary( ml_x + ml_t + 1 );
-  double *scores = (double *) malloc( (ml_x + 3) * (ml_t + 2) * sizeof(double) );
-
-  unsigned int *X = NULL, *T = NULL;
-
-  X = (unsigned int *) malloc( (ml_x + ml_t + 2) * sizeof(int) );
-
-  if ( (scores == NULL) ||  (X == NULL) ){
-    UNPROTECT(6); free(X); free(scores); 
-    error("Unable to allocate enough memory");
-  }
-
-  T = X + ml_x + 1;
-  memset(X, 0, (ml_x + ml_t + 2)*sizeof(int));
-
-
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
+  #ifdef _OPENMP
+  #pragma omp parallel num_threads(nthreads) default(none) \
+    shared(x,table, y, w, R_PosInf, nx, ntable, no_match, match_na, bytes, ml_x, ml_t, maxDist)
+  #endif
+  {
+    /* claim space for workhorse */
+    dictionary *dict = new_dictionary( ml_x + ml_t + 1 );
+    double *scores = (double *) malloc( (ml_x + 3) * (ml_t + 2) * sizeof(double) );
 
-  double d = R_PosInf, d1 = R_PosInf;
-  int index, len_X, len_T, isna_X, isna_T;
-  unsigned int *X1, *T1;
-  for ( int i=0; i<nx; i++){
-    index = no_match;
-    if ( bytes ){
-      X = get_elem(x, i , bytes, &len_X, &isna_X, X);
-    } else {
-      X1 = get_elem(x, i , bytes, &len_X, &isna_X, X);
-      memcpy(X, X1, len_X*sizeof(int));
+    unsigned int *X = NULL, *T = NULL;
+
+    X = (unsigned int *) malloc( (ml_x + ml_t + 2) * sizeof(int) );
+
+    if ( (scores == NULL) ||  (X == NULL) ){
+      UNPROTECT(6); free(X); free(scores); 
+      error("Unable to allocate enough memory");
     }
-    d1 = R_PosInf;
 
-    for ( int j=0; j<ntable; j++){
+    T = X + ml_x + 1;
+    memset(X, 0, (ml_x + ml_t + 2)*sizeof(int));
+
+    double d = R_PosInf, d1 = R_PosInf;
+    int index, len_X, len_T, isna_X, isna_T;
+    unsigned int *X1, *T1;
+    #pragma omp for
+    for ( int i=0; i<nx; i++){
+      index = no_match;
       if ( bytes ){
-        T = get_elem(table, j, bytes, &len_T, &isna_T, T);
+        X = get_elem(x, i , bytes, &len_X, &isna_X, X);
       } else {
-        T1 = get_elem(table, j, bytes, &len_T, &isna_T, T);
-        memcpy(T, T1, len_T * sizeof(int));
+        X1 = get_elem(x, i , bytes, &len_X, &isna_X, X);
+        memcpy(X, X1, len_X*sizeof(int));
       }
-      if ( !isna_X && !isna_T ){        // both are char (usual case)
-        d = distance(
-          X, T, len_X, len_T, w, dict, scores
-        );
-        memset(T,0, (ml_t+1)*sizeof(int));
-        if ( d <= maxDist && d < d1){ 
-          index = j + 1;
-          if ( abs(d) < 1e-14 ) break;
-          d1 = d;
+      d1 = R_PosInf;
+
+      for ( int j=0; j<ntable; j++){
+        if ( bytes ){
+          T = get_elem(table, j, bytes, &len_T, &isna_T, T);
+        } else {
+          T1 = get_elem(table, j, bytes, &len_T, &isna_T, T);
+          memcpy(T, T1, len_T * sizeof(int));
         }
-      } else if ( isna_X && isna_T ) {  // both are NA
-        index = match_na ? j + 1 : no_match;
-        break;
+        if ( !isna_X && !isna_T ){        // both are char (usual case)
+          d = distance(
+            X, T, len_X, len_T, w, dict, scores
+          );
+          memset(T,0, (ml_t+1)*sizeof(int));
+          if ( d <= maxDist && d < d1){ 
+            index = j + 1;
+            if ( abs(d) < 1e-14 ) break;
+            d1 = d;
+          }
+        } else if ( isna_X && isna_T ) {  // both are NA
+          index = match_na ? j + 1 : no_match;
+          break;
+        }
       }
-    }
-    
-    y[i] = index;
-    memset(X,0,(ml_x + 1)*sizeof(int));
-  }  
-  UNPROTECT(7);
-  free(X);
-  free_dictionary(dict);
-  free(scores);
+      
+      y[i] = index;
+      memset(X,0,(ml_x + 1)*sizeof(int));
+    }  
+    free(X);
+    free_dictionary(dict);
+    free(scores);
+  } // end of parallel region
+  UNPROTECT(8);
   return(yy);
 }

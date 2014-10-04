@@ -25,17 +25,19 @@
 #'
 #' @param x vector: elements to be approximately matched: will be coerced to \code{character}.
 #' @param table vector: lookup table for matching. Will be coerced to \code{character}.
-#' @param nomatch The value to be returned when no match is found. This is coerced to integer. \code{nomatch=0} 
+#' @param nomatch (\code{integer}, \code{NA}) The value to be returned when no match is found. This is coerced to integer. \code{nomatch=0} 
 #'  can be a useful option.
-#' @param matchNA Should \code{NA}'s be matched? Default behaviour mimics the
+#' @param matchNA (\code{logical}) Should \code{NA}'s be matched? Default behaviour mimics the
 #'   behaviour of base \code{\link[base]{match}}, meaning that \code{NA} matches
 #'   \code{NA} (see also the note on \code{NA} handling below).
-#' @param method Matching algorithm to use. See \code{\link{stringdist}}.
-#' @param useBytes Perform byte-wise comparison. \code{useBytes=TRUE} is faster but may yield different
+#' @param method (\code{character}) Matching algorithm to use. See \code{\link{stringdist}}.
+#' @param useBytes (\code{logical}) Perform byte-wise comparison. \code{useBytes=TRUE} is faster but may yield different
 #' 	results depending on character encoding. See also \code{\link{stringdist}}, under encoding issues.
-#' @param weight Weight parameters for matching algorithm See \code{\link{stringdist}}.
-#' @param maxDist Elements in \code{x} will not be matched with elements of
+#' @param weight (\code{numeric}) Weight parameters for matching algorithm See \code{\link{stringdist}}.
+#' @param maxDist (\code{numeric}) Elements in \code{x} will not be matched with elements of
 #'  \code{table} if their distance is larger than \code{maxDist}. 
+#' @param nthread (positive \code{integer}) Number of threads used by the underlying C-code. The default is the number of cores
+#'  detected by \code{\link[parallel]{detectCores}}.
 #'   
 #' @param q q-gram size, see \code{\link{stringdist}}.
 #' @param p Winklers penalty parameter for Jaro-Winkler distance, see \code{\link{stringdist}}.
@@ -46,12 +48,12 @@
 #'
 #' @example ../examples/amatch.R
 #' @export
-amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE, 
-  method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw", "soundex"), 
-  useBytes = FALSE,
-  weight=c(d=1,i=1,s=1,t=1), 
-  maxDist=0.1, q=1, p=0){
-
+amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
+  , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw", "soundex") 
+  , useBytes = FALSE
+  , weight=c(d=1,i=1,s=1,t=1)
+  , maxDist=0.1, q=1, p=0
+  , nthread = getOption("sd_num_thread")){
 
   x <- as.character(x)
   table <- as.character(table)
@@ -73,13 +75,14 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE,
       , is.logical(useBytes)
       , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
+      , nthread > 0
   )
   if (maxDist==Inf && !method %in% c('osa','lv','dl','hm','lcs') ) maxDist <- 0L;
   if (method == 'jw') weight <- weight[c(2,1,3)]
   switch(method,
     osa     = .Call('R_match_osa'       , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),
     lv      = .Call('R_match_lv'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),
-    dl      = .Call('R_match_dl'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),
+    dl      = .Call('R_match_dl'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist), as.integer(nthread)),
     hamming = .Call('R_match_hm'        , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist)),
     lcs     = .Call('R_match_lcs'        , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist)),
     qgram   = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 0L),
