@@ -20,9 +20,9 @@ RECYCLEWARNING <- NULL
 #' @section Some tips on character encoding and transliteration:
 #' Some algorithms (like soundex) are defined only on the printable ASCII character set. This excludes any character
 #' with accents for example. Translating accented characters to the non-accented ones is a form of transliteration. On
-#' most systems running R you can achieve this with 
+#' many systems running R (but not all!) you can achieve this with 
 #' 
-#' \code{iconv(x,"ASCII//TRANSLIT")}, 
+#' \code{iconv(x,to="ASCII//TRANSLIT")}, 
 #' 
 #' where \code{x} is your character vector. See the documentation of \code{\link[base]{iconv}} for details.
 #'
