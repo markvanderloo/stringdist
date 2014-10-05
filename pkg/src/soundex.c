@@ -322,10 +322,7 @@ SEXP R_soundex_dist(SEXP a, SEXP b, SEXP nthrd) {
       int ml_b = max_length(b);
       s = (unsigned int *) malloc((ml_a + ml_b) * sizeof(unsigned int));
       t = s + ml_a;
-      if (s == NULL) {
-         free(s);
-         error("Unable to allocate enough memory");
-      }
+      if (s == NULL) nt = -1;
     }
 
     unsigned int ifail = 0;
@@ -367,6 +364,7 @@ SEXP R_soundex_dist(SEXP a, SEXP b, SEXP nthrd) {
   #endif
   check_fail(nfail);
   UNPROTECT(4);
+  if ( nt < 0 ) error("Unable to allocate enough memory");
   return yy;
 }
 
