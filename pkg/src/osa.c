@@ -68,7 +68,7 @@ for ( i = 1; i <= na; ++i ){
       scores[i-1 + M] + sub            // substitution
     );
     if ( i>1 && j>1 && a[i-1] == b[j-2] && a[i-2] == b[j-1] ){
-      scores[i + L] = MIN(scores[i + L], scores[i-2 + M-I]) + tran; // transposition
+      scores[i + L] = MIN(scores[i + L], scores[i-2 + M-I] + tran); // transposition
     }
   }
 }

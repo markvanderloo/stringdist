@@ -1,7 +1,7 @@
 Package: stringdist
 Maintainer: Mark van der Loo <mark.vanderloo@gmail.com>
 License: GPL-3
-Title: Approximate string matching and string distance functions.
+Title: Approximate String Matching and String Distance Functions
 LazyData: no
 Type: Package
 LazyLoad: yes

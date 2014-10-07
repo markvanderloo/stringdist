@@ -2,10 +2,15 @@ version 0.9.0
 - stringdist, stringdistmatrix, and amatch gain nthread argument. Near linear speadup in stringdist when useBytes=TRUE
 - C-code underlying stringdist and amatch now use multithreading based on openMP.
 
+version 0.8.2
+- Fixed a few warnings issued by the CLANG compiler (thanks to Brian Ripley)
+
 version 0.8.1
 - stringdistmatrix returns dimensionless matrix when both arguments have length zero (thanks to Richie Cotton)
 - stringdistmatrix gains argument 'useNames' (thanks to Richie Cotton)
 - Package now 'Imports' parallel rather than 'Depends' on it.
+- bugfix in optimal string alignment distance: the nr of transpositions was sometimes overcounted (thanks to Frank Binder)
+- rearranged the documentation.
 
 version 0.8.0
 - Added soundex-based string distance (thanks to Jan van der Laan)

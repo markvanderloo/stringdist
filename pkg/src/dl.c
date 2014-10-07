@@ -342,7 +342,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
           memset(T,0, (ml_t+1)*sizeof(int));
           if ( d <= maxDist && d < d1){ 
             index = j + 1;
-            if ( abs(d) < 1e-14 ) break;
+            if ( fabs(d) < 1e-14 ) break;
             d1 = d;
           }
         } else if ( isna_X && isna_T ) {  // both are NA

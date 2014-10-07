@@ -280,7 +280,7 @@ static qtree *push_string(unsigned int *str, int strlen, unsigned int q, qtree *
  */
 static void getdist(qtree *Q, double *d){
   if (Q == NULL) return;
-  d[0] += (double) abs(Q->n[0] - Q->n[1]);
+  d[0] += fabs(Q->n[0] - Q->n[1]);
   Q->n[0] = 0;
   Q->n[1] = 0;
   getdist(Q->left, d);
@@ -543,7 +543,7 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
             continue;
           } else if ( d > -1 && d < d1){ 
             index = j + 1;
-            if ( abs(d) < 1e-14 ) break; 
+            if ( fabs(d) < 1e-14 ) break; 
             d1 = d;
           }
         } else if ( isna_X && isna_T ) {  // both are NA
