@@ -1,4 +1,5 @@
 version 0.8.2
+- Fixed a few warnings issued by the CLANG compiler (thanks to Brian Ripley)
 
 version 0.8.1
 - stringdistmatrix returns dimensionless matrix when both arguments have length zero (thanks to Richie Cotton)

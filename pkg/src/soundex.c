@@ -195,8 +195,8 @@ static unsigned int soundex(const unsigned int* str, unsigned int str_len, unsig
 static double soundex_dist(unsigned int *a, unsigned int *b, unsigned int a_len, 
     unsigned int b_len, unsigned int *nfail) {
   const unsigned int l = 4;
-  unsigned int sa[l];
-  unsigned int sb[l];
+  unsigned int sa[4];
+  unsigned int sb[4];
   (*nfail) += soundex(a, a_len, sa);
   (*nfail) += soundex(b, b_len, sb);
   for (unsigned int i = 0; i < l; ++i) 
