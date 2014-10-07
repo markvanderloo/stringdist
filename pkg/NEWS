@@ -1,3 +1,5 @@
+version 0.8.2
+
 version 0.8.1
 - stringdistmatrix returns dimensionless matrix when both arguments have length zero (thanks to Richie Cotton)
 - stringdistmatrix gains argument 'useNames' (thanks to Richie Cotton)
