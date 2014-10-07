@@ -3,6 +3,7 @@ version 0.8.1
 - stringdistmatrix gains argument 'useNames' (thanks to Richie Cotton)
 - Package now 'Imports' parallel rather than 'Depends' on it.
 - bugfix in optimal string alignment distance: the nr of transpositions was sometimes overcounted (thanks to Frank Binder)
+- rearranged the documentation.
 
 version 0.8.0
 - Added soundex-based string distance (thanks to Jan van der Laan)
