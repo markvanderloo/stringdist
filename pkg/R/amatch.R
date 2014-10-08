@@ -30,10 +30,14 @@
 #' @param matchNA (\code{logical}) Should \code{NA}'s be matched? Default behaviour mimics the
 #'   behaviour of base \code{\link[base]{match}}, meaning that \code{NA} matches
 #'   \code{NA} (see also the note on \code{NA} handling below).
-#' @param method (\code{character}) Matching algorithm to use. See \code{\link{stringdist}}.
+#' @param method (\code{character}) Matching algorithm to use. See \code{\link{stringdist-package}}.
 #' @param useBytes (\code{logical}) Perform byte-wise comparison. \code{useBytes=TRUE} is faster but may yield different
 #' 	results depending on character encoding. See also \code{\link{stringdist}}, under encoding issues.
-#' @param weight (\code{numeric}) Weight parameters for matching algorithm See \code{\link{stringdist}}.
+#' @param weight For \code{method='osa'} or \code{'dl'}, the penalty for deletion, insertion, substitution and transposition, in that order.
+#'   When \code{method='lv'}, the penalty for transposition is ignored. When \code{method='jw'}, the weights associated with characters
+#'   of \code{a}, characters from \code{b} and the transposition weight, in that order.
+#'   Weights must be positive and not exceed 1. \code{weight} is
+#'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'}, \code{'lcs'}, or \code{soundex}. 
 #' @param maxDist (\code{numeric}) Elements in \code{x} will not be matched with elements of
 #'  \code{table} if their distance is larger than \code{maxDist}. 
 #' @param nthread (positive \code{integer}) Number of threads used by the underlying C-code. The default is the number of cores
