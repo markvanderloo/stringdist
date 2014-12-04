@@ -2,5 +2,5 @@ library(testthat)
 
 
 dyn.load("../pkg/src/stringdist.so")
-auto_test("../pkg/R", "../pkg/inst/tests")
+auto_test("../pkg/R", "../pkg/tests/testthat")
 
