@@ -157,20 +157,21 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
 //-- Match function interface with R
 
 SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight
-  , SEXP maxDistance, SEXP nthrd){
+  , SEXP maxDistance, SEXP useBytes, SEXP nthrd){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
   PROTECT(matchNA);
   PROTECT(weight);
   PROTECT(maxDistance);
+  PROTECT(useBytes);
   PROTECT(nthrd);
 
   int nx = length(x)
     , ntable = length(table)
     , no_match = INTEGER(nomatch)[0]
     , match_na = INTEGER(matchNA)[0]
-    , bytes = IS_CHARACTER(x)
+    , bytes = INTEGER(x)[0]
     , ml_x = max_length(x)
     , ml_t = max_length(table);
 
@@ -191,10 +192,8 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight
     double *work = (double *) malloc( (ml_x + 3) * (ml_t + 2) * sizeof(double) );
 
     unsigned int *X = NULL, *T = NULL;
-    if ( bytes ){
-      X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int));
-      T = X + ml_x;
-    }
+    X = (unsigned int *) malloc( (2L + ml_x + ml_t) * sizeof(int));
+    T = X + ml_x + 1L;
 
     if ( (work == NULL) | (bytes && X == NULL) ) nx = -1;
 
@@ -206,12 +205,12 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight
     #endif
     for ( int i=0; i<nx; i++){
       index = no_match;
-      X = get_elem(x, i, bytes, &len_X, &isna_X, X);
+      get_elem1(x, i, bytes, &len_X, &isna_X, X);
       d1 = R_PosInf;
 
       for ( int j=0; j<ntable; j++){
 
-        T = get_elem(table, j, bytes, &len_T, &isna_T, T);
+        get_elem1(table, j, bytes, &len_T, &isna_T, T);
         
         if ( !isna_X && !isna_T ){        // both are char (usual case)
 
@@ -232,7 +231,7 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight
       y[i] = index;
     }
 
-    if (bytes) free(X);  
+    free(X);  
     free(work);
   } // end of parallel region
   UNPROTECT(8);
