@@ -42,15 +42,16 @@ static int hamming(unsigned int *a, unsigned int *b, int n){
 
 // -- R interface
 
-SEXP R_hm(SEXP a, SEXP b, SEXP nthrd){
+SEXP R_hm(SEXP a, SEXP b, SEXP useBytes, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
+  PROTECT(useBytes);
   PROTECT(nthrd);
 
   int na = length(a)
     , nb = length(b)
     , nt = ( na > nb) ? na : nb
-    , bytes = IS_CHARACTER(a)
+    , bytes = INTEGER(useBytes)[0]
     , ml_a = max_length(a)
     , ml_b = max_length(b);
 
@@ -70,11 +71,9 @@ SEXP R_hm(SEXP a, SEXP b, SEXP nthrd){
   #endif
   {
     unsigned int *s = NULL, *t = NULL;
-    if ( bytes ){
-      s = (unsigned int *) malloc( (ml_a + ml_b) * sizeof(int));
-      if ( s == NULL ) error("Unable to allocate enough memory");
-      t = s + ml_a;
-    }
+    s = (unsigned int *) malloc( (2L + ml_a + ml_b) * sizeof(int));
+    if ( s == NULL ) error("Unable to allocate enough memory");
+    t = s + ml_a;
     
     int k, len_s, len_t, isna_s, isna_t
       , i = 0, j = 0, ID = 0, num_threads = 1;
@@ -85,10 +84,9 @@ SEXP R_hm(SEXP a, SEXP b, SEXP nthrd){
     i = recycle(ID-num_threads, num_threads, na);
     j = recycle(ID-num_threads, num_threads, nb);
     #endif
-
     for ( k = ID; k < nt; k += num_threads ){
-      s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-      t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+      get_elem1(a, i, bytes, &len_s, &isna_s, s);
+      get_elem1(b, j, bytes, &len_t, &isna_t, t);
       if ( isna_s || isna_t ){
         y[k] = NA_REAL;
         continue;         
@@ -101,9 +99,9 @@ SEXP R_hm(SEXP a, SEXP b, SEXP nthrd){
       i = recycle(i, num_threads, na);
       j = recycle(j, num_threads, nb);
     }
-    if (bytes) free(s);
-  }
-  UNPROTECT(4);
+    free(s);
+  } // end of parallel region
+  UNPROTECT(5);
   return yy;
 }
 

@@ -145,11 +145,11 @@ unsigned int *get_elem1(SEXP x, int i, int bytes, int *len, int *isna, unsigned 
 
   *isna = ( STRING_ELT(x,i) == NA_STRING );
   if (bytes){
-    *len  = length(STRING_ELT(x,i));
+    (*len)  = length(STRING_ELT(x,i));
     for (int j=0; j < *len; j++ )
       c[j] =  CHAR(STRING_ELT(x,i))[j];
   } else {
-    *len  = utf8_to_int( CHAR(STRING_ELT(x,i)), c);
+    (*len)  = utf8_to_int( CHAR(STRING_ELT(x,i)), c);
   }
   return  c;
 }
