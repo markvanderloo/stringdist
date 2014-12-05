@@ -109,11 +109,12 @@ SEXP R_hm(SEXP a, SEXP b, SEXP useBytes, SEXP nthrd){
 //-- Match function interface with R
 
 SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
-    , SEXP maxDistance, SEXP nthrd){
+    , SEXP maxDistance, SEXP useBytes, SEXP nthrd){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
   PROTECT(matchNA);
+  PROTECT(useBytes);
   PROTECT(nthrd);
 
   int nx = length(x)
@@ -135,12 +136,10 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
   #endif
   {
     unsigned int *X = NULL, *T = NULL;
-    if ( bytes ){
-      int ml_x = max_length(x);
-      X = (unsigned int *) malloc((ml_x + max_length(table)) * sizeof(int));
-      T = X + ml_x;
-      if ( X == NULL ) nx = -1;
-    }
+    int ml_x = max_length(x);
+    X = (unsigned int *) malloc((2L + ml_x + max_length(table)) * sizeof(int));
+    T = X + ml_x + 1L;
+    if ( X == NULL ) nx = -1;
     double d = R_PosInf, d1 = R_PosInf;
     int index, isna_X, isna_T, len_X, len_T;
 
@@ -149,10 +148,10 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
     #endif
     for ( int i=0; i<nx; i++){
       index = no_match;
-      X = get_elem(x, i, bytes, &len_X, &isna_X, X);
+      get_elem1(x, i, bytes, &len_X, &isna_X, X);
       d1 = R_PosInf;
       for ( int j=0; j<ntable; j++){
-        T = get_elem(table, j, bytes, &len_T, &isna_T, T);
+        get_elem1(table, j, bytes, &len_T, &isna_T, T);
         if ( len_X != len_T ) continue;
 
         if ( !isna_X && !isna_T ){        // both are char (usual case)
@@ -172,7 +171,7 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
     }  
     if (bytes) free(X);
   } // end of parallel region
-  UNPROTECT(6);
+  UNPROTECT(7);
   if (nx < 0 ) error("Unable to allocate enough memory");
   return(yy);
 }
