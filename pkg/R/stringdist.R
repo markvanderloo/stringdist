@@ -243,9 +243,9 @@ stringdist <- function(a, b
   , maxDist=Inf, q=1, p=0
   , nthread = getOption("sd_num_thread")
 ){
-
-  a <- as.character(a)
-  b <- as.character(b)
+  # note: enc2utf8 is very efficient when the native encoding is already UTF-8.
+  a <- enc2utf8(as.character(a))
+  b <- enc2utf8(as.character(b))
   if (length(a) == 0 || length(b) == 0){ 
     return(numeric(0))
   }
@@ -266,12 +266,12 @@ stringdist <- function(a, b
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
       , nthread > 0
   )
-  if (!useBytes){
+  if (!useBytes && !method %in% c('dl') ){
     a <- char2int(a)
     b <- char2int(b)
   }
   if (method == 'jw') weight <- weight[c(2,1,3)]
-  do_dist(b, a, method, weight, maxDist, q, p, nthread)
+  do_dist(b, a, method, weight, maxDist, q, p, useBytes, nthread)
 }
 
 
@@ -295,8 +295,8 @@ stringdistmatrix <- function(a, b
   , nthread = getOption("sd_num_thread")
 ){
   
-  a <- as.character(a)
-  b <- as.character(b)
+  a <- enc2utf8(as.character(a))
+  b <- enc2utf8(as.character(b))
  
   if (length(a) == 0 || length(b) == 0){ 
    return(matrix(numeric(0)))
@@ -322,13 +322,13 @@ stringdistmatrix <- function(a, b
       , ncores > 0
       , nthread > 0
   )
-  if (!useBytes){
+  if (!useBytes && !method %in% c('dl') ){
     a <- char2int(a)
     b <- lapply(char2int(b),list)
   }
   if (method == 'jw') weight <- weight[c(2,1,3)]
   if (ncores==1){
-    x <- sapply(b,do_dist, USE.NAMES=FALSE, a,method,weight,maxDist, q, p,nthread)
+    x <- sapply(b,do_dist, USE.NAMES=FALSE, a,method,weight,maxDist, q, p,useBytes, nthread)
   } else {
     if ( is.null(cluster) ){
       cluster <- makeCluster(ncores)
@@ -337,7 +337,7 @@ stringdistmatrix <- function(a, b
       stopifnot(inherits(cluster, 'cluster'))
       turn_cluster_off <- FALSE
     }
-    x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q, p, nthread)
+    x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q, p, useBytes, nthread)
     if (turn_cluster_off) stopCluster(cluster)
   }
   if (!useNames)  as.matrix(x) else structure(as.matrix(x), dimnames=list(rowns,colns))
@@ -355,11 +355,11 @@ char2int <- function(x){
 
 
 
-do_dist <- function(a, b, method, weight, maxDist, q, p, nthread=1L){
+do_dist <- function(a, b, method, weight, maxDist, q, p, useBytes=FALSE, nthread=1L){
   d <- switch(method,
     osa     = .Call('R_osa'   , a, b, as.double(weight), nthread),
     lv      = .Call('R_lv'    , a, b, as.double(weight), nthread),
-    dl      = .Call('R_dl'    , a, b, as.double(weight), nthread),
+    dl      = .Call('R_dl'    , a, b, as.double(weight), useBytes, nthread),
     hamming = .Call('R_hm'    , a, b, nthread),
     lcs     = .Call('R_lcs'   , a, b, nthread),
     qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L, nthread),

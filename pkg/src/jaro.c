@@ -153,7 +153,8 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight, SEXP nthrd){
     , nb = length(b)
     , nt = MAX(na,nb)
     , bytes = IS_CHARACTER(a);
-  
+ 
+Rprintf("ml_a %d\n",ml_a); 
   // output variable
   SEXP yy;
   PROTECT(yy = allocVector(REALSXP,nt));

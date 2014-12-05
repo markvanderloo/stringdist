@@ -17,14 +17,33 @@
  *  You can contact the author at: mark _dot_ vanderloo _at_ gmail _dot_ com
  */
 
+//#define USE_RINTERNALS
+#include <R.h>
+#include <Rdefines.h>
+#include "utils.h"
+#include <string.h>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 
 /* This function is gratefully copied from the R core distribution.
  * It is replicated here to facilitate multicore processing through
  * openmp (as it is not part of R's API).
  *
+ * Convert a single character to integer.
+ *
+ * *s input buffer (must be utf8)
+ * *w output buffer
+ *
+ * value:
+ * >0 : The number of bytes in the multi-byte representation
+ * 0  : End of string reached.
+ * <0 : Invalid input (not interpretable as UTF-8)
+ * 
+ * 
  */
-static int mbrtoint(int *w, const char *s)
+static int mbrtoint(unsigned int *w, const char *s)
 {
     unsigned int byte;
     byte = *((unsigned char *)s);
@@ -96,4 +115,45 @@ static int mbrtoint(int *w, const char *s)
     }
     /* return -2; not reached */
 }
+
+
+
+static int utf8_to_int(const char *str, unsigned int *outbuf){
+
+  unsigned int *p = outbuf;
+  char *s = (char *) str;
+  int nbytes
+    , str_len = 0L;
+
+  for (int i=0;; i++){
+    nbytes = mbrtoint(p, s);
+    if (nbytes > 0){
+      p += 1L;
+      str_len += 1L;
+      s += nbytes;
+    } else if (nbytes == -1L) { // non-utf-8 sequence encountered.
+      return -1; 
+    } else if (nbytes == 0L ){
+      return str_len;
+    }
+  }
+}
+
+
+/* todo: catch *len=-1 */
+unsigned int *get_elem1(SEXP x, int i, int bytes, int *len, int *isna, unsigned int *c){
+
+  *isna = ( STRING_ELT(x,i) == NA_STRING );
+  if (bytes){
+    *len  = length(STRING_ELT(x,i));
+    for (int j=0; j < *len; j++ )
+      c[j] =  CHAR(STRING_ELT(x,i))[j];
+  } else {
+    *len  = utf8_to_int( CHAR(STRING_ELT(x,i)), c);
+  }
+  return  c;
+}
+
+
+
 

@@ -173,21 +173,20 @@ static double distance(
 /* End of workhorse */
 
 // -- interface with R 
-
-
-SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP nthrd){
+SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
   PROTECT(weight);
+  PROTECT(useBytes);
   PROTECT(nthrd);
    
   int na = length(a)
     , nb = length(b)
     , nt = (na > nb) ? na : nb
-    , bytes = IS_CHARACTER(a)
+    , bytes = INTEGER(useBytes)[0]
     , ml_a = max_length(a)
     , ml_b = max_length(b);
-  
+ 
   double *w = REAL(weight);
 
   // output
@@ -233,11 +232,11 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP nthrd){
 
     for ( k=ID; k < nt; k += num_threads ){
       if (bytes){
-        s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-        t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+        s = get_elem1(a, i, bytes, &len_s, &isna_s, s);
+        t = get_elem1(b, j, bytes, &len_t, &isna_t, t);
       } else { // make sure there's an extra 0 at the end of the string.
-        s1 = get_elem(a, i, bytes, &len_s, &isna_s, s);
-        t1 = get_elem(b, j, bytes, &len_t, &isna_t, t);
+        s1 = get_elem1(a, i, bytes, &len_s, &isna_s, s);
+        t1 = get_elem1(b, j, bytes, &len_t, &isna_t, t);
         memcpy(s,s1,len_s*sizeof(int));
         memcpy(t,t1,len_t*sizeof(int));
       }
@@ -260,11 +259,12 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP nthrd){
     free(scores);
     free(s);
   }
-  UNPROTECT(5);
+  UNPROTECT(6);
   if (nt < 0)  error("Unable to allocate enough memory");
  
   return yy;
 } 
+
 
 //-- Match function interface with R
 
