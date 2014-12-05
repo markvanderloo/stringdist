@@ -169,7 +169,7 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
       
       y[i] = index;
     }  
-    if (bytes) free(X);
+    free(X);
   } // end of parallel region
   UNPROTECT(7);
   if (nx < 0 ) error("Unable to allocate enough memory");
