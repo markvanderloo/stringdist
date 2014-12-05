@@ -231,15 +231,8 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
     #endif
 
     for ( k=ID; k < nt; k += num_threads ){
-      if (bytes){
-        s = get_elem1(a, i, bytes, &len_s, &isna_s, s);
-        t = get_elem1(b, j, bytes, &len_t, &isna_t, t);
-      } else { // make sure there's an extra 0 at the end of the string.
-        s1 = get_elem1(a, i, bytes, &len_s, &isna_s, s);
-        t1 = get_elem1(b, j, bytes, &len_t, &isna_t, t);
-        memcpy(s,s1,len_s*sizeof(int));
-        memcpy(t,t1,len_t*sizeof(int));
-      }
+      get_elem1(a, i, bytes, &len_s, &isna_s, s);
+      get_elem1(b, j, bytes, &len_t, &isna_t, t);
       if ( isna_s || isna_t ){
         y[k] = NA_REAL;
         continue;
