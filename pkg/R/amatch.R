@@ -63,7 +63,7 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   table <- enc2utf8(as.character(table))
 
   method <- match.arg(method)
-  if (!useBytes && !method %in% c('dl','hamming')){
+  if (!useBytes && !method %in% c('dl','hamming', 'jw')){
     x <- char2int(x)
     table <- char2int(table)
   }
@@ -92,7 +92,7 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
     qgram   = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 0L, as.integer(nthread)),
     cosine  = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 1L, as.integer(nthread)),
     jaccard = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 2L, as.integer(nthread)),
-    jw      = .Call('R_match_jw'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(p), as.double(weight), as.double(maxDist),as.integer(nthread)),
+    jw      = .Call('R_match_jw'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(p), as.double(weight), as.double(maxDist), useBytes, as.integer(nthread)),
     soundex = .Call('R_match_soundex'   , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(nthread))
   )
 }
