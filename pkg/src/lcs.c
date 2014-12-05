@@ -71,6 +71,7 @@ static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int *scores){
 SEXP R_lcs(SEXP a, SEXP b, SEXP useBytes, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
+  PROTECT(useBytes);
   PROTECT(nthrd);
 
   int na = length(a)
@@ -127,7 +128,7 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP useBytes, SEXP nthrd){
     free(s);
   } // end parallel region
 
-  UNPROTECT(4);
+  UNPROTECT(5);
   if (nt < 0)  error("Unable to allocate enough memory");
   return(yy);
 }

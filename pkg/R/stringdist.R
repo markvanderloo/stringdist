@@ -266,7 +266,7 @@ stringdist <- function(a, b
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
       , nthread > 0
   )
-  if (!useBytes && !method %in% c('dl','hamming','jw','lcs') ){
+  if (!useBytes && !method %in% c('dl','hamming','jw','lcs','lv') ){
     a <- char2int(a)
     b <- char2int(b)
   }
@@ -322,7 +322,7 @@ stringdistmatrix <- function(a, b
       , ncores > 0
       , nthread > 0
   )
-  if (!useBytes && !method %in% c('dl','hamming','jw','lcs') ){
+  if (!useBytes && !method %in% c('dl','hamming','jw','lcs','lv') ){
     a <- char2int(a)
     b <- lapply(char2int(b),list)
   }
@@ -358,7 +358,7 @@ char2int <- function(x){
 do_dist <- function(a, b, method, weight, maxDist, q, p, useBytes=FALSE, nthread=1L){
   d <- switch(method,
     osa     = .Call('R_osa'   , a, b, as.double(weight), nthread),
-    lv      = .Call('R_lv'    , a, b, as.double(weight), nthread),
+    lv      = .Call('R_lv'    , a, b, as.double(weight), useBytes, nthread),
     dl      = .Call('R_dl'    , a, b, as.double(weight), useBytes, nthread),
     hamming = .Call('R_hm'    , a, b, useBytes, nthread),
     lcs     = .Call('R_lcs'   , a, b, useBytes, nthread),
