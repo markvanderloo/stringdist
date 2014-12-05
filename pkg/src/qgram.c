@@ -552,7 +552,7 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
       
       y[i] = index;
     } 
-    if ( bytes ) free(X);
+    free(X);
     free_qtree();
   } // end of parallel region
   UNPROTECT(9);

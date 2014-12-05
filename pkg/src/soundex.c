@@ -367,11 +367,12 @@ SEXP R_soundex_dist(SEXP a, SEXP b, SEXP useBytes, SEXP nthrd) {
   return yy;
 }
 
-SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP nthrd) {
+SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP useBytes, SEXP nthrd) {
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
   PROTECT(matchNA);
+  PROTECT(useBytes);
   PROTECT(nthrd);
   
 
@@ -379,7 +380,7 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP nthrd)
   int ntable = length(table);
   int no_match = INTEGER(nomatch)[0];
   int match_na = INTEGER(matchNA)[0];
-  int bytes = IS_CHARACTER(x);
+  int bytes = INTEGER(x)[0];
 
   // output vector
   SEXP yy = allocVector(INTSXP, nx);
@@ -395,13 +396,11 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP nthrd)
     // when a and b are character vectors; create unsigned int vectors in which
     // the elements of and b will be copied
     unsigned int *s = NULL, *t = NULL;
-    if (bytes) {
-      int ml_x = max_length(x);
-      int ml_t = max_length(table);
-      s = (unsigned int *) malloc((ml_x + ml_t) * sizeof(unsigned int));
-      t = s + ml_x;
-      if (s == NULL) nx = -1;
-    }
+    int ml_x = max_length(x);
+    int ml_t = max_length(table);
+    s = (unsigned int *) malloc((2L + ml_x + ml_t) * sizeof(unsigned int));
+    t = s + ml_x;
+    if (s == NULL) nx = -1;
 
 
     int index, isna_s, isna_t, len_s, len_t;
@@ -413,10 +412,10 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP nthrd)
     #endif
     for (int i=0; i<nx; ++i) {
       index = no_match;
-      s = get_elem(x, i, bytes, &len_s, &isna_s, s);
+      get_elem1(x, i, bytes, &len_s, &isna_s, s);
 
       for (int j=0; j<ntable; ++j) {
-        t = get_elem(table, j, bytes, &len_t, &isna_t, t);
+        get_elem1(table, j, bytes, &len_t, &isna_t, t);
 
         if (!isna_s && !isna_t) {        // both are char (usual case)
           d = soundex_dist(s, t, len_s, len_t, &nfail);
@@ -433,9 +432,9 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP nthrd)
     }   
     // cleanup and return
     check_fail(nfail);
-    if (bytes) free(s); 
+    free(s); 
   } // end of parallel region
-  UNPROTECT(6);
+  UNPROTECT(7);
   if (nx < 0) error("Unable to allocate enough memory");
   return(yy);
 }
