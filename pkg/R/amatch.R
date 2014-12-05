@@ -63,7 +63,7 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   table <- enc2utf8(as.character(table))
 
   method <- match.arg(method)
-  if (!useBytes && !method %in% c('dl','hamming', 'jw','lcs')){
+  if (!useBytes && !method %in% c('dl','hamming', 'jw','lcs','lv')){
     x <- char2int(x)
     table <- char2int(table)
   }
@@ -85,7 +85,7 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   if (method == 'jw') weight <- weight[c(2,1,3)]
   switch(method,
     osa     = .Call('R_match_osa'       , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist), as.integer(nthread)),
-    lv      = .Call('R_match_lv'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist), as.integer(nthread)),
+    lv      = .Call('R_match_lv'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist), useBytes, as.integer(nthread)),
     dl      = .Call('R_match_dl'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist), useBytes, as.integer(nthread)),
     hamming = .Call('R_match_hm'        , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist),useBytes,as.integer(nthread)),
     lcs     = .Call('R_match_lcs'        , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist), useBytes, as.integer(nthread)),
