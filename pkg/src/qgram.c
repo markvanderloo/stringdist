@@ -395,11 +395,12 @@ static double qgram_tree(
 }
 
 /* R interface to qgram distance */
-SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance, SEXP nthrd){
+SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance, SEXP useBytes, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
   PROTECT(qq);
   PROTECT(distance);
+  PROTECT(useBytes);
   PROTECT(nthrd);
 
   // choose distance function
@@ -411,7 +412,7 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance, SEXP nthrd){
     , nt = (na > nb) ? na : nb
     , ml_a = max_length(a)
     , ml_b = max_length(b)
-    , bytes = IS_CHARACTER(a);
+    , bytes = INTEGER(useBytes)[0];
 
   // output
   SEXP yy; 
@@ -427,11 +428,9 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance, SEXP nthrd){
     // set up a qtree; 
     qtree *Q = new_qtree(q, 2L);
     unsigned int *s = NULL, *t = NULL;
-    if ( bytes ){
-      s = (unsigned int *) malloc( (ml_a + ml_b) * sizeof(int) );
-      t = s + ml_a;
-      if ( s == NULL ) nt = -1;
-    }
+    s = (unsigned int *) malloc( (2L + ml_a + ml_b) * sizeof(int) );
+    t = s + ml_a + 1L;
+    if ( s == NULL ) nt = -1;
    
     int k, len_s, len_t, isna_s, isna_t
       , i = 0, j = 0, ID = 0, num_threads = 1;
@@ -445,8 +444,8 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance, SEXP nthrd){
 
     for ( k = ID; k < nt; k += num_threads ){ 
 
-      s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-      t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+      get_elem1(a, i, bytes, &len_s, &isna_s, s);
+      get_elem1(b, j, bytes, &len_t, &isna_t, t);
 
       if ( isna_s || isna_t ){
         y[k] = NA_REAL;
