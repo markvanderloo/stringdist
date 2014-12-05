@@ -266,7 +266,7 @@ stringdist <- function(a, b
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
       , nthread > 0
   )
-  if (!useBytes && !method %in% c('dl','hamming','jw') ){
+  if (!useBytes && !method %in% c('dl','hamming','jw','lcs') ){
     a <- char2int(a)
     b <- char2int(b)
   }
@@ -322,7 +322,7 @@ stringdistmatrix <- function(a, b
       , ncores > 0
       , nthread > 0
   )
-  if (!useBytes && !method %in% c('dl','hamming','jw') ){
+  if (!useBytes && !method %in% c('dl','hamming','jw','lcs') ){
     a <- char2int(a)
     b <- lapply(char2int(b),list)
   }
@@ -361,7 +361,7 @@ do_dist <- function(a, b, method, weight, maxDist, q, p, useBytes=FALSE, nthread
     lv      = .Call('R_lv'    , a, b, as.double(weight), nthread),
     dl      = .Call('R_dl'    , a, b, as.double(weight), useBytes, nthread),
     hamming = .Call('R_hm'    , a, b, useBytes, nthread),
-    lcs     = .Call('R_lcs'   , a, b, nthread),
+    lcs     = .Call('R_lcs'   , a, b, useBytes, nthread),
     qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L, nthread),
     cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L, nthread),
     jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L, nthread),

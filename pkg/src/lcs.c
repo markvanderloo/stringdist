@@ -68,7 +68,7 @@ static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int *scores){
 //-- interface with R
 
 
-SEXP R_lcs(SEXP a, SEXP b, SEXP nthrd){
+SEXP R_lcs(SEXP a, SEXP b, SEXP useBytes, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
   PROTECT(nthrd);
@@ -77,7 +77,7 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP nthrd){
     , nb = length(b)
     , ml_a = max_length(a)
     , ml_b = max_length(b)
-    , bytes = IS_CHARACTER(a)
+    , bytes = INTEGER(useBytes)[0]
     , nt = (na > nb) ? na : nb;
 
   // output vector
@@ -96,10 +96,8 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP nthrd){
     scores = (int *) malloc( (ml_a + 1) * (ml_b + 1) * sizeof(int)); 
 
     unsigned int *s = NULL, *t = NULL;
-    if ( bytes ){
-      s = (unsigned int *) malloc( (ml_a + ml_b) * sizeof(int));
-      t = s + ml_a; 
-    }
+    s = (unsigned int *) malloc( (2L + ml_a + ml_b) * sizeof(int));
+    t = s + ml_a + 1L; 
     // no memory = no joy = no looping.
     if ( (scores == NULL) | (bytes && s == NULL) ) nt = -1;
 
@@ -114,8 +112,8 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP nthrd){
     #endif
     
     for ( int k=ID; k < nt; k += num_threads ){
-      s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-      t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+      get_elem1(a, i, bytes, &len_s, &isna_s, s);
+      get_elem1(b, j, bytes, &len_t, &isna_t, t);
       if ( isna_s || isna_t ){
         y[k] = NA_REAL;
         continue;
@@ -126,7 +124,7 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP nthrd){
       j = recycle(j, num_threads, nb);
     } 
     free(scores);
-    if (bytes) free(s);
+    free(s);
   } // end parallel region
 
   UNPROTECT(4);
