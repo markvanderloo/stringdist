@@ -474,7 +474,7 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance, SEXP useBytes, SEXP nt
 //-- Match function interface with R
 
 SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
-    , SEXP maxDist, SEXP distance, SEXP nthrd){
+    , SEXP maxDist, SEXP distance, SEXP useBytes, SEXP nthrd){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
@@ -482,6 +482,7 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
   PROTECT(qq);
   PROTECT(maxDist);
   PROTECT(distance);
+  PROTECT(useBytes);
   PROTECT(nthrd);
 
   double max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
@@ -493,7 +494,7 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
     , ntable = length(table)
     , no_match = INTEGER(nomatch)[0]
     , match_na = INTEGER(matchNA)[0]
-    , bytes = IS_CHARACTER(x)
+    , bytes = INTEGER(x)[0]
     , ml_x = max_length(x)
     , ml_t = max_length(table);
   
@@ -513,11 +514,9 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
     qtree *Q = new_qtree(q, 2);
 
     unsigned int *X = NULL, *T = NULL;
-    if (bytes){
-      X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int));
-      if ( X == NULL ) nx = -1;
-      T = X + ml_x;
-    }
+    X = (unsigned int *) malloc( (2L + ml_x + ml_t) * sizeof(int));
+    if ( X == NULL ) nx = -1;
+    T = X + ml_x + 1L;
 
     double d = R_PosInf, d1 = R_PosInf;
     int index, isna_X, isna_T, len_X, len_T;
@@ -527,11 +526,11 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
     #endif
     for ( int i=0; i<nx; i++){
       index = no_match;
-      X = get_elem(x, i, bytes, &len_X, &isna_X, X);
+      get_elem1(x, i, bytes, &len_X, &isna_X, X);
       d1 = R_PosInf;
       for ( int j=0; j<ntable; j++){
 
-        T = get_elem(table, j, bytes, &len_T, &isna_T,T);
+        get_elem1(table, j, bytes, &len_T, &isna_T,T);
 
         if ( !isna_X && !isna_T ){        // both are char (usual case)
           d = qgram_tree(
