@@ -138,7 +138,7 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
     }
     
     free(scores);
-    if ( bytes ) free(s);
+    free(s);
   } // end of parallel region
   UNPROTECT(6);
   if (nt < 0) error("Unable to allocate enough memory");

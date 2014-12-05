@@ -287,15 +287,16 @@ SEXP R_soundex(SEXP x) {
 }
 
 
-SEXP R_soundex_dist(SEXP a, SEXP b, SEXP nthrd) {
+SEXP R_soundex_dist(SEXP a, SEXP b, SEXP useBytes, SEXP nthrd) {
   PROTECT(a);
   PROTECT(b);
+  PROTECT(useBytes);
   PROTECT(nthrd);
 
   int na = length(a)
     , nb = length(b)
     , nt = MAX(na,nb)
-    , bytes = IS_CHARACTER(a);
+    , bytes = INTEGER(useBytes)[0];
 
   // create output variable
   SEXP yy = allocVector(REALSXP, nt);
@@ -317,13 +318,11 @@ SEXP R_soundex_dist(SEXP a, SEXP b, SEXP nthrd) {
     // when a and b are character vectors; create unsigned int vectors in which
     // the elements of and b will be copied
     unsigned int *s = NULL, *t = NULL;
-    if (bytes) {
-      int ml_a = max_length(a);
-      int ml_b = max_length(b);
-      s = (unsigned int *) malloc((ml_a + ml_b) * sizeof(unsigned int));
-      t = s + ml_a;
-      if (s == NULL) nt = -1;
-    }
+    int ml_a = max_length(a);
+    int ml_b = max_length(b);
+    s = (unsigned int *) malloc((2L + ml_a + ml_b) * sizeof(unsigned int));
+    t = s + ml_a + 1L;
+    if (s == NULL) nt = -1;
 
     unsigned int ifail = 0;
     // compute distances, skipping NA's
@@ -338,8 +337,8 @@ SEXP R_soundex_dist(SEXP a, SEXP b, SEXP nthrd) {
     #endif
   
     for ( k=ID; k < nt; k += num_threads ) {
-      s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-      t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+      get_elem1(a, i, bytes, &len_s, &isna_s, s);
+      get_elem1(b, j, bytes, &len_t, &isna_t, t);
       if (isna_s || isna_t) {
         y[k] = NA_REAL;
       } else { 
@@ -349,7 +348,7 @@ SEXP R_soundex_dist(SEXP a, SEXP b, SEXP nthrd) {
       j = recycle(j, num_threads, nb);
     }
     // cleanup and return
-    if (bytes) free(s);
+    free(s);
     #ifdef _OPENMP
     omp_set_lock(&writelock);
     #endif
@@ -363,7 +362,7 @@ SEXP R_soundex_dist(SEXP a, SEXP b, SEXP nthrd) {
   omp_destroy_lock(&writelock);
   #endif
   check_fail(nfail);
-  UNPROTECT(4);
+  UNPROTECT(5);
   if ( nt < 0 ) error("Unable to allocate enough memory");
   return yy;
 }

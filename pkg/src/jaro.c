@@ -201,9 +201,9 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight, SEXP useBytes, SEXP nthrd){
     }
       
     free(work);
-    if (bytes) free(s);
+    free(s);
   }
-  UNPROTECT(6);
+  UNPROTECT(7);
   if ( nt < 0 ) error("Unable to allocate enough memory");
   return yy;
 }

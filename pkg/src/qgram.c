@@ -463,7 +463,7 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance, SEXP useBytes, SEXP nt
       j = recycle(j, num_threads, nb);
     }
     free_qtree();
-    if ( bytes ) free(s);
+    free(s);
   }
   UNPROTECT(6);
   if (nt < 0)  error("Unable to allocate enough memory");

@@ -266,7 +266,7 @@ stringdist <- function(a, b
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
       , nthread > 0
   )
-  if (!useBytes && !method %in% c('dl','hamming','jw','lcs','lv','osa','qgram','cosine','jaccard') ){
+  if (!useBytes && !method %in% c('dl','hamming','jw','lcs','lv','osa','qgram','cosine','jaccard','soundex') ){
     a <- char2int(a)
     b <- char2int(b)
   }
@@ -322,7 +322,7 @@ stringdistmatrix <- function(a, b
       , ncores > 0
       , nthread > 0
   )
-  if (!useBytes && !method %in% c('dl','hamming','jw','lcs','lv','osa','qgram','cosine','jaccard') ){
+  if (!useBytes && !method %in% c('dl','hamming','jw','lcs','lv','osa','qgram','cosine','jaccard','soundex') ){
     a <- char2int(a)
     b <- lapply(char2int(b),list)
   }
@@ -366,7 +366,7 @@ do_dist <- function(a, b, method, weight, maxDist, q, p, useBytes=FALSE, nthread
     cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L, useBytes, nthread),
     jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L, useBytes, nthread),
     jw      = .Call('R_jw'    , a, b, as.double(p), as.double(weight), useBytes, nthread),
-    soundex = .Call('R_soundex_dist', a, b, nthread)
+    soundex = .Call('R_soundex_dist', a, b, useBytes, nthread)
   )
   if (maxDist < Inf ){
     d[!is.na(d) & d > maxDist] <- Inf
