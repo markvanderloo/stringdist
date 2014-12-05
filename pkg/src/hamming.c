@@ -73,7 +73,7 @@ SEXP R_hm(SEXP a, SEXP b, SEXP useBytes, SEXP nthrd){
     unsigned int *s = NULL, *t = NULL;
     s = (unsigned int *) malloc( (2L + ml_a + ml_b) * sizeof(int));
     if ( s == NULL ) error("Unable to allocate enough memory");
-    t = s + ml_a;
+    t = s + ml_a + 1L;
     
     int k, len_s, len_t, isna_s, isna_t
       , i = 0, j = 0, ID = 0, num_threads = 1;

@@ -139,11 +139,12 @@ static double jaro_winkler(
 
 /*----------- R interface ------------------------------------------------*/
 
-SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight, SEXP nthrd){
+SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight, SEXP useBytes, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
   PROTECT(p);
   PROTECT(weight);
+  PROTECT(useBytes);
   PROTECT(nthrd);
 
   // find the length of longest strings
@@ -152,9 +153,8 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight, SEXP nthrd){
     , na = length(a)
     , nb = length(b)
     , nt = MAX(na,nb)
-    , bytes = IS_CHARACTER(a);
+    , bytes = INTEGER(useBytes)[0];
  
-Rprintf("ml_a %d\n",ml_a); 
   // output variable
   SEXP yy;
   PROTECT(yy = allocVector(REALSXP,nt));
@@ -172,10 +172,8 @@ Rprintf("ml_a %d\n",ml_a);
     // workspace for worker function
     int *work = (int *) malloc( sizeof(int) * MAX(ml_a,ml_b) );
     unsigned int *s = NULL, *t = NULL;
-    if (bytes){
-      s = (unsigned int *) malloc((ml_a + ml_b) * sizeof(int));
-      t = s + ml_a;
-    }
+    s = (unsigned int *) malloc((2L + ml_a + ml_b) * sizeof(int));
+    t = s + ml_a + 1L;
     if ( (work == NULL) | (bytes && s == NULL) ) nt = -1;
 
 
@@ -190,8 +188,8 @@ Rprintf("ml_a %d\n",ml_a);
     j = recycle(ID-num_threads, num_threads, nb);
     #endif
     for ( int k = ID; k < nt; k += num_threads){
-      s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-      t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+      get_elem1(a, i, bytes, &len_s, &isna_s, s);
+      get_elem1(b, j, bytes, &len_t, &isna_t, t);
       if ( isna_s || isna_t ){
         y[k] = NA_REAL;
         continue;
