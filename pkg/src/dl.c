@@ -262,20 +262,21 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
 //-- Match function interface with R
 
 SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
-    , SEXP weight, SEXP maxDistance, SEXP nthrd){
+    , SEXP weight, SEXP maxDistance, SEXP useBytes, SEXP nthrd){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
   PROTECT(matchNA);
   PROTECT(weight);
   PROTECT(maxDistance);
+  PROTECT(useBytes);
   PROTECT(nthrd);
 
   int nx = length(x)
     , ntable = length(table)
     , no_match = INTEGER(nomatch)[0]
     , match_na = INTEGER(matchNA)[0]
-    , bytes = IS_CHARACTER(x)
+    , bytes = INTEGER(x)[0]
     , ml_x = max_length(x)
     , ml_t = max_length(table);
 
@@ -293,41 +294,32 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
   #endif
   {
     /* claim space for workhorse */
-    dictionary *dict = new_dictionary( ml_x + ml_t + 1 );
-    double *scores = (double *) malloc( (ml_x + 3) * (ml_t + 2) * sizeof(double) );
+    dictionary *dict = new_dictionary( ml_x + ml_t + 1L );
+    double *scores = (double *) malloc( (ml_x + 3L) * (ml_t + 2L) * sizeof(double) );
 
     unsigned int *X = NULL, *T = NULL;
 
-    X = (unsigned int *) malloc( (ml_x + ml_t + 2) * sizeof(int) );
+    X = (unsigned int *) malloc( (ml_x + ml_t + 2L) * sizeof(int) );
 
     if ( (scores == NULL) ||  (X == NULL) ) nx = -1;
 
-    T = X + ml_x + 1;
+    T = X + ml_x + 1L;
     memset(X, 0, (ml_x + ml_t + 2)*sizeof(int));
 
     double d = R_PosInf, d1 = R_PosInf;
     int index, len_X, len_T, isna_X, isna_T;
-    unsigned int *X1, *T1;
+
     #ifdef _OPENMP
     #pragma omp for
     #endif
     for ( int i=0; i<nx; i++){
       index = no_match;
-      if ( bytes ){
-        X = get_elem(x, i , bytes, &len_X, &isna_X, X);
-      } else {
-        X1 = get_elem(x, i , bytes, &len_X, &isna_X, X);
-        memcpy(X, X1, len_X*sizeof(int));
-      }
+      get_elem1(x, i , bytes, &len_X, &isna_X, X);
+
       d1 = R_PosInf;
 
       for ( int j=0; j<ntable; j++){
-        if ( bytes ){
-          T = get_elem(table, j, bytes, &len_T, &isna_T, T);
-        } else {
-          T1 = get_elem(table, j, bytes, &len_T, &isna_T, T);
-          memcpy(T, T1, len_T * sizeof(int));
-        }
+        T = get_elem1(table, j, bytes, &len_T, &isna_T, T);
         if ( !isna_X && !isna_T ){        // both are char (usual case)
           d = distance(
             X, T, len_X, len_T, w, dict, scores
@@ -351,7 +343,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
     free_dictionary(dict);
     free(scores);
   } // end of parallel region
-  UNPROTECT(8);
+  UNPROTECT(9);
   if (nx < 0) error("Unable to allocate enough memory");
   return(yy);
 }

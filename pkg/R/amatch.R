@@ -59,11 +59,11 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   , maxDist=0.1, q=1, p=0
   , nthread = getOption("sd_num_thread")){
 
-  x <- as.character(x)
-  table <- as.character(table)
+  x <- enc2utf8(as.character(x))
+  table <- enc2utf8(as.character(table))
 
   method <- match.arg(method)
-  if (!useBytes){
+  if (!useBytes && !method %in% c('dl')){
     x <- char2int(x)
     table <- char2int(table)
   }
@@ -86,7 +86,7 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   switch(method,
     osa     = .Call('R_match_osa'       , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist), as.integer(nthread)),
     lv      = .Call('R_match_lv'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist), as.integer(nthread)),
-    dl      = .Call('R_match_dl'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist), as.integer(nthread)),
+    dl      = .Call('R_match_dl'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist), useBytes, as.integer(nthread)),
     hamming = .Call('R_match_hm'        , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist),as.integer(nthread)),
     lcs     = .Call('R_match_lcs'        , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist), as.integer(nthread)),
     qgram   = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 0L, as.integer(nthread)),
