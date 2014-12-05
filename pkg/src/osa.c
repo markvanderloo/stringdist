@@ -79,15 +79,16 @@ for ( i = 1; i <= na; ++i ){
 //-- Distance function interface with R
 
 
-SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP nthrd){
+SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
   PROTECT(weight);
+  PROTECT(useBytes);
   PROTECT(nthrd);
 
   int na = length(a)
     , nb = length(b)
-    , bytes = IS_CHARACTER(a)
+    , bytes = INTEGER(useBytes)[0]
     , ml_a = max_length(a)
     , ml_b = max_length(b)
     , nt = (na > nb) ? na : nb;
@@ -109,12 +110,10 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP nthrd){
     double *scores = (double *) malloc( (ml_a + 1) * (ml_b + 1) * sizeof(double)); 
 
     unsigned int *s = NULL, *t = NULL;
-    if (bytes){
-      s = (unsigned int *) malloc(( ml_a + ml_b) * sizeof(int));
-    }
+    s = (unsigned int *) malloc(( 2L + ml_a + ml_b) * sizeof(int));
 
     if ( (scores == NULL) | (bytes && s == NULL) ) nt = -1;
-    t = s + ml_a;
+    t = s + ml_a + 1L;
       
     int len_s, len_t, isna_s, isna_t
       , i = 0, j = 0, ID = 0, num_threads = 1;
@@ -127,8 +126,8 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP nthrd){
     #endif
 
     for ( int k=ID; k < nt; k += num_threads ){
-      s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-      t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+      get_elem1(a, i, bytes, &len_s, &isna_s, s);
+      get_elem1(b, j, bytes, &len_t, &isna_t, t);
    
       if (isna_s || isna_t){
         y[k] = NA_REAL;
