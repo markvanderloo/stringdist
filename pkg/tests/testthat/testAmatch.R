@@ -122,6 +122,12 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="qgram",matchNA=FALSE), NA_integer_)
   expect_equal(amatch(NA,NA, method="qgram",matchNA=FALSE,nomatch=0L), 0L)
   expect_equal(amatch(NA,NA, method="qgram",matchNA=FALSE,nomatch=7L), 7L)
+  # bug reported by Robert Carlson
+  expect_equal( 
+      amatch("600 EXAMPLE AVE NJ 8629", 
+        c("2100 EXAMPLE AVE NJ 8619", "600 EXAMPLE AVE NJ 8629"), method="jaccard")
+      , 2L)
+
 })
 
 

@@ -3,7 +3,7 @@ version 0.9.0
 - C-code underlying stringdist and amatch now use multithreading based on openMP.
 
 version 0.8.2
-- Fixed a few warnings issued by the CLANG compiler (thanks to Brian Ripley)
+- Fixed a few warnings issued by the CLANG compiler (thanks to Brian Ripley). This fixes a bug in amatch/jaccard
 
 version 0.8.1
 - stringdistmatrix returns dimensionless matrix when both arguments have length zero (thanks to Richie Cotton)
