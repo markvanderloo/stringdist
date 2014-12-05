@@ -266,10 +266,6 @@ stringdist <- function(a, b
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
       , nthread > 0
   )
-  if (!useBytes && !method %in% c('dl','hamming','jw','lcs','lv','osa','qgram','cosine','jaccard','soundex') ){
-    a <- char2int(a)
-    b <- char2int(b)
-  }
   if (method == 'jw') weight <- weight[c(2,1,3)]
   do_dist(b, a, method, weight, maxDist, q, p, useBytes, nthread)
 }
@@ -322,10 +318,6 @@ stringdistmatrix <- function(a, b
       , ncores > 0
       , nthread > 0
   )
-  if (!useBytes && !method %in% c('dl','hamming','jw','lcs','lv','osa','qgram','cosine','jaccard','soundex') ){
-    a <- char2int(a)
-    b <- lapply(char2int(b),list)
-  }
   if (method == 'jw') weight <- weight[c(2,1,3)]
   if (ncores==1){
     x <- sapply(b,do_dist, USE.NAMES=FALSE, a,method,weight,maxDist, q, p,useBytes, nthread)
