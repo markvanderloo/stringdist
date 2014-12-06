@@ -215,22 +215,22 @@ static void check_fail(unsigned int nfail){
   }
 }
 
-SEXP R_soundex(SEXP x) {
+SEXP R_soundex(SEXP x, SEXP useBytes) {
+  PROTECT(x);
+  PROTECT(useBytes);
+
   int n = length(x);
-  int bytes = IS_CHARACTER(x);
+  int bytes = INTEGER(useBytes)[0];
 
   // when a and b are character vectors; create unsigned int vectors in which
   // the elements of and b will be copied
   unsigned int *s = NULL;
-  if (bytes) {
-    int ml = max_length(x);
-    s = (unsigned int *) malloc(ml*sizeof(unsigned int));
-    if (s == NULL) {
-       free(s);
-       error("Unable to allocate enough memory");
-    }
+  int ml = max_length(x);
+  s = (unsigned int *) malloc( (1L+ml) * sizeof(unsigned int));
+  if (s == NULL) {
+    UNPROTECT(2);
+    error("Unable to allocate enough memory");
   }
-
   if (bytes) {
     // create output variable
     SEXP y = allocVector(STRSXP, n);
@@ -241,7 +241,7 @@ SEXP R_soundex(SEXP x) {
     char sndx[5];
     unsigned int sndx_int[4];
     for (int i = 0; i < n; ++i) {
-      s = get_elem(x, i, bytes, &len_s, &isna_s, s);
+      get_elem1(x, i, bytes, &len_s, &isna_s, s);
       if (isna_s) {
         SET_STRING_ELT(y, i, R_NaString);
       } else { 
@@ -254,7 +254,7 @@ SEXP R_soundex(SEXP x) {
     // cleanup and return
     check_fail(nfail);
     free(s);
-    UNPROTECT(1);
+    UNPROTECT(3);
     return y;
   } else {
     // create output variable
@@ -264,7 +264,7 @@ SEXP R_soundex(SEXP x) {
     unsigned int nfail = 0;
     int len_s, isna_s;
     for (int i = 0; i < n; ++i) {
-      s = get_elem(x, i, bytes, &len_s, &isna_s, s);
+      get_elem1(x, i, bytes, &len_s, &isna_s, s);
       if (isna_s) {
         SEXP sndx = allocVector(INTSXP, 1);
         PROTECT(sndx);
@@ -281,7 +281,7 @@ SEXP R_soundex(SEXP x) {
     }
     // cleanup and return
     check_fail(nfail);
-    UNPROTECT(1);
+    UNPROTECT(3);
     return y;
   }
 }

@@ -244,8 +244,13 @@ stringdist <- function(a, b
   , nthread = getOption("sd_num_thread")
 ){
   # note: enc2utf8 is very efficient when the native encoding is already UTF-8.
-  a <- enc2utf8(as.character(a))
-  b <- enc2utf8(as.character(b))
+  a <- as.character(a)
+  b <- as.character(b)
+  if ( !useBytes ){
+    a <- enc2utf8(a)
+    b <- enc2utf8(b)
+  }
+
   if (length(a) == 0 || length(b) == 0){ 
     return(numeric(0))
   }
@@ -291,8 +296,13 @@ stringdistmatrix <- function(a, b
   , nthread = getOption("sd_num_thread")
 ){
   
-  a <- enc2utf8(as.character(a))
-  b <- enc2utf8(as.character(b))
+  a <- as.character(a)
+  b <- as.character(b)
+
+  if (!useBytes){
+    a <- enc2utf8(a)
+    b <- enc2utf8(b)
+  }
  
   if (length(a) == 0 || length(b) == 0){ 
    return(matrix(numeric(0)))

@@ -219,7 +219,6 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
     }
     /* start working */
     
-    unsigned int *s1, *t1;
     int k, len_s, len_t, isna_s, isna_t
       , i = 0, j = 0, ID = 0, num_threads = 1;
 
