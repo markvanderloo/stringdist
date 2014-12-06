@@ -152,7 +152,7 @@ SEXP R_match_lcs(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
     , no_match = INTEGER(nomatch)[0]
     , match_na = INTEGER(matchNA)[0]
     , max_dist = INTEGER(maxDistance)[0]
-    , bytes = IS_CHARACTER(x)
+    , bytes = INTEGER(useBytes)[0]
     , ml_x = max_length(x)
     , ml_t = max_length(table);
 

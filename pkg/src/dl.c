@@ -275,7 +275,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
     , ntable = length(table)
     , no_match = INTEGER(nomatch)[0]
     , match_na = INTEGER(matchNA)[0]
-    , bytes = INTEGER(x)[0]
+    , bytes = INTEGER(useBytes)[0]
     , ml_x = max_length(x)
     , ml_t = max_length(table);
 

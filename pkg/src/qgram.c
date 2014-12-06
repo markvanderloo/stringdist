@@ -465,7 +465,7 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance, SEXP useBytes, SEXP nt
     free_qtree();
     free(s);
   }
-  UNPROTECT(6);
+  UNPROTECT(7);
   if (nt < 0)  error("Unable to allocate enough memory");
   return yy;
 }
@@ -555,7 +555,7 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
     free(X);
     free_qtree();
   } // end of parallel region
-  UNPROTECT(9);
+  UNPROTECT(10);
   if (nx < 0 ) error("Unable to allocate enough memory");
   return(yy);
 }

@@ -376,11 +376,11 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP useByt
   PROTECT(nthrd);
   
 
-  int nx = length(x);
-  int ntable = length(table);
-  int no_match = INTEGER(nomatch)[0];
-  int match_na = INTEGER(matchNA)[0];
-  int bytes = INTEGER(x)[0];
+  int nx = length(x)
+    , ntable = length(table)
+    , no_match = INTEGER(nomatch)[0]
+    , match_na = INTEGER(matchNA)[0]
+    , bytes = INTEGER(useBytes)[0];
 
   // output vector
   SEXP yy = allocVector(INTSXP, nx);
@@ -399,7 +399,7 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP useByt
     int ml_x = max_length(x);
     int ml_t = max_length(table);
     s = (unsigned int *) malloc((2L + ml_x + ml_t) * sizeof(unsigned int));
-    t = s + ml_x;
+    t = s + ml_x + 1L;
     if (s == NULL) nx = -1;
 
 

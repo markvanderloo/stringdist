@@ -180,7 +180,7 @@
 #' 
 #' In older versions (<0.9) of \code{stringdist}, the \code{cluster} and \code{ncores} argument were the only 
 #' paralellization options. These options are based on the parallel package which starts multiple R-sessions
-#' to run R code in parallel. If you're running R on a single machine it is most probably faster to use the default
+#' to run R code in parallel. If you're running R on a single machine it is both faster and easier to use the default
 #' multithreading (so do not specify \code{ncores} or \code{cluster}).
 #'
 #' As of the introduction of the \code{nthreads} argument, the \code{ncores} is mostly useless, although it still works.
@@ -191,12 +191,13 @@
 #' setting up a network of nodes accross physically different machines. In each node, \code{nthread} threads will be used.
 #'
 #'
-#' @section Acknowledgement:
+#' @section Acknowledgements:
 #' The code for the full Damerau-Levenshtein distance was adapted from Nick Logan's
 #' \href{https://github.com/ugexe/Text--Levenshtein--Damerau--XS/blob/master/damerau-int.c}{public github repository}.
 #' 
+#' C code for converting UTF-8 to integer was copied from the R core.
 #'
-#' @section other:
+#' @section Other:
 #'
 #' \itemize{
 #'

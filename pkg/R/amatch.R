@@ -59,14 +59,15 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   , maxDist=0.1, q=1, p=0
   , nthread = getOption("sd_num_thread")){
 
-  x <- enc2utf8(as.character(x))
-  table <- enc2utf8(as.character(table))
+  x <- as.character(x)
+  table <- as.character(table)
+
+  if (!useBytes){
+    x <- enc2utf8(x)
+    table <- enc2utf8(table)
+  }
 
   method <- match.arg(method)
-  if (!useBytes && !method %in% c('dl','hamming', 'jw','lcs','lv','osa','cosine','jaccard','qgram', 'soundex')){
-    x <- char2int(x)
-    table <- char2int(table)
-  }
   stopifnot(
       all(is.finite(weight))
       , all(weight > 0)

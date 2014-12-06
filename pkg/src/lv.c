@@ -83,7 +83,7 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
 
   int na = length(a)
     , nb = length(b)
-    , bytes = INTEGER(a)[0]
+    , bytes = INTEGER(useBytes)[0]
     , ml_a = max_length(a)
     , ml_b = max_length(b);
 
@@ -163,7 +163,7 @@ SEXP R_match_lv(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight
     , ntable = length(table)
     , no_match = INTEGER(nomatch)[0]
     , match_na = INTEGER(matchNA)[0]
-    , bytes = IS_CHARACTER(x)
+    , bytes = INTEGER(useBytes)[0]
     , ml_x = max_length(x)
     , ml_t = max_length(table);
 

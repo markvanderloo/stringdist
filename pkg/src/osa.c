@@ -147,7 +147,7 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
     if (bytes) free(s);
   } // end of parallel region
 
-  UNPROTECT(5);
+  UNPROTECT(6);
   if (nt < 0 ) error("Unable to allocate enough memory");
   return(yy);
 }
@@ -234,7 +234,7 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight
     free(X);  
     free(work);
   } // end of parallel region
-  UNPROTECT(8);
+  UNPROTECT(9);
   if (nx < 0 ) error("Unable to allocate enough memory");
   return(yy);
 }

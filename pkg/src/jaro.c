@@ -227,7 +227,7 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p
     , ntable = length(table)
     , no_match = INTEGER(nomatch)[0]
     , match_na = INTEGER(matchNA)[0]
-    , bytes = IS_CHARACTER(x)
+    , bytes = INTEGER(useBytes)[0]
     , ml_x = max_length(x)
     , ml_t = max_length(table)
     , nthreads = INTEGER(nthrd)[0];
@@ -288,7 +288,7 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p
     free(X); 
     free(work);
   } // end of parallel region
-  UNPROTECT(8);
+  UNPROTECT(10);
   if ( nx < 0 ) error ("Unable to allocate enough memory");
   return(yy);
 }
