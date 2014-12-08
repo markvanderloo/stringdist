@@ -22,7 +22,6 @@
 #include <Rdefines.h>
 #include "utils.h"
 #include <string.h>
-#include "stringset.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif

@@ -27,6 +27,19 @@
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 #define ABS(X) ((X)<0 ? -1*(X) : (X))
 
+
+/* A structure for storing integer reps of strings */
+typedef struct {
+  // array of pointers to integer representation of strings, stored in data.
+  unsigned int **string;
+  //  array of string lengths.
+  int *str_len;
+  //  storage room for integer representation of strings
+  unsigned int *data;
+} Stringset;
+
+
+
 unsigned int max_length(SEXP);
 
 /* Get element from SEXP list and determine some parameters.
