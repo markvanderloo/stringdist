@@ -22,6 +22,7 @@
 #include <Rdefines.h>
 #include "utils.h"
 #include <string.h>
+#include "stringset.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -117,7 +118,14 @@ static int mbrtoint(unsigned int *w, const char *s)
 }
 
 
-
+/* Translate a UTF-8 string to integers.
+ *
+ *
+ *
+ * Returns:
+ * The number of logical characters.
+ *
+ */
 static int utf8_to_int(const char *str, unsigned int *outbuf){
 
   unsigned int *p = outbuf;
@@ -153,6 +161,105 @@ unsigned int *get_elem1(SEXP x, int i, int bytes, int *len, int *isna, unsigned 
   }
   return  c;
 }
+
+/* byte-by-byte char to int translation 
+ *
+ *
+ * Return value: the number of bytes converted.
+ *
+ *
+ */
+static int char_to_int(const char *str, unsigned int *outbuf){
+  unsigned int *p = outbuf;
+  char *s = (char *) str;
+  int str_len = 0L;
+  while (*s){
+    (*p) =  (unsigned char) *s;
+    p++;
+    s++;
+    str_len++;
+  }
+  return str_len;
+}
+
+static Stringset *new_stringset(SEXP str, int bytes){
+  size_t nstr = length(str);
+  Stringset *s;
+  s = (Stringset *) malloc(sizeof(Stringset));
+
+  // get and set string lengths.
+  s->str_len = (int *) malloc(nstr * sizeof(int));
+
+  size_t nbytes = 0L;
+  for (size_t i=0; i<nstr; i++){
+    nbytes += length(STRING_ELT(str,i));
+  }
+
+  s->string = (unsigned int **) malloc(nstr * sizeof(int *));
+  // room for int rep of strings, including a trailing zero (needed by e.g. by full dl-distance)
+  // this is enough room for byte-by-byte translation, so for UTF-8 it will be too much.
+  s->data = (unsigned int *) malloc( (nstr + nbytes) * sizeof(int));
+ Rprintf("nstr+nbytes = %d\n",nstr + nbytes); 
+  int *t = s->str_len;
+  unsigned int *d = s->data;
+  if (bytes){
+    for (size_t i=0L; i < nstr; i++, t++){
+      (*t) = char_to_int(CHAR(STRING_ELT(str,i)), d);
+      s->string[i] = d;
+      d += (*t) + 1L;
+    }
+  } else { // no bytewise interpretattion.
+    for ( size_t i=0; i<nstr; i++, t++){
+     (*t) = utf8_to_int(CHAR(STRING_ELT(str,i)), d); 
+     s->string[i] = d; 
+     d += (*t) + 1L; // add extra space for trailing zero.
+    }
+  }
+  return s;
+}
+
+static void free_stringset(Stringset *s){
+  free(s->string);
+  free(s->data);
+  free(s->str_len);
+  free(s);  
+}
+
+
+
+
+
+SEXP stringset(SEXP str, SEXP useBytes){
+  int bytes = INTEGER(useBytes)[0];
+
+  Stringset *s = new_stringset(str, bytes);
+  for ( size_t i=0; i < length(str); i++){
+    Rprintf("string of length %d, ints:", s->str_len[i]);
+    for ( int j=0; j < s->str_len[i]; j++){
+      Rprintf("%d ", *(s->string[i] + j));
+    }
+    Rprintf("\n");
+  }
+  for (int i=0; i<10; ++i){
+    Rprintf("%d, ",s->data[i]);
+  }; Rprintf("\n");
+ 
+  free_stringset(s);
+  return R_NilValue;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
