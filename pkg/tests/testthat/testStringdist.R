@@ -21,6 +21,10 @@ test_that("Edge cases in OSA method",{
    expect_equal(stringdist("a","a",method='osa'),0)
    # Thanks to Frank Binder for poining out this bug
    expect_equal(stringdist("ab","aba",method='osa'),1)
+   # Thanks to Lauri Koobas for pointing out this bug.
+   expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd")))),1)
+
+
 })
 
 test_that("max distance is obeyed",{

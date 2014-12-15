@@ -109,7 +109,10 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight){
   double *y = REAL(yy);   
    
   int i=0, j=0, len_s, len_t, isna_s, isna_t;
-  for ( int k=0; k < nt; ++k ){
+  for ( int k=0; k < nt; ++k 
+    , i = RECYCLE(i+1,na)
+    , j = RECYCLE(j+1,nb)
+    ){
     s = get_elem(a, i, bytes, &len_s, &isna_s, s);
     t = get_elem(b, j, bytes, &len_t, &isna_t, t);
  
@@ -123,8 +126,6 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight){
      , w, scores
     );
     if ( y[k] < 0 ) y[k] = R_PosInf;
-    i = RECYCLE(i+1,na);
-    j = RECYCLE(j+1,nb);
   }
    
   free(scores);
