@@ -76,6 +76,7 @@ test_that("Edge cases in Levenshtein method",{
    expect_equal(stringdist( "","a",method='lv'),1)
    expect_equal(stringdist("a", "",method='lv'),1)
    expect_equal(stringdist("a","a",method='lv'),0)
+   expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="lv"))),1)
 })
 
 test_that("max distance is obeyed",{
@@ -128,6 +129,7 @@ test_that("max distance is obeyed",{
    expect_equal(stringdist("abc","",method='dl',maxDist=2), Inf)
    expect_equal(stringdist("aa","bbb",method='dl',maxDist=2), Inf)
    expect_equal(stringdist("bbb","aa",method='dl',maxDist=2), Inf)
+   expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="dl"))),1)
 })
 
 test_that("Shortest argument is recycled",{
@@ -164,6 +166,7 @@ test_that("Edge cases in LCS method",{
    expect_equal(stringdist( "","a",method='lcs'),1)
    expect_equal(stringdist("a", "",method='lcs'),1)
    expect_equal(stringdist("a","a",method='lcs'),0)
+   expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="lcs"))),1)
 })
 
 test_that("max distance is obeyed",{
@@ -193,6 +196,7 @@ context("Hamming distance")
 test_that("Edge cases in DL method",{
    expect_equal(stringdist( "", "",method='h'),0)
    expect_equal(stringdist("a","a",method='h'),0)
+   expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="h"))),1)
 })
 
 test_that("Unequal string lengths",{
@@ -227,6 +231,7 @@ test_that("Edge cases in qgram method",{
    expect_equal(stringdist("a", "",method='qgram',q=1),Inf)
    expect_equal(stringdist("a","a",method='qgram',q=1), 0)
    expect_error(stringdist("aa","bb",method='qgram',q=-2))
+   expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="qgram"))),1)
 })
 
 
@@ -264,6 +269,7 @@ test_that("cosine distance computes correctly",{
   # numerical accuracy test (thanks to Ben Haller)
   # note that 1 - 2/(sqrt(2)*sqrt(2)) != 0, so this used to give ~2.2E-16. 
   expect_equal( stringdist("ab","ab",method="cosine"),0.0,tolerance=0.0 ) 
+  expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="cosine"))),1)
 })
 
 context("Jaccard distance")
@@ -277,6 +283,7 @@ test_that("Jaccard distance computes correctly",{
     round(stringdist("aaa","abc",method="jaccard",q=2),8),
     1.0
   )
+  expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="jaccard"))),1)
 })
 
 
@@ -290,6 +297,7 @@ test_that("basic examples and edge cases work",{
   expect_equal(stringdist("","",method='jw'), 0);
   # following test added after a bug report of Carol Gan:
   expect_equal(stringdist("tire","tree",method="jw"),stringdist("tree","tire",method="jw"));
+  expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="jw"))),1)
 })
 
 test_that("Extended examples work",{

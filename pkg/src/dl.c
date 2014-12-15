@@ -212,7 +212,10 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight){
 
   int i=0, j=0, len_s, len_t, isna_s, isna_t;
   unsigned int *s1, *t1;
-  for ( int k=0; k < nt; ++k ){
+  for ( int k=0; k < nt; ++k
+    , i = RECYCLE(i+1,na)
+    , j = RECYCLE(j+1,nb)
+  ){
     if (bytes){
       s = get_elem(a, i, bytes, &len_s, &isna_s, s);
       t = get_elem(b, j, bytes, &len_t, &isna_t, t);
@@ -232,8 +235,6 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight){
      w, dict, scores
     );
     if (y[k] < 0 ) y[k] = R_PosInf;
-    i = RECYCLE(i+1,na);
-    j = RECYCLE(j+1,nb);
     memset(s, 0, slen);
   }
   
