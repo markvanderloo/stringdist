@@ -4,7 +4,7 @@ stringdist
 * Approximate matching and string distance calculations for R. 
 * All distance and matching operations are system- and encoding-independent.
 
-Current CRAN version: **0.8.1** [NEWS](http://cran.r-project.org/web/packages/stringdist/NEWS)
+Current CRAN version: **0.8.2** [NEWS](http://cran.r-project.org/web/packages/stringdist/NEWS)
 
 The package offers four main functions:
 
