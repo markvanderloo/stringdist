@@ -394,7 +394,7 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP useByt
   #ifdef _OPENMP
   int nthreads = INTEGER(nthrd)[0];
   #pragma omp parallel num_threads(nthreads) default(none) \
-    shared(X, T, y, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, bytes)
+    shared(X,T, y, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, bytes)
   #endif
   {
     // when a and b are character vectors; create unsigned int vectors in which
