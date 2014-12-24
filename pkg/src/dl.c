@@ -292,7 +292,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
   #ifdef _OPENMP
   int nthreads = INTEGER(nthrd)[0];
   #pragma omp parallel num_threads(nthreads) default(none) \
-    shared(X, T, x,table, y, w, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, bytes, ml_x, ml_t, maxDist)
+    shared(X, T, y, w, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, bytes, ml_x, ml_t, maxDist)
   #endif
   {
     /* claim space for workhorse */

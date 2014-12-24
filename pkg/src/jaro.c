@@ -235,6 +235,10 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p
     , *w = REAL(weight)
     , max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
   
+  // convert to integer. 
+  Stringset *X = new_stringset(x, bytes);
+  Stringset *T = new_stringset(table, bytes);
+
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
@@ -243,32 +247,27 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p
 
   #ifdef _OPENMP
   #pragma omp parallel num_threads(nthreads) default(none) \
-    shared(x,table, y, R_PosInf, nx, ntable, no_match, match_na, bytes,ml_x,ml_t,pp,w, max_dist)
+    shared(X,T, y, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, bytes,ml_x,ml_t,pp,w, max_dist)
   #endif
   {
     // workspace for worker function
     int *work = (int *) malloc( sizeof(int) * MAX(ml_x, ml_t) );
-    unsigned int *X = NULL, *T = NULL;
-    X = (unsigned int *) malloc( (2L + ml_x + ml_t) * sizeof(int));
-    T = X + ml_x + 1L;
-    if ( (work == NULL) | (bytes && X == NULL) ) nx = -1;
-
     double d = R_PosInf, d1 = R_PosInf;
-    int index, isna_X, isna_T, len_X,len_T;
-
+    int index, len_X,len_T;
 
     #ifdef _OPENMP
     #pragma omp for
     #endif
     for ( int i=0; i<nx; i++){
       index = no_match;
-      get_elem1(x, i, bytes, &len_X, &isna_X, X);
+      len_X = X->str_len[i];
+
       d1 = R_PosInf;
       for ( int j=0; j<ntable; j++){
-        get_elem1(table, j, bytes, &len_T, &isna_T, T);
+        len_T = T->str_len[j];
 
-        if ( !isna_X && !isna_T ){        // both are char (usual case)
-          d = jaro_winkler(X, T, len_X, len_T, pp, w, work);
+        if ( len_X != NA_INTEGER && len_T != NA_INTEGER ){        // both are char (usual case)
+          d = jaro_winkler(X->string[i], T->string[j], len_X, len_T, pp, w, work);
           if ( d > max_dist ){
             continue;
           } else if ( d > -1.0 && d < d1){ 
@@ -276,7 +275,7 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p
             if ( ABS(d) < 1e-14 ) break; // exact match
             d1 = d;
           }
-        } else if ( isna_X && isna_T ) {  // both are NA
+        } else if ( len_X == NA_INTEGER && len_T == NA_INTEGER ) {  // both are NA
           index = match_na ? j + 1 : no_match;
           break;
         }
@@ -284,9 +283,10 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p
       
       y[i] = index;
     }   
-    free(X); 
     free(work);
   } // end of parallel region
+  free_stringset(X);
+  free_stringset(T);
   UNPROTECT(10);
   if ( nx < 0 ) error ("Unable to allocate enough memory");
   return(yy);

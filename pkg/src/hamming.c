@@ -122,6 +122,10 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
     , max_dist = INTEGER(maxDistance)[0]
     , bytes = INTEGER(useBytes)[0];
 
+  // convert to integer. 
+  Stringset *X = new_stringset(x, bytes);
+  Stringset *T = new_stringset(table, bytes);
+
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
@@ -130,36 +134,30 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
   #ifdef _OPENMP
   int nthreads = INTEGER(nthrd)[0];
   #pragma omp parallel num_threads(nthreads) default(none) \
-    shared(x,table, y, R_PosInf, nx, ntable, no_match, match_na, bytes, max_dist)
+    shared(X, T, y, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, bytes, max_dist)
   #endif
   {
-    unsigned int *X = NULL, *T = NULL;
-    int ml_x = max_length(x);
-    X = (unsigned int *) malloc((2L + ml_x + max_length(table)) * sizeof(int));
-    T = X + ml_x + 1L;
-    if ( X == NULL ) nx = -1;
     double d = R_PosInf, d1 = R_PosInf;
-    int index, isna_X, isna_T, len_X, len_T;
+    int index, len_X, len_T;
 
     #ifdef _OPENMP
     #pragma omp for
     #endif
     for ( int i=0; i<nx; i++){
       index = no_match;
-      get_elem1(x, i, bytes, &len_X, &isna_X, X);
+      len_X = X->str_len[i];
       d1 = R_PosInf;
       for ( int j=0; j<ntable; j++){
-        get_elem1(table, j, bytes, &len_T, &isna_T, T);
+        len_T = T->str_len[j];
         if ( len_X != len_T ) continue;
-
-        if ( !isna_X && !isna_T ){        // both are char (usual case)
-          d = (double) hamming( X, T, len_X );
+        if ( len_X != NA_INTEGER && len_T != NA_INTEGER ){        // both are char (usual case)
+          d = (double) hamming( X->string[i], T->string[j], len_X );
           if ( d <= max_dist && d < d1){ 
             index = j + 1;
             if ( d == 0.0 ) break;
             d1 = d;
           }
-        } else if ( isna_X && isna_T ) {  // both are NA
+        } else if ( len_X == NA_INTEGER && len_T == NA_INTEGER ) {  // both are NA
           index = match_na ? j + 1 : no_match;
           break;
         }
@@ -167,8 +165,9 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
       
       y[i] = index;
     }  
-    free(X);
   } // end of parallel region
+  free_stringset(X);
+  free_stringset(T);
   UNPROTECT(7);
   if (nx < 0 ) error("Unable to allocate enough memory");
   return(yy);

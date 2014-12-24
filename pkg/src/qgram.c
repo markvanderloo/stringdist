@@ -494,10 +494,12 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
     , ntable = length(table)
     , no_match = INTEGER(nomatch)[0]
     , match_na = INTEGER(matchNA)[0]
-    , bytes = INTEGER(x)[0]
-    , ml_x = max_length(x)
-    , ml_t = max_length(table);
+    , bytes = INTEGER(x)[0];
   
+  // convert to integer. 
+  Stringset *X = new_stringset(x, bytes);
+  Stringset *T = new_stringset(table, bytes);
+
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
@@ -507,34 +509,27 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
   #ifdef _OPENMP
   int nthreads = INTEGER(nthrd)[0];
   #pragma omp parallel num_threads(nthreads) default(none) \
-    shared(x,table, y, R_PosInf, nx, ntable, no_match, match_na, bytes, ml_x, ml_t, q, dist, max_dist)
+    shared(X, T, y, R_PosInf,NA_INTEGER, nx, ntable, no_match, match_na, bytes, q, dist, max_dist)
   #endif
   {
     // set up a qtree;
     qtree *Q = new_qtree(q, 2);
 
-    unsigned int *X = NULL, *T = NULL;
-    X = (unsigned int *) malloc( (2L + ml_x + ml_t) * sizeof(int));
-    if ( X == NULL ) nx = -1;
-    T = X + ml_x + 1L;
-
     double d = R_PosInf, d1 = R_PosInf;
-    int index, isna_X, isna_T, len_X, len_T;
+    int index, len_X, len_T;
 
     #ifdef _OPENMP
     #pragma omp for
     #endif
     for ( int i=0; i<nx; i++){
       index = no_match;
-      get_elem1(x, i, bytes, &len_X, &isna_X, X);
+      len_X = X->str_len[i];
       d1 = R_PosInf;
       for ( int j=0; j<ntable; j++){
-
-        get_elem1(table, j, bytes, &len_T, &isna_T,T);
-
-        if ( !isna_X && !isna_T ){        // both are char (usual case)
+        len_T = T->str_len[j];
+        if ( len_X != NA_INTEGER && len_T != NA_INTEGER ){ // both are char (usual case)
           d = qgram_tree(
-            X, T, len_X, len_T, q, Q, dist
+            X->string[i], T->string[j], len_X, len_T, q, Q, dist
           );
           if ( d == -2.0 ) nx = -1;
           if ( d > max_dist ){
@@ -544,7 +539,7 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
             if ( fabs(d) < 1e-14 ) break; 
             d1 = d;
           }
-        } else if ( isna_X && isna_T ) {  // both are NA
+        } else if ( len_X == NA_INTEGER && len_T == NA_INTEGER ) {  // both are NA
           index = match_na ? j + 1 : no_match;
           break;
         }
@@ -552,9 +547,10 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
       
       y[i] = index;
     } 
-    free(X);
     free_qtree();
   } // end of parallel region
+  free_stringset(X);
+  free_stringset(T);
   UNPROTECT(10);
   if (nx < 0 ) error("Unable to allocate enough memory");
   return(yy);

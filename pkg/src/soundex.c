@@ -382,6 +382,10 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP useByt
     , match_na = INTEGER(matchNA)[0]
     , bytes = INTEGER(useBytes)[0];
 
+  // convert to integer. 
+  Stringset *X = new_stringset(x, bytes);
+  Stringset *T = new_stringset(table, bytes);
+
   // output vector
   SEXP yy = allocVector(INTSXP, nx);
   PROTECT(yy);
@@ -390,20 +394,13 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP useByt
   #ifdef _OPENMP
   int nthreads = INTEGER(nthrd)[0];
   #pragma omp parallel num_threads(nthreads) default(none) \
-    shared(x,table, y, R_PosInf, nx, ntable, no_match, match_na, bytes)
+    shared(X, T, y, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, bytes)
   #endif
   {
     // when a and b are character vectors; create unsigned int vectors in which
     // the elements of and b will be copied
-    unsigned int *s = NULL, *t = NULL;
-    int ml_x = max_length(x);
-    int ml_t = max_length(table);
-    s = (unsigned int *) malloc((2L + ml_x + ml_t) * sizeof(unsigned int));
-    t = s + ml_x + 1L;
-    if (s == NULL) nx = -1;
 
-
-    int index, isna_s, isna_t, len_s, len_t;
+    int index, len_X, len_T;
     unsigned int nfail = 0;
     double d;
 
@@ -412,18 +409,17 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP useByt
     #endif
     for (int i=0; i<nx; ++i) {
       index = no_match;
-      get_elem1(x, i, bytes, &len_s, &isna_s, s);
+      len_X = X->str_len[i];
 
       for (int j=0; j<ntable; ++j) {
-        get_elem1(table, j, bytes, &len_t, &isna_t, t);
-
-        if (!isna_s && !isna_t) {        // both are char (usual case)
-          d = soundex_dist(s, t, len_s, len_t, &nfail);
+        len_T = T->str_len[j];
+        if ( len_X != NA_INTEGER && len_T != NA_INTEGER ) {        // both are char (usual case)
+          d = soundex_dist(X->string[i], T->string[j], len_X, len_T, &nfail);
           if (d < 0.5) { // exact match as d can only take on values 0 and 1
             index = j + 1;
             break;
           } 
-        } else if (isna_s && isna_t) {  // both are NA
+        } else if ( len_X == NA_INTEGER && len_T == NA_INTEGER ) {  // both are NA
           index = match_na ? j + 1 : no_match;
           break;
         }
@@ -432,8 +428,9 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP useByt
     }   
     // cleanup and return
     check_fail(nfail);
-    free(s); 
   } // end of parallel region
+  free_stringset(X);
+  free_stringset(T);
   UNPROTECT(7);
   if (nx < 0) error("Unable to allocate enough memory");
   return(yy);
