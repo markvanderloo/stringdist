@@ -119,10 +119,13 @@ static int mbrtoint(unsigned int *w, const char *s)
 
 /* Translate a UTF-8 string to integers.
  *
+ * Input
  *
+ * str   : pointer to input string.
+ * outbuf: pointer to output buffer.
  *
  * Returns:
- * The number of logical characters.
+ * The number of logical characters converted.
  *
  */
 static int utf8_to_int(const char *str, unsigned int *outbuf){
@@ -173,7 +176,7 @@ static int char_to_int(const char *str, unsigned int *outbuf){
   char *s = (char *) str;
   int str_len = 0L;
   while (*s){
-    (*p) =  (unsigned char) *s;
+    (*p) =  (unsigned int) *s;
     p++;
     s++;
     str_len++;
@@ -181,7 +184,7 @@ static int char_to_int(const char *str, unsigned int *outbuf){
   return str_len;
 }
 
-static Stringset *new_stringset(SEXP str, int bytes){
+Stringset *new_stringset(SEXP str, int bytes){
   size_t nstr = length(str);
   Stringset *s;
   s = (Stringset *) malloc(sizeof(Stringset));
@@ -198,26 +201,27 @@ static Stringset *new_stringset(SEXP str, int bytes){
   // room for int rep of strings, including a trailing zero (needed by e.g. by full dl-distance)
   // this is enough room for byte-by-byte translation, so for UTF-8 it will be too much.
   s->data = (unsigned int *) malloc( (nstr + nbytes) * sizeof(int));
- Rprintf("nstr+nbytes = %d\n",nstr + nbytes); 
+
   int *t = s->str_len;
   unsigned int *d = s->data;
-  if (bytes){
-    for (size_t i=0L; i < nstr; i++, t++){
-      (*t) = char_to_int(CHAR(STRING_ELT(str,i)), d);
+  for (size_t i=0L; i < nstr; i++, t++){
+    if ( STRING_ELT(str,i) == NA_STRING ){
+      (*t) = NA_INTEGER; 
+    } else {
+      if (bytes){
+        (*t) = char_to_int(CHAR(STRING_ELT(str,i)), d);
+      } else {
+        (*t) = utf8_to_int(CHAR(STRING_ELT(str,i)), d); 
+      }
       s->string[i] = d;
+      (*(d + (*t))) = 0L; // append a zero.
       d += (*t) + 1L;
-    }
-  } else { // no bytewise interpretattion.
-    for ( size_t i=0; i<nstr; i++, t++){
-     (*t) = utf8_to_int(CHAR(STRING_ELT(str,i)), d); 
-     s->string[i] = d; 
-     d += (*t) + 1L; // add extra space for trailing zero.
     }
   }
   return s;
 }
 
-static void free_stringset(Stringset *s){
+void free_stringset(Stringset *s){
   free(s->string);
   free(s->data);
   free(s->str_len);
@@ -227,7 +231,7 @@ static void free_stringset(Stringset *s){
 
 
 
-
+/*
 SEXP stringset(SEXP str, SEXP useBytes){
   int bytes = INTEGER(useBytes)[0];
 
@@ -246,7 +250,7 @@ SEXP stringset(SEXP str, SEXP useBytes){
   free_stringset(s);
   return R_NilValue;
 }
-
+*/
 
 
 

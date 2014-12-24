@@ -91,7 +91,20 @@ static inline int recycle(int i, int nthreads, int ni){
   return i;
 }
 
+/* Create a new stringset from an character vector.
+ *
+ * Translates character vectors to integers. Input is expected in utf-8 format.
+ * Translation can be bytewise (bytes=1) or interpreted utf8.
+ *
+ * Output: Pointer to a Stringset.
+ *
+ *
+ *
+ */
+Stringset *new_stringset(SEXP str, int bytes);
 
+/* Clean up a Stringset. */
+void free_stringset(Stringset *s);
 
 
 #endif

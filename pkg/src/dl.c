@@ -280,7 +280,11 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
 
   double *w = REAL(weight);
   double maxDist = REAL(maxDistance)[0];
-  
+
+  // convert to integer. 
+  Stringset *X = new_stringset(x, bytes);
+  Stringset *T = new_stringset(table, bytes);
+ 
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
@@ -288,59 +292,48 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
   #ifdef _OPENMP
   int nthreads = INTEGER(nthrd)[0];
   #pragma omp parallel num_threads(nthreads) default(none) \
-    shared(x,table, y, w, R_PosInf, nx, ntable, no_match, match_na, bytes, ml_x, ml_t, maxDist)
+    shared(X, T, x,table, y, w, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, bytes, ml_x, ml_t, maxDist)
   #endif
   {
     /* claim space for workhorse */
     dictionary *dict = new_dictionary( ml_x + ml_t + 1L );
     double *scores = (double *) malloc( (ml_x + 3L) * (ml_t + 2L) * sizeof(double) );
 
-    unsigned int *X = NULL, *T = NULL;
-
-    X = (unsigned int *) malloc( (ml_x + ml_t + 2L) * sizeof(int) );
-
-    if ( (scores == NULL) ||  (X == NULL) ) nx = -1;
-
-    T = X + ml_x + 1L;
-    memset(X, 0, (ml_x + ml_t + 2)*sizeof(int));
-
     double d = R_PosInf, d1 = R_PosInf;
-    int index, len_X, len_T, isna_X, isna_T;
+    int index, len_X, len_T;
 
     #ifdef _OPENMP
     #pragma omp for
     #endif
     for ( int i=0; i<nx; i++){
       index = no_match;
-      get_elem1(x, i , bytes, &len_X, &isna_X, X);
-
+      len_X = X->str_len[i];
       d1 = R_PosInf;
 
       for ( int j=0; j<ntable; j++){
-        T = get_elem1(table, j, bytes, &len_T, &isna_T, T);
-        if ( !isna_X && !isna_T ){        // both are char (usual case)
+        len_T = T->str_len[j];
+        if ( len_X != NA_INTEGER &&  len_T != NA_INTEGER ){        // both are char (usual case)
           d = distance(
-            X, T, len_X, len_T, w, dict, scores
+            X->string[i], T->string[j], len_X, len_T, w, dict, scores
           );
-          memset(T,0, (ml_t+1)*sizeof(int));
           if ( d <= maxDist && d < d1){ 
             index = j + 1;
             if ( fabs(d) < 1e-14 ) break;
             d1 = d;
           }
-        } else if ( isna_X && isna_T ) {  // both are NA
+        } else if ( len_X == NA_INTEGER && len_T == NA_INTEGER ) {  // both are NA
           index = match_na ? j + 1 : no_match;
           break;
         }
       }
       
       y[i] = index;
-      memset(X,0,(ml_x + 1)*sizeof(int));
     }  
-    free(X);
     free_dictionary(dict);
     free(scores);
   } // end of parallel region
+  free_stringset(X);
+  free_stringset(T);
   UNPROTECT(9);
   if (nx < 0) error("Unable to allocate enough memory");
   return(yy);
