@@ -192,7 +192,6 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight, SEXP useBytes, SEXP nthrd){
       get_elem1(b, j, bytes, &len_t, &isna_t, t);
       if ( isna_s || isna_t ){
         y[k] = NA_REAL;
-        continue;
       } else { // jaro-winkler distance
         y[k] = jaro_winkler(s, t, len_s, len_t, pp, w, work);
       }

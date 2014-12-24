@@ -89,13 +89,11 @@ SEXP R_hm(SEXP a, SEXP b, SEXP useBytes, SEXP nthrd){
       get_elem1(b, j, bytes, &len_t, &isna_t, t);
       if ( isna_s || isna_t ){
         y[k] = NA_REAL;
-        continue;         
+      } else if ( len_s != len_t ){
+          y[k] = R_PosInf;
+      } else {
+        y[k] = (double) hamming(s, t, len_s);
       }
-      if ( len_s != len_t ){
-        y[k] = R_PosInf;
-        continue;
-      }
-      y[k] = (double) hamming(s, t, len_s);
       i = recycle(i, num_threads, na);
       j = recycle(j, num_threads, nb);
     }

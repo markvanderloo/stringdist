@@ -117,10 +117,10 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP useBytes, SEXP nthrd){
       get_elem1(b, j, bytes, &len_t, &isna_t, t);
       if ( isna_s || isna_t ){
         y[k] = NA_REAL;
-        continue;
+      } else {
+        y[k] = lcs(s, len_s, t, len_t, scores );
+        if (y[k] < 0 ) y[k] = R_PosInf;
       }
-      y[k] = lcs(s, len_s, t, len_t, scores );
-      if (y[k] < 0 ) y[k] = R_PosInf;
       i = recycle(i, num_threads, na);
       j = recycle(j, num_threads, nb);
     } 

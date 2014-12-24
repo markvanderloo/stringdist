@@ -125,14 +125,14 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
       get_elem1(b, j, bytes, &len_t, &isna_t, t);
       if (isna_s || isna_t){
         y[k] = NA_REAL;
-        continue;
+      } else {
+        y[k] = lv(
+            s, len_s
+          , t, len_t
+          , bytes, w, scores 
+        );
+        if (y[k] < 0 ) y[k] = R_PosInf;
       }
-      y[k] = lv(
-          s, len_s
-        , t, len_t
-        , bytes, w, scores 
-      );
-      if (y[k] < 0 ) y[k] = R_PosInf;
       i = recycle(i, num_threads, na);
       j = recycle(j, num_threads, nb);
     }

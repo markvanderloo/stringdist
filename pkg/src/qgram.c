@@ -449,15 +449,15 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance, SEXP useBytes, SEXP nt
 
       if ( isna_s || isna_t ){
         y[k] = NA_REAL;
-        continue;
-      }
-      y[k] = qgram_tree(s, t, len_s, len_t, q, Q, dist);
-      if (y[k] == -2.0){
-        UNPROTECT(5);
-        error("Unable to allocate enough memory");
-      }
-      if (y[k] == -1.0){
-        y[k] = R_PosInf;
+      } else {
+        y[k] = qgram_tree(s, t, len_s, len_t, q, Q, dist);
+        if (y[k] == -2.0){
+          UNPROTECT(5);
+          error("Unable to allocate enough memory");
+        }
+        if (y[k] == -1.0){
+          y[k] = R_PosInf;
+        }
       }
       i = recycle(i, num_threads, na);
       j = recycle(j, num_threads, nb);
