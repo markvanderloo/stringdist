@@ -124,7 +124,6 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
     i = recycle(ID-num_threads, num_threads, na);
     j = recycle(ID-num_threads, num_threads, nb);
     #endif
-
     for ( int k=ID; k < nt; k += num_threads ){
       get_elem1(a, i, bytes, &len_s, &isna_s, s);
       get_elem1(b, j, bytes, &len_t, &isna_t, t);

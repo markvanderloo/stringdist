@@ -196,12 +196,12 @@ static unsigned int soundex(const unsigned int* str, unsigned int str_len, unsig
 
 static double soundex_dist(unsigned int *a, unsigned int *b, unsigned int a_len, 
     unsigned int b_len, unsigned int *nfail) {
-  const unsigned int l = 4;
+
   unsigned int sa[4];
   unsigned int sb[4];
   (*nfail) += soundex(a, a_len, sa);
   (*nfail) += soundex(b, b_len, sb);
-  for (unsigned int i = 0; i < l; ++i) 
+  for (unsigned int i = 0; i < 4; ++i) 
     if (sa[i] != sb[i]) return 1.0;
   return 0.0;
 }
@@ -391,17 +391,22 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP useByt
   PROTECT(yy);
   int* y = INTEGER(yy);
 
+  // Counter for the number of non-printable ascii or non-ascii characters.
+  unsigned int nfail = 0;
+
   #ifdef _OPENMP
   int nthreads = INTEGER(nthrd)[0];
+  omp_lock_t writelock;
+  omp_init_lock(&writelock);
   #pragma omp parallel num_threads(nthreads) default(none) \
-    shared(X,T, y, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, bytes)
+    shared(X,T, y, nfail, writelock, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, bytes)
   #endif
   {
     // when a and b are character vectors; create unsigned int vectors in which
     // the elements of and b will be copied
 
     int index, len_X, len_T;
-    unsigned int nfail = 0;
+    unsigned int ifail = 0;
     double d;
 
     #ifdef _OPENMP
@@ -414,7 +419,7 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP useByt
       for (int j=0; j<ntable; ++j) {
         len_T = T->str_len[j];
         if ( len_X != NA_INTEGER && len_T != NA_INTEGER ) {        // both are char (usual case)
-          d = soundex_dist(X->string[i], T->string[j], len_X, len_T, &nfail);
+          d = soundex_dist(X->string[i], T->string[j], len_X, len_T, &ifail);
           if (d < 0.5) { // exact match as d can only take on values 0 and 1
             index = j + 1;
             break;
@@ -426,9 +431,19 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP useByt
       }
       y[i] = index;
     }   
+    #ifdef _OPENMP
+    omp_set_lock(&writelock);
+    #endif
+    nfail += ifail;
+    #ifdef _OPENMP
+    omp_unset_lock(&writelock);
+    #endif
     // cleanup and return
-    check_fail(nfail);
   } // end of parallel region
+  check_fail(nfail);
+  #ifdef _OPENMP
+  omp_destroy_lock(&writelock);
+  #endif
   free_stringset(X);
   free_stringset(T);
   UNPROTECT(7);
