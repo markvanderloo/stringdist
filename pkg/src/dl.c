@@ -301,6 +301,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
 
     double d = R_PosInf, d1 = R_PosInf;
     int index, len_X, len_T;
+    unsigned int *str, **tab;
 
     #ifdef _OPENMP
     #pragma omp for
@@ -309,12 +310,14 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
       index = no_match;
       len_X = X->str_len[i];
       d1 = R_PosInf;
-
-      for ( int j=0; j<ntable; j++){
+      str = X->string[i];
+      tab = &(T->string[0]);
+      for ( int j=0; j<ntable; j++, tab++){
         len_T = T->str_len[j];
-        if ( len_X != NA_INTEGER &&  len_T != NA_INTEGER ){        // both are char (usual case)
+
+        if ( len_X != NA_INTEGER &&  len_T != NA_INTEGER ){      // both are char (usual case)
           d = distance(
-            X->string[i], T->string[j], len_X, len_T, w, dict, scores
+            str, *tab, len_X, len_T, w, dict, scores
           );
           if ( d <= maxDist && d < d1){ 
             index = j + 1;
