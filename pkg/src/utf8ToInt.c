@@ -161,6 +161,9 @@ unsigned int *get_elem1(SEXP x, int i, int bytes, int *len, int *isna, unsigned 
   } else {
     (*len)  = utf8_to_int( CHAR(STRING_ELT(x,i)), c);
   }
+  if ( *len < 0 ){
+    error("Encountered byte sequence not representing an utf-8 character.\n");
+  }
   return  c;
 }
 
