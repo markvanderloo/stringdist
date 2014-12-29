@@ -23,6 +23,15 @@
 #' is \code{NA}, the \code{nomatch} value is returned, regardless of whether \code{NA} is present in \code{table}.
 #' In \code{\link[base]{match}} the behaviour can be controlled by setting the \code{incomparables} option.
 #'
+#' @section Paralellization:
+#'
+#' By default \code{amatch} will use \code{getOption("sd_num_thread")} threads.
+#' When the package is loaded, this option is set to the smaller of the number of available cores or the
+#' environment variable \code{OMP_THREAD_LIMIT}, if available. The number of cores is detected with
+#' \code{parallel::detectCores}. Using the maximum number of threads is not allways the fastest option.
+#' At least one core will also be occupied with for example OS services, so it may be faster to use one core less
+#' than the maximum number of cores.
+#' 
 #' @param x vector: elements to be approximately matched: will be coerced to \code{character}.
 #' @param table vector: lookup table for matching. Will be coerced to \code{character}.
 #' @param nomatch (\code{integer}, \code{NA}) The value to be returned when no match is found. This is coerced to integer. \code{nomatch=0} 

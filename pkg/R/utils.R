@@ -4,7 +4,9 @@ RECYCLEWARNING <- NULL
 
 .onLoad <- function(libname, pkgname){
   RECYCLEWARNING <<- gettext(tryCatch( (1:2)+(1:3),warning=function(w) w$message ))
-  options(sd_num_thread=parallel::detectCores())
+  omp_thread_limit = as.numeric(Sys.getenv("OMP_THREAD_LIMIT"))
+  ncores = parallel::detectCores()
+  options(sd_num_thread=max(ncores,omp_thread_limit,na.rm=TRUE))
 }
 
 

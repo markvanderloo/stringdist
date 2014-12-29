@@ -175,13 +175,16 @@
 #' @section Paralellization:
 #'
 #' By default \code{stringdist} and \code{stringdistmatrix} will use \code{getOption("sd_num_thread")} threads.
-#' When the package is loaded, this option is set to the number of available cores, as detected by 
-#' \code{parallel::detectCores}. If you're using R on a single machine, you probably do not need to alter this.
+#' When the package is loaded, this option is set to the smaller of the number of available cores or the
+#' environment variable \code{OMP_THREAD_LIMIT}, if available. The number of cores is detected with
+#' \code{parallel::detectCores}. Using the maximum number of threads is not allways the fastest option.
+#' At least one core will also be occupied with for example OS services, so it may be faster to use one core less
+#' than the maximum number of cores.
 #' 
 #' In older versions (<0.9) of \code{stringdist}, the \code{cluster} and \code{ncores} argument were the only 
-#' paralellization options. These options are based on the parallel package which starts multiple R-sessions
-#' to run R code in parallel. If you're running R on a single machine it is both faster and easier to use the default
-#' multithreading (so do not specify \code{ncores} or \code{cluster}).
+#' paralellization options, and only for \code{stringdistmatrix}. These options are based on the parallel package 
+#' which starts multiple R-sessions to run R code in parallel. If you're running R on a single machine it is both 
+#' faster and easier to use the default multithreading (so do not specify \code{ncores} or \code{cluster}).
 #'
 #' As of the introduction of the \code{nthreads} argument, the \code{ncores} is mostly useless, although it still works.
 #' If \code{ncores>0}, a local cluster of running R-sessions is set up automatically. Each R-session will use \code{nthread}
