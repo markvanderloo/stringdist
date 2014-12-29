@@ -141,10 +141,10 @@ static int utf8_to_int(const char *str, unsigned int *outbuf){
       p += 1L;
       str_len += 1L;
       s += nbytes;
-    } else if (nbytes == -1L) { // non-utf-8 sequence encountered.
-      return -1; 
     } else if (nbytes == 0L ){
       return str_len;
+    } else if (nbytes == -1L) { // non-utf-8 sequence encountered.
+      return -1; 
     }
   }
 }

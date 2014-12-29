@@ -517,6 +517,7 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
 
     double d = R_PosInf, d1 = R_PosInf;
     int index, len_X, len_T;
+    unsigned int *str, **tab;
 
     #ifdef _OPENMP
     #pragma omp for
@@ -524,12 +525,14 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
     for ( int i=0; i<nx; i++){
       index = no_match;
       len_X = X->str_len[i];
+      str = X->string[i];
+      tab = T->string;
       d1 = R_PosInf;
-      for ( int j=0; j<ntable; j++){
+      for ( int j=0; j<ntable; j++, tab++){
         len_T = T->str_len[j];
         if ( len_X != NA_INTEGER && len_T != NA_INTEGER ){ // both are char (usual case)
           d = qgram_tree(
-            X->string[i], T->string[j], len_X, len_T, q, Q, dist
+            str, *tab, len_X, len_T, q, Q, dist
           );
           if ( d == -2.0 ) nx = -1;
           if ( d > max_dist ){

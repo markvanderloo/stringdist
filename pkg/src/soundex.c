@@ -408,6 +408,7 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP useByt
     int index, len_X, len_T;
     unsigned int ifail = 0;
     double d;
+    unsigned int *str, **tab;
 
     #ifdef _OPENMP
     #pragma omp for
@@ -415,11 +416,12 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP useByt
     for (int i=0; i<nx; ++i) {
       index = no_match;
       len_X = X->str_len[i];
-
-      for (int j=0; j<ntable; ++j) {
+      str = X->string[i];
+      tab = T->string;
+      for (int j=0; j<ntable; ++j, ++tab) {
         len_T = T->str_len[j];
         if ( len_X != NA_INTEGER && len_T != NA_INTEGER ) {        // both are char (usual case)
-          d = soundex_dist(X->string[i], T->string[j], len_X, len_T, &ifail);
+          d = soundex_dist(str, *tab, len_X, len_T, &ifail);
           if (d < 0.5) { // exact match as d can only take on values 0 and 1
             index = j + 1;
             break;

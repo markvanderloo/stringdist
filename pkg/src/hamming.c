@@ -139,6 +139,7 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
   {
     double d = R_PosInf, d1 = R_PosInf;
     int index, len_X, len_T;
+    unsigned int *str, **tab;
 
     #ifdef _OPENMP
     #pragma omp for
@@ -147,11 +148,13 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
       index = no_match;
       len_X = X->str_len[i];
       d1 = R_PosInf;
-      for ( int j=0; j<ntable; j++){
+      str = X->string[i];
+      tab = T->string;
+      for ( int j=0; j<ntable; j++, tab++){
         len_T = T->str_len[j];
         if ( len_X != len_T ) continue;
         if ( len_X != NA_INTEGER && len_T != NA_INTEGER ){        // both are char (usual case)
-          d = (double) hamming( X->string[i], T->string[j], len_X );
+          d = (double) hamming( str, *tab, len_X );
           if ( d <= max_dist && d < d1){ 
             index = j + 1;
             if ( d == 0.0 ) break;

@@ -311,7 +311,7 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
       len_X = X->str_len[i];
       d1 = R_PosInf;
       str = X->string[i];
-      tab = &(T->string[0]);
+      tab = T->string;
       for ( int j=0; j<ntable; j++, tab++){
         len_T = T->str_len[j];
 
