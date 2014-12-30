@@ -1,3 +1,8 @@
+version 0.9.0
+- C-code underlying stringdist and amatch now automatically use multithreading based on openMP.
+- stringdist, stringdistmatrix, and amatch gain nthread argument.
+- bugfix in amatch/dl. In certain cases, the best match went undetected.
+
 version 0.8.2
 - Fixed a few warnings issued by the CLANG compiler (thanks to Brian Ripley). This fixes a bug in amatch/jaccard
 - Fixed a bug in stringdist/osa, dl: NA incorectly returned (thanks to Lauri Koobas).

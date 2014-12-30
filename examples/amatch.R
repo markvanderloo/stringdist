@@ -5,6 +5,9 @@ amatch("leia",c("uhura","leela"),maxDist=5)
 # we can restrict the search
 amatch("leia",c("uhura","leela"),maxDist=1)
 
+# we can match each value in the find vector against values in the lookup table:
+amatch(c("leia","uhura"),c("ripley","leela","scully","trinity"),maxDist=2)
+
 # setting nomatch returns a different value when no match is found
 amatch("leia",c("uhura","leela"),maxDist=1,nomatch=0)
 

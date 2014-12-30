@@ -1,4 +1,4 @@
-#' A package for string distance calculation
+#' A package for string distance calculation and approximate string matching.
 #'
 #' @name stringdist-package
 #' @docType package
@@ -7,29 +7,30 @@
 #'
 #' @section Supported distances:
 #'
+#' \emph{Distances are measured between \code{character} variables \code{a} and \code{b}.}
+#'
 #' The \bold{Hamming distance} (\code{hamming}) counts the number of 
 #' character substitutions that turns \code{b} into \code{a}. If \code{a} 
-#' and \code{b} have different number of characters or if \code{maxDist} is 
-#' exceeded, \code{Inf} is returned.
+#' and \code{b} have different number of characters the distance is \code{Inf}. 
 #'
 #' The \bold{Levenshtein distance} (\code{lv}) counts the number of 
 #' deletions, insertions and substitutions necessary to turn \code{b} into 
 #' \code{a}. This method is equivalent to \code{R}'s native \code{\link[utils]{adist}} 
-#' function. If \code{maxDist} is exceeded \code{Inf}  is returned.
+#' function. 
 #'
 #' The \bold{Optimal String Alignment distance} (\code{osa}) is like the Levenshtein 
 #' distance but also allows transposition of adjacent characters. Here, each 
 #' substring  may be edited only once. (For example, a character cannot be transposed twice
-#' to move it forward in the string). If \code{maxDist} is exceeded \code{Inf}  is returned.
+#' to move it forward in the string). 
 #'
 #' The \bold{full Damerau-Levensthein distance} (\code{dl}) allows for multiple 
-#' edits on substrings. If \code{maxDist} is exceeded \code{Inf}  is returned.
+#' edits on substrings. 
 #'
 #' The \bold{longest common substring} is defined as the longest string that can be 
 #' obtained by pairing characters from \code{a} and \code{b} while keeping the order 
 #' of characters intact. The \bold{lcs-distance} is defined as the number of unpaired characters. 
 #' The distance is equivalent to the edit distance allowing only deletions and insertions, 
-#' each with weight one. If \code{maxDist} is exceeded \code{Inf}  is returned.
+#' each with weight one. 
 #'
 #' A \bold{\eqn{q}-gram} is a subsequence of \eqn{q} \emph{consecutive} 
 #' characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
@@ -68,20 +69,26 @@
 #' factor \eqn{p} is a penalty factor, which in the work of Winkler is often
 #' chosen \eqn{0.1}.
 #'
-#' For the \bold{soundex} method, strings are translated to a soundex code (see \code{\link{phonetic}} for a specification). The
+#' For the \bold{soundex} method, strings are translated to a soundex code 
+#' (see \code{\link{phonetic}} for a specification). The
 #' distance between strings is 0 when they have the same soundex code,
 #' otherwise 1. Note that soundex recoding is only meaningful for characters
 #' in the ranges a-z and A-Z. A warning is emitted when non-printable or non-ascii
 #' characters are encountered. Also see \code{\link{printable_ascii}}.
 #'
+#' @section Citation:
+#' If you would like to cite this package, please cite the \href{http://journal.r-project.org/archive/2014-1/loo.pdf}{R Journal Paper}: 
+#' \itemize{
+#' \item{M.P.J. van der Loo (2014). The \code{stringdist} package for approximate string matching. 
+#'  R Journal 6(1) pp 111-122}
+#' }
+#' Or use \code{citation('stringdist')} to get a bibtex item.
+#'
+#'
 #' @references
 #'
 #' \itemize{
 #'
-#' \item{
-#'  Mark P.J. van der Loo (2014) Approximate text matching with the stringdist package. The R Journal 
-#'  6(1) pp 111-122.
-#' } 
 #' \item{
 #'  An extensive overview of offline string matching algorithms is given by L. Boytsov (2011). Indexing
 #'  methods for approximate dictionary searching: comparative analyses. ACM Journal of experimental
@@ -135,7 +142,7 @@
 #'    \code{soundex} \tab Distance based on soundex encoding (see below)
 #' }
 #' 
-#' A short description of these algorithms is proveded \link[=stringdist-package]{here}, or
+#' A short description of these algorithms is provided \link[=stringdist-package]{here}, or
 #' see the \href{http://journal.r-project.org/archive/2014-1/loo.pdf}{R Journal Paper} (external link) for
 #' more formal descriptions.
 #' 
@@ -166,29 +173,34 @@
 #'
 #'
 #' @section Paralellization:
-#' The \code{stringdistmatrix} function uses \code{\link[parallel]{makeCluster}} to create a local cluster and compute the
-#' distance matrix in parallel when \code{ncores>1}. The cluster is terminated after the matrix has been computed. 
-#' As the cluster is local, the \code{ncores} parameter should not be larger than the number
-#' of cores on your machine. Use \code{\link[parallel]{detectCores}} to check the number of cores available. Alternatively,
-#' you can create a cluster using \code{\link[parallel]{makeCluster}} and pass that to \code{stringdistmatrix} (through the \code{cluster} argument. 
-#' This allows you to reuse the cluster setup for other calculations.
-#' There is overhead in creating clusters, so creating the cluster yourself is a good choice if you want to call \code{stringdistmatrix} 
-#' multiple times, for example in a loop.
 #'
-#' @section Acknowledgement:
+#' By default \code{stringdist} and \code{stringdistmatrix} will use \code{getOption("sd_num_thread")} threads.
+#' When the package is loaded, this option is set to the smaller of the number of available cores or the
+#' environment variable \code{OMP_THREAD_LIMIT}, if available. The number of cores is detected with
+#' \code{parallel::detectCores}. Using the maximum number of threads is not allways the fastest option.
+#' At least one core will also be occupied with for example OS services, so it may be faster to use one core less
+#' than the maximum number of cores.
+#' 
+#' In older versions (<0.9) of \code{stringdist}, the \code{cluster} and \code{ncores} argument were the only 
+#' paralellization options, and only for \code{stringdistmatrix}. These options are based on the parallel package 
+#' which starts multiple R-sessions to run R code in parallel. If you're running R on a single machine it is both 
+#' faster and easier to use the default multithreading (so do not specify \code{ncores} or \code{cluster}).
+#'
+#' As of the introduction of the \code{nthreads} argument, the \code{ncores} is mostly useless, although it still works.
+#' If \code{ncores>0}, a local cluster of running R-sessions is set up automatically. Each R-session will use \code{nthread}
+#' threads.
+#'
+#' The \code{cluster} argument is only interesting when the cluster is set up over different physical nodes. For example when
+#' setting up a network of nodes accross physically different machines. In each node, \code{nthread} threads will be used.
+#'
+#'
+#' @section Acknowledgements:
 #' The code for the full Damerau-Levenshtein distance was adapted from Nick Logan's
 #' \href{https://github.com/ugexe/Text--Levenshtein--Damerau--XS/blob/master/damerau-int.c}{public github repository}.
 #' 
+#' C code for converting UTF-8 to integer was copied from the R core.
 #'
-#' @section Citation:
-#' If you would like to cite this package, please cite the \href{http://journal.r-project.org/archive/2014-1/loo.pdf}{R Journal Paper}: 
-#' \itemize{
-#' \item{M.P.J. van der Loo (2014). The \code{stringdist} package for approximate string matching. 
-#'  R Journal 6(1) pp 111-122}
-#' }
-#' Or use \code{citation('stringdist')} to get a bibtex item.
-#'
-#' @section other:
+#' @section Other:
 #'
 #' \itemize{
 #'
@@ -210,12 +222,15 @@
 #'   When \code{method='lv'}, the penalty for transposition is ignored. When \code{method='jw'}, the weights associated with characters
 #'   of \code{a}, characters from \code{b} and the transposition weight, in that order.
 #'   Weights must be positive and not exceed 1. \code{weight} is
-#'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'}, or \code{'lcs'}. 
+#'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'}, \code{'lcs'}, or \code{soundex}. 
 #' @param maxDist  [DEPRECATED AND WILL BE REMOVED] Currently kept for backward compatibility. It does not
 #' offer any speed gain. (In fact, it currently slows things down when set to anything different from \code{Inf}).
 #' @param q  Size of the \eqn{q}-gram; must be nonnegative. Only applies to \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
 #' @param p Penalty factor for Jaro-Winkler distance. The valid range for \code{p} is \code{0 <= p <= 0.25}. 
 #'  If \code{p=0} (default), the Jaro-distance is returned. Applies only to \code{method='jw'}.
+#' @param nthread (positive integer) Number of threads used by the underlying C-code. The default is the number of cores
+#'  detected by \code{\link[parallel]{detectCores}}.
+#'
 #'
 #' @return For \code{stringdist},  a vector with string distances of size \code{max(length(a),length(b))}.
 #'  For \code{stringdistmatrix}, a \code{length(a)xlength(b)} \code{matrix}. The returned distance is
@@ -225,15 +240,21 @@
 #'  
 #' @example ../examples/stringdist.R
 #' @export
-stringdist <- function(a, b, 
-  method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw","soundex"), 
-  useBytes = FALSE,
-  weight=c(d=1,i=1,s=1,t=1), 
-  maxDist=Inf, q=1, p=0
+stringdist <- function(a, b
+  , method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw","soundex")
+  , useBytes = FALSE
+  , weight=c(d=1,i=1,s=1,t=1) 
+  , maxDist=Inf, q=1, p=0
+  , nthread = getOption("sd_num_thread")
 ){
-
+  # note: enc2utf8 is very efficient when the native encoding is already UTF-8.
   a <- as.character(a)
   b <- as.character(b)
+  if ( !useBytes ){
+    a <- enc2utf8(a)
+    b <- enc2utf8(b)
+  }
+
   if (length(a) == 0 || length(b) == 0){ 
     return(numeric(0))
   }
@@ -241,7 +262,7 @@ stringdist <- function(a, b,
     warning(RECYCLEWARNING)
   }
   method <- match.arg(method)
-  
+  nthread <- as.integer(nthread)
   stopifnot(
       all(is.finite(weight))
       , all(weight > 0)
@@ -252,13 +273,10 @@ stringdist <- function(a, b,
       , is.logical(useBytes)
       , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
+      , nthread > 0
   )
-  if (!useBytes){
-    a <- char2int(a)
-    b <- char2int(b)
-  }
   if (method == 'jw') weight <- weight[c(2,1,3)]
-  do_dist(b, a, method, weight, maxDist, q, p)
+  do_dist(b, a, method, weight, maxDist, q, p, useBytes, nthread)
 }
 
 
@@ -274,15 +292,21 @@ stringdist <- function(a, b,
 #'
 #' @rdname stringdist
 #' @export
-stringdistmatrix <- function(a, b, 
-  method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex"), 
-  useBytes = FALSE,
-  weight=c(d=1,i=1,s=1,t=1),  maxDist=Inf, q=1, p=0,
-  useNames=FALSE, ncores=1, cluster=NULL
+stringdistmatrix <- function(a, b
+  , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex")
+  , useBytes = FALSE
+  , weight=c(d=1,i=1,s=1,t=1),  maxDist=Inf, q=1, p=0
+  , useNames=FALSE, ncores=1, cluster=NULL
+  , nthread = getOption("sd_num_thread")
 ){
   
   a <- as.character(a)
   b <- as.character(b)
+
+  if (!useBytes){
+    a <- enc2utf8(a)
+    b <- enc2utf8(b)
+  }
  
   if (length(a) == 0 || length(b) == 0){ 
    return(matrix(numeric(0)))
@@ -294,6 +318,7 @@ stringdistmatrix <- function(a, b,
   }
 
   method <- match.arg(method)
+  nthread <- as.integer(nthread)
   stopifnot(
       all(is.finite(weight))
       , all(weight > 0)
@@ -305,14 +330,11 @@ stringdistmatrix <- function(a, b,
       , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
       , ncores > 0
+      , nthread > 0
   )
-  if (!useBytes){
-    a <- char2int(a)
-    b <- lapply(char2int(b),list)
-  }
   if (method == 'jw') weight <- weight[c(2,1,3)]
   if (ncores==1){
-    x <- sapply(b,do_dist, USE.NAMES=FALSE, a,method,weight,maxDist, q, p)
+    x <- sapply(b,do_dist, USE.NAMES=FALSE, a,method,weight,maxDist, q, p,useBytes, nthread)
   } else {
     if ( is.null(cluster) ){
       cluster <- makeCluster(ncores)
@@ -321,7 +343,7 @@ stringdistmatrix <- function(a, b,
       stopifnot(inherits(cluster, 'cluster'))
       turn_cluster_off <- FALSE
     }
-    x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q, p)
+    x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q, p, useBytes, nthread)
     if (turn_cluster_off) stopCluster(cluster)
   }
   if (!useNames)  as.matrix(x) else structure(as.matrix(x), dimnames=list(rowns,colns))
@@ -339,18 +361,18 @@ char2int <- function(x){
 
 
 
-do_dist <- function(a, b, method, weight, maxDist, q, p){
+do_dist <- function(a, b, method, weight, maxDist, q, p, useBytes=FALSE, nthread=1L){
   d <- switch(method,
-    osa     = .Call('R_osa'   , a, b, as.double(weight)),
-    lv      = .Call('R_lv'    , a, b, as.double(weight)),
-    dl      = .Call('R_dl'    , a, b, as.double(weight)),
-    hamming = .Call('R_hm'    , a, b),
-    lcs     = .Call('R_lcs'   , a, b),
-    qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L),
-    cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L),
-    jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L),
-    jw      = .Call('R_jw'    , a, b, as.double(p), as.double(weight)),
-    soundex = .Call('R_soundex_dist', a, b)
+    osa     = .Call('R_osa'   , a, b, as.double(weight), useBytes, nthread),
+    lv      = .Call('R_lv'    , a, b, as.double(weight), useBytes, nthread),
+    dl      = .Call('R_dl'    , a, b, as.double(weight), useBytes, nthread),
+    hamming = .Call('R_hm'    , a, b, useBytes, nthread),
+    lcs     = .Call('R_lcs'   , a, b, useBytes, nthread),
+    qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L, useBytes, nthread),
+    cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L, useBytes, nthread),
+    jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L, useBytes, nthread),
+    jw      = .Call('R_jw'    , a, b, as.double(p), as.double(weight), useBytes, nthread),
+    soundex = .Call('R_soundex_dist', a, b, useBytes, nthread)
   )
   if (maxDist < Inf ){
     d[!is.na(d) & d > maxDist] <- Inf

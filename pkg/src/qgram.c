@@ -24,7 +24,9 @@
 #include <R.h>
 #include <Rdefines.h>
 #include "utils.h"
-
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 /* binary tree; dictionary of qgrams */
 
@@ -38,15 +40,17 @@ typedef struct qnode {
 
 
 
+
 /* -- Simple memory allocator to store nodes of the qtree -- */
 
 
-/* Nodes are stored in boxes which are stored on a shelve.
- * Every time a new box is added to the shelve, the capacity 
+/* Nodes are stored in boxes which are stored on a shelf.
+ * Every time a new box is added to the shelf, the capacity 
  * for node storage doubles, unless MAXBOXES is surpassed.
  */
-#define MAXBOXES 20           // max number of boxes
-#define MIN_BOX_SIZE (1<<10)  // nr of nodes in initial box
+#define MAXBOXES 20             // max number of boxes
+#define MIN_BOX_SIZE (1<<10)    // nr of nodes in initial box
+#define MAX_NUM_THREADS (1<<10) // nr of threads for which alocator is thread-safe.
 
 // A Box of nodes.
 typedef struct {
@@ -80,26 +84,40 @@ static void free_box(Box *box){
   free( box);
 }
 
-// A shelve can store up to MAXBOXES Boxes.
+// A shelf can store up to MAXBOXES Boxes.
 typedef struct {
   Box *box[MAXBOXES];
   int nboxes;         // number of boxes on the shelf
   int q;              // the q in q-gram
   int nstr;           // the number of stings compared
-} Shelve;
+} Shelf;
 
-// one shelve for all.
-static Shelve shelve;
+// A wall with shelfs: one for each thread.
+static Shelf wall[MAX_NUM_THREADS];
 
-static void init_shelve(int q, int nstr){
-  shelve.q = q;
-  shelve.nstr = nstr;
-  shelve.nboxes = 0L;
-  for ( int i=0; i<MAXBOXES; i++ )
-    shelve.box[i] = NULL;
+// When multithreaded, check what shelf we're storing stuff.
+static inline int get_shelf_num(){
+  int thread_num=0;
+  #ifdef _OPENMP
+  thread_num = omp_get_thread_num();
+  #endif
+  return thread_num;
 }
 
-/* add box to shelve
+
+
+static void init_shelf(int q, int nstr){
+
+  Shelf *shelf = &wall[get_shelf_num()];
+
+  shelf->q = q;
+  shelf->nstr = nstr;
+  shelf->nboxes = 0L;
+  for ( int i=0; i<MAXBOXES; i++ )
+    shelf->box[i] = NULL;
+}
+
+/* add box to shelf
  *
  * return values:
  * 0: okidoki
@@ -108,13 +126,14 @@ static void init_shelve(int q, int nstr){
  */
 static int add_box(int nnodes){
 
+  Shelf *shelf = &wall[get_shelf_num()];
   // is there room for another box?
-  if ( shelve.nboxes >= MAXBOXES ) return 1;
+  if ( shelf->nboxes >= MAXBOXES ) return 1;
 
-  Box *b = new_box(nnodes, shelve.q, shelve.nstr);
+  Box *b = new_box(nnodes, shelf->q, shelf->nstr);
   if ( b != NULL ){
-    shelve.box[shelve.nboxes] = b;
-    shelve.nboxes++;
+    shelf->box[shelf->nboxes] = b;
+    shelf->nboxes++;
     return 1L;
   } else {
     return 0L;
@@ -122,11 +141,12 @@ static int add_box(int nnodes){
   
 }
 
-static void clear_shelve(){
-  for ( int i = 0; i < shelve.nboxes; i++ ){
-    free_box(shelve.box[i]);
+static void clear_shelf(){
+  Shelf *shelf = &wall[get_shelf_num()];
+  for ( int i = 0; i < shelf->nboxes; i++ ){
+    free_box(shelf->box[i]);
   }
-  shelve.nboxes=0L;
+  shelf->nboxes=0L;
 }
 
 /* the allocator can store ints (q-grams), doubles (counts, per string) 
@@ -137,28 +157,29 @@ typedef enum { uInt, Double, Qtree } type;
 
 // cf. n1256.pdf (C99 std) sect 6.3.2.3 for pointer conversion.
 static void *alloc(type t){
+  Shelf *shelf = &wall[get_shelf_num()];
 
   if ( 
-    shelve.nboxes == 0L &&
+    shelf->nboxes == 0L &&
     !add_box(MIN_BOX_SIZE)
   ) return NULL;
 
-  Box *box = shelve.box[shelve.nboxes-1L];
+  Box *box = shelf->box[shelf->nboxes-1L];
   if ( box->nalloc == box->nnodes ){
     // add box such that storage size is doubled.
     if (
-      !add_box( (1 << (shelve.nboxes-1L)) * MIN_BOX_SIZE )
+      !add_box( (1 << (shelf->nboxes-1L)) * MIN_BOX_SIZE )
     ) return NULL;
-    box = shelve.box[shelve.nboxes-1L];
+    box = shelf->box[shelf->nboxes-1L];
   }
 
   void *x;
   switch ( t){
     case uInt:
-      x = (void *) (box->intblocks + box->nalloc * shelve.q);
+      x = (void *) (box->intblocks + box->nalloc * shelf->q);
       break;
     case Double:
-      x = (void *) (box->dblblocks + box->nalloc * shelve.nstr);
+      x = (void *) (box->dblblocks + box->nalloc * shelf->nstr);
       break;
     case Qtree:
 
@@ -192,12 +213,12 @@ static int compare(unsigned int *q1, unsigned int *q2, int q){
 
 // helper functions
 static qtree *new_qtree(int q, int nstr){
-  init_shelve(q, nstr);
+  init_shelf(q, nstr);
   return NULL;
 }
 
 static void free_qtree(){
-  clear_shelve();
+  clear_shelf();
 }
 
 
@@ -374,74 +395,86 @@ static double qgram_tree(
 }
 
 /* R interface to qgram distance */
-SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance){
+SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance, SEXP useBytes, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
   PROTECT(qq);
   PROTECT(distance);
+  PROTECT(useBytes);
+  PROTECT(nthrd);
+
   // choose distance function
 
   int dist = INTEGER(distance)[0]
     , q = INTEGER(qq)[0]
     , na = length(a)
     , nb = length(b)
+    , nt = (na > nb) ? na : nb
     , ml_a = max_length(a)
     , ml_b = max_length(b)
-    , bytes = IS_CHARACTER(a);
-
-  // set up a qtree; 
-  qtree *Q = new_qtree(q, 2L);
-  unsigned int *s = NULL, *t = NULL;
-  if ( bytes ){
-    s = (unsigned int *) malloc( (ml_a + ml_b) * sizeof(int) );
-    if ( s == NULL ){ 
-      UNPROTECT(4);
-      error("Unable to allocate enough memory");
-    }
-    t = s + ml_a;
-  }
+    , bytes = INTEGER(useBytes)[0];
 
   // output
-  int nt = (na > nb) ? na : nb;
   SEXP yy; 
   PROTECT(yy = allocVector(REALSXP, nt));
   double *y = REAL(yy);
 
-  
- 
-  int i=0, j=0, len_s, len_t, isna_s, isna_t;
-  for ( int k=0; k < nt; ++k 
-      , i = RECYCLE(i+1,na)
-      , j = RECYCLE(j+1,nb) ){
+  #ifdef _OPENMP 
+  int  nthreads = INTEGER(nthrd)[0];
+  #pragma omp parallel num_threads(nthreads) default(none) \
+      shared(y, R_PosInf, NA_REAL, bytes, dist, q, na, nb, ml_a, ml_b, nt, a, b)
+  #endif
+  {
+    // set up a qtree; 
+    qtree *Q = new_qtree(q, 2L);
+    unsigned int *s = NULL, *t = NULL;
+    s = (unsigned int *) malloc( (2L + ml_a + ml_b) * sizeof(int) );
+    t = s + ml_a + 1L;
+    if ( s == NULL ) nt = -1;
+   
+    int k, len_s, len_t, isna_s, isna_t
+      , i = 0, j = 0, ID = 0, num_threads = 1;
 
-    s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-    t = get_elem(b, j, bytes, &len_t, &isna_t, t);
+    #ifdef _OPENMP
+    ID = omp_get_thread_num();
+    num_threads = omp_get_num_threads();
+    i = recycle(ID-num_threads, num_threads, na);
+    j = recycle(ID-num_threads, num_threads, nb);
+    #endif
 
-    if ( isna_s || isna_t ){
-      y[k] = NA_REAL;
-      continue;
+    for ( k = ID; k < nt; k += num_threads ){ 
+
+      get_elem1(a, i, bytes, &len_s, &isna_s, s);
+      get_elem1(b, j, bytes, &len_t, &isna_t, t);
+
+      if ( isna_s || isna_t ){
+        y[k] = NA_REAL;
+      } else {
+        y[k] = qgram_tree(s, t, len_s, len_t, q, Q, dist);
+        if (y[k] == -2.0){
+          UNPROTECT(5);
+          error("Unable to allocate enough memory");
+        }
+        if (y[k] == -1.0){
+          y[k] = R_PosInf;
+        }
+      }
+      i = recycle(i, num_threads, na);
+      j = recycle(j, num_threads, nb);
     }
-    y[k] = qgram_tree(s, t, len_s, len_t, q, Q, dist);
-    if (y[k] == -2.0){
-      UNPROTECT(5);
-      error("Unable to allocate enough memory");
-    }
-    if (y[k] == -1.0){
-      y[k] = R_PosInf;
-    }
+    free_qtree();
+    free(s);
   }
-
-
-  free_qtree();
-  if ( bytes ) free(s);
-  UNPROTECT(5);
+  UNPROTECT(7);
+  if (nt < 0)  error("Unable to allocate enough memory");
   return yy;
 }
 
 
 //-- Match function interface with R
 
-SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq, SEXP maxDist, SEXP distance){
+SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
+    , SEXP maxDist, SEXP distance, SEXP useBytes, SEXP nthrd){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
@@ -449,6 +482,8 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq,
   PROTECT(qq);
   PROTECT(maxDist);
   PROTECT(distance);
+  PROTECT(useBytes);
+  PROTECT(nthrd);
 
   double max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
   
@@ -459,66 +494,68 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq,
     , ntable = length(table)
     , no_match = INTEGER(nomatch)[0]
     , match_na = INTEGER(matchNA)[0]
-    , bytes = IS_CHARACTER(x)
-    , ml_x = max_length(x)
-    , ml_t = max_length(table);
+    , bytes = INTEGER(x)[0];
   
-  // set up a qtree;
-  qtree *Q = new_qtree(q, 2);
-
-  unsigned int *X = NULL, *T = NULL;
-  if (bytes){
-    X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int));
-    if ( X == NULL){
-      UNPROTECT(7);
-      error("Unable to allocate enough memory");
-    }
-    T = X + ml_x;
-  }
+  // convert to integer. 
+  Stringset *X = new_stringset(x, bytes);
+  Stringset *T = new_stringset(table, bytes);
 
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
 
+  
+  #ifdef _OPENMP
+  int nthreads = INTEGER(nthrd)[0];
+  #pragma omp parallel num_threads(nthreads) default(none) \
+    shared(X, T, y, R_PosInf,NA_INTEGER, nx, ntable, no_match, match_na, bytes, q, dist, max_dist)
+  #endif
+  {
+    // set up a qtree;
+    qtree *Q = new_qtree(q, 2);
 
-  double d = R_PosInf, d1 = R_PosInf;
-  int index, isna_X, isna_T, len_X, len_T;
+    double d = R_PosInf, d1 = R_PosInf;
+    int index, len_X, len_T;
+    unsigned int *str, **tab;
 
-  for ( int i=0; i<nx; i++){
-    index = no_match;
-    X = get_elem(x, i, bytes, &len_X, &isna_X, X);
-    d1 = R_PosInf;
-    for ( int j=0; j<ntable; j++){
-
-      T = get_elem(table, j, bytes, &len_T, &isna_T,T);
-
-      if ( !isna_X && !isna_T ){        // both are char (usual case)
-        d = qgram_tree(
-          X, T, len_X, len_T, q, Q, dist
-        );
-        if ( d == -2.0 ){
-          UNPROTECT(7);
-          error("Unable to allocate enough memory for qgram storage");
+    #ifdef _OPENMP
+    #pragma omp for
+    #endif
+    for ( int i=0; i<nx; i++){
+      index = no_match;
+      len_X = X->str_len[i];
+      str = X->string[i];
+      tab = T->string;
+      d1 = R_PosInf;
+      for ( int j=0; j<ntable; j++, tab++){
+        len_T = T->str_len[j];
+        if ( len_X != NA_INTEGER && len_T != NA_INTEGER ){ // both are char (usual case)
+          d = qgram_tree(
+            str, *tab, len_X, len_T, q, Q, dist
+          );
+          if ( d == -2.0 ) nx = -1;
+          if ( d > max_dist ){
+            continue;
+          } else if ( d > -1 && d < d1){ 
+            index = j + 1;
+            if ( fabs(d) < 1e-14 ) break; 
+            d1 = d;
+          }
+        } else if ( len_X == NA_INTEGER && len_T == NA_INTEGER ) {  // both are NA
+          index = match_na ? j + 1 : no_match;
+          break;
         }
-        if ( d > max_dist ){
-          continue;
-        } else if ( d > -1 && d < d1){ 
-          index = j + 1;
-          if ( fabs(d) < 1e-14 ) break; 
-          d1 = d;
-        }
-      } else if ( isna_X && isna_T ) {  // both are NA
-        index = match_na ? j + 1 : no_match;
-        break;
       }
-    }
-    
-    y[i] = index;
-  } 
-  if ( bytes ) free(X);
-  free_qtree();
-  UNPROTECT(8);
+      
+      y[i] = index;
+    } 
+    free_qtree();
+  } // end of parallel region
+  free_stringset(X);
+  free_stringset(T);
+  UNPROTECT(10);
+  if (nx < 0 ) error("Unable to allocate enough memory");
   return(yy);
 }
 

@@ -27,6 +27,19 @@
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 #define ABS(X) ((X)<0 ? -1*(X) : (X))
 
+
+/* A structure for storing integer reps of strings */
+typedef struct {
+  // array of pointers to integer representation of strings, stored in data.
+  unsigned int **string;
+  //  array of string lengths.
+  int *str_len;
+  //  storage room for integer representation of strings
+  unsigned int *data;
+} Stringset;
+
+
+
 unsigned int max_length(SEXP);
 
 /* Get element from SEXP list and determine some parameters.
@@ -46,5 +59,52 @@ unsigned int max_length(SEXP);
  *
  */
 unsigned int *get_elem(SEXP x, int i, int bytes, int *len, int *isna, unsigned int *c);
+
+unsigned int *get_elem1(SEXP x, int i, int bytes, int *len, int *isna, unsigned int *c);
+
+/* (mutlithreaded) recycling.
+ *
+ * This avoids having to compute i % ni at every iteration while
+ * recycling over a vector. 
+ *
+ * In the default case, the counter i starts at omp_thread_num() and
+ * is increased with omp_get_num_threads() (round robin parallelization).
+ * If a counter is increased to above the length of a vector, it's value
+ * is decreased with the vector length (recycling).
+ *
+ * There is an edge case when omp_get_num_threads() is less than the
+ * vector's length. In that case, when i > the vector length, the 
+ * modulus is computed anyway.
+ *
+ *
+ * Input:
+ * i : integer, current index.
+ * nthreads : number of threads working on the vector.
+ * ni : vector length
+ *
+ *
+ */
+static inline int recycle(int i, int nthreads, int ni){
+  i += nthreads;
+  if ( i >= ni )
+    i = (nthreads < ni) ? (i - ni) : (i % ni);
+  return i;
+}
+
+/* Create a new stringset from an character vector.
+ *
+ * Translates character vectors to integers. Input is expected in utf-8 format.
+ * Translation can be bytewise (bytes=1) or interpreted utf8.
+ *
+ * Output: Pointer to a Stringset.
+ *
+ *
+ *
+ */
+Stringset *new_stringset(SEXP str, int bytes);
+
+/* Clean up a Stringset. */
+void free_stringset(Stringset *s);
+
 
 #endif

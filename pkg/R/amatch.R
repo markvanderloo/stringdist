@@ -23,19 +23,34 @@
 #' is \code{NA}, the \code{nomatch} value is returned, regardless of whether \code{NA} is present in \code{table}.
 #' In \code{\link[base]{match}} the behaviour can be controlled by setting the \code{incomparables} option.
 #'
+#' @section Paralellization:
+#'
+#' By default \code{amatch} will use \code{getOption("sd_num_thread")} threads.
+#' When the package is loaded, this option is set to the smaller of the number of available cores or the
+#' environment variable \code{OMP_THREAD_LIMIT}, if available. The number of cores is detected with
+#' \code{parallel::detectCores}. Using the maximum number of threads is not allways the fastest option.
+#' At least one core will also be occupied with for example OS services, so it may be faster to use one core less
+#' than the maximum number of cores.
+#' 
 #' @param x vector: elements to be approximately matched: will be coerced to \code{character}.
 #' @param table vector: lookup table for matching. Will be coerced to \code{character}.
-#' @param nomatch The value to be returned when no match is found. This is coerced to integer. \code{nomatch=0} 
+#' @param nomatch (\code{integer}, \code{NA}) The value to be returned when no match is found. This is coerced to integer. \code{nomatch=0} 
 #'  can be a useful option.
-#' @param matchNA Should \code{NA}'s be matched? Default behaviour mimics the
+#' @param matchNA (\code{logical}) Should \code{NA}'s be matched? Default behaviour mimics the
 #'   behaviour of base \code{\link[base]{match}}, meaning that \code{NA} matches
 #'   \code{NA} (see also the note on \code{NA} handling below).
-#' @param method Matching algorithm to use. See \code{\link{stringdist}}.
-#' @param useBytes Perform byte-wise comparison. \code{useBytes=TRUE} is faster but may yield different
+#' @param method (\code{character}) Matching algorithm to use. See \code{\link{stringdist-package}}.
+#' @param useBytes (\code{logical}) Perform byte-wise comparison. \code{useBytes=TRUE} is faster but may yield different
 #' 	results depending on character encoding. See also \code{\link{stringdist}}, under encoding issues.
-#' @param weight Weight parameters for matching algorithm See \code{\link{stringdist}}.
-#' @param maxDist Elements in \code{x} will not be matched with elements of
+#' @param weight For \code{method='osa'} or \code{'dl'}, the penalty for deletion, insertion, substitution and transposition, in that order.
+#'   When \code{method='lv'}, the penalty for transposition is ignored. When \code{method='jw'}, the weights associated with characters
+#'   of \code{a}, characters from \code{b} and the transposition weight, in that order.
+#'   Weights must be positive and not exceed 1. \code{weight} is
+#'   ignored completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'}, \code{'Jaccard'}, \code{'lcs'}, or \code{soundex}. 
+#' @param maxDist (\code{numeric}) Elements in \code{x} will not be matched with elements of
 #'  \code{table} if their distance is larger than \code{maxDist}. 
+#' @param nthread (positive \code{integer}) Number of threads used by the underlying C-code. The default is the number of cores
+#'  detected by \code{\link[parallel]{detectCores}}.
 #'   
 #' @param q q-gram size, see \code{\link{stringdist}}.
 #' @param p Winklers penalty parameter for Jaro-Winkler distance, see \code{\link{stringdist}}.
@@ -46,21 +61,22 @@
 #'
 #' @example ../examples/amatch.R
 #' @export
-amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE, 
-  method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw", "soundex"), 
-  useBytes = FALSE,
-  weight=c(d=1,i=1,s=1,t=1), 
-  maxDist=0.1, q=1, p=0){
-
+amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
+  , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw", "soundex") 
+  , useBytes = FALSE
+  , weight=c(d=1,i=1,s=1,t=1)
+  , maxDist=0.1, q=1, p=0
+  , nthread = getOption("sd_num_thread")){
 
   x <- as.character(x)
   table <- as.character(table)
 
-  method <- match.arg(method)
   if (!useBytes){
-    x <- char2int(x)
-    table <- char2int(table)
+    x <- enc2utf8(x)
+    table <- enc2utf8(table)
   }
+
+  method <- match.arg(method)
   stopifnot(
       all(is.finite(weight))
       , all(weight > 0)
@@ -73,20 +89,21 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE,
       , is.logical(useBytes)
       , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
+      , nthread > 0
   )
   if (maxDist==Inf && !method %in% c('osa','lv','dl','hm','lcs') ) maxDist <- 0L;
   if (method == 'jw') weight <- weight[c(2,1,3)]
   switch(method,
-    osa     = .Call('R_match_osa'       , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),
-    lv      = .Call('R_match_lv'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),
-    dl      = .Call('R_match_dl'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist)),
-    hamming = .Call('R_match_hm'        , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist)),
-    lcs     = .Call('R_match_lcs'        , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist)),
-    qgram   = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 0L),
-    cosine  = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 1L),
-    jaccard = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 2L),
-    jw      = .Call('R_match_jw'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(p), as.double(weight), as.double(maxDist)),
-    soundex = .Call('R_match_soundex'   , x, table, as.integer(nomatch), as.integer(matchNA))
+    osa     = .Call('R_match_osa'       , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist), useBytes, as.integer(nthread)),
+    lv      = .Call('R_match_lv'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist), useBytes, as.integer(nthread)),
+    dl      = .Call('R_match_dl'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(weight), as.double(maxDist), useBytes, as.integer(nthread)),
+    hamming = .Call('R_match_hm'        , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist),useBytes,as.integer(nthread)),
+    lcs     = .Call('R_match_lcs'       , x, table, as.integer(nomatch), as.integer(matchNA), as.integer(maxDist), useBytes, as.integer(nthread)),
+    qgram   = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 0L, useBytes, as.integer(nthread)),
+    cosine  = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 1L, useBytes, as.integer(nthread)),
+    jaccard = .Call('R_match_qgram_tree', x, table, as.integer(nomatch), as.integer(matchNA), as.integer(q), as.double(maxDist), 2L, useBytes, as.integer(nthread)),
+    jw      = .Call('R_match_jw'        , x, table, as.integer(nomatch), as.integer(matchNA), as.double(p), as.double(weight), as.double(maxDist), useBytes, as.integer(nthread)),
+    soundex = .Call('R_match_soundex'   , x, table, as.integer(nomatch), as.integer(matchNA), useBytes, as.integer(nthread))
   )
 }
 

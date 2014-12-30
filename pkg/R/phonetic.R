@@ -17,7 +17,7 @@
 #' not be trusted. If non-ascii or non-printable ascii charcters are encountered, a warning 
 #' is emitted.
 #' 
-#' @seealso \code{\link{printable_ascii}}
+#' @seealso \code{\link{printable_ascii}}, \code{\link{stringdist-package}}
 #' 
 #' 
 #' @return
@@ -25,14 +25,6 @@
 #' implemented methods return a character vector of the same length of the input
 #' vector. Output characters are in the system's native encoding.
 #'
-#' @section Citation:
-#' If you would like to cite this package, please cite the R-journal paper: 
-#' \itemize{
-#' \item{M.P.J. van der Loo (2014). The \code{stringdist} package for approximate string matching. 
-#'  R Journal 6(1) pp. 111-122}
-#' }
-#' Or use \code{citation('stringdist')} to get a bibtex item.
-#' 
 #' @references
 #' \itemize{
 #' \item{The Soudex algorithm implemented is the algorithm used by the 
@@ -49,9 +41,9 @@ phonetic <- function(x, method = c("soundex"), useBytes = FALSE) {
   x <- as.character(x)
   method <- match.arg(method)
   stopifnot(is.logical(useBytes))
-  if (!useBytes) x <- char2int(x)
+  if (!useBytes) x <- enc2utf8(x)
   if (method == "soundex") {
-    r <- .Call("R_soundex", x)
+    r <- .Call("R_soundex", x, useBytes)
     if (!useBytes) int2char(r) else r
   } 
 }

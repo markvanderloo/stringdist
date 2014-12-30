@@ -21,6 +21,9 @@
 #include <stdlib.h>
 #include <R.h>
 #include <Rdefines.h>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 #include "utils.h"
 
 /* Longest common substring
@@ -65,56 +68,68 @@ static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int *scores){
 //-- interface with R
 
 
-SEXP R_lcs(SEXP a, SEXP b){
+SEXP R_lcs(SEXP a, SEXP b, SEXP useBytes, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
+  PROTECT(useBytes);
+  PROTECT(nthrd);
 
   int na = length(a)
     , nb = length(b)
     , ml_a = max_length(a)
     , ml_b = max_length(b)
-    , bytes = IS_CHARACTER(a);
-
-  // space for the workfunction
-  int *scores; 
-  scores = (int *) malloc( (ml_a + 1) * (ml_b + 1) * sizeof(int)); 
-
-  unsigned int *s = NULL, *t = NULL;
-  if ( bytes ){
-    s = (unsigned int *) malloc( (ml_a + ml_b) * sizeof(int));
-    t = s + ml_a; 
-  }
-
-  if ( (scores == NULL) | (bytes && s == NULL) ){
-    UNPROTECT(2); free(scores); free(s);
-    error("%s\n","unable to allocate enough memory for workspace");
-  }
+    , bytes = INTEGER(useBytes)[0]
+    , nt = (na > nb) ? na : nb;
 
   // output vector
-  int nt = (na > nb) ? na : nb;   
   SEXP yy;
   PROTECT(yy = allocVector(REALSXP, nt));
   double *y = REAL(yy);   
   
-  int i=0, j=0, len_s, len_t, isna_s, isna_t;
-  for ( int k=0; k < nt; 
-      ++k 
-     , i = RECYCLE(i+1,na)
-     , j = RECYCLE(j+1,nb) ){
+  #ifdef _OPENMP 
+  int  nthreads = INTEGER(nthrd)[0];
+  #pragma omp parallel num_threads(nthreads) default(none) \
+      shared(y, R_PosInf, NA_REAL, bytes, na, nb, ml_a, ml_b, nt, a, b)
+  #endif
+  {
+    // space for the workfunction
+    int *scores; 
+    scores = (int *) malloc( (ml_a + 1) * (ml_b + 1) * sizeof(int)); 
 
-    s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-    t = get_elem(b, j, bytes, &len_t, &isna_t, t);
-    if ( isna_s || isna_t ){
-      y[k] = NA_REAL;
-      continue;
-    }
-    y[k] = lcs(s, len_s, t, len_t, scores );
-    if (y[k] < 0 ) y[k] = R_PosInf;
-  }
-  
-  free(scores);
-  if (bytes) free(s);
-  UNPROTECT(3);
+    unsigned int *s = NULL, *t = NULL;
+    s = (unsigned int *) malloc( (2L + ml_a + ml_b) * sizeof(int));
+    t = s + ml_a + 1L; 
+    // no memory = no joy = no looping.
+    if ( (scores == NULL) | (bytes && s == NULL) ) nt = -1;
+
+    int len_s, len_t, isna_s, isna_t
+      , i = 0, j = 0, ID = 0, num_threads=1;
+
+    #ifdef _OPENMP
+    ID = omp_get_thread_num();
+    num_threads = omp_get_num_threads();
+    i = recycle(ID-num_threads, num_threads, na);
+    j = recycle(ID-num_threads, num_threads, nb);
+    #endif
+    
+    for ( int k=ID; k < nt; k += num_threads ){
+      get_elem1(a, i, bytes, &len_s, &isna_s, s);
+      get_elem1(b, j, bytes, &len_t, &isna_t, t);
+      if ( isna_s || isna_t ){
+        y[k] = NA_REAL;
+      } else {
+        y[k] = lcs(s, len_s, t, len_t, scores );
+        if (y[k] < 0 ) y[k] = R_PosInf;
+      }
+      i = recycle(i, num_threads, na);
+      j = recycle(j, num_threads, nb);
+    } 
+    free(scores);
+    free(s);
+  } // end parallel region
+
+  UNPROTECT(5);
+  if (nt < 0)  error("Unable to allocate enough memory");
   return(yy);
 }
 
@@ -122,71 +137,77 @@ SEXP R_lcs(SEXP a, SEXP b){
 
 //-- Match function interface with R
 
-SEXP R_match_lcs(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP maxDistance){
+SEXP R_match_lcs(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
+    , SEXP maxDistance, SEXP useBytes, SEXP nthrd){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
   PROTECT(matchNA);
   PROTECT(maxDistance);
+  PROTECT(useBytes);
+  PROTECT(nthrd);
 
   int nx = length(x)
     , ntable = length(table)
     , no_match = INTEGER(nomatch)[0]
     , match_na = INTEGER(matchNA)[0]
     , max_dist = INTEGER(maxDistance)[0]
-    , bytes = IS_CHARACTER(x)
-    , ml_x = max_length(x)
-    , ml_t = max_length(table);
+    , bytes = INTEGER(useBytes)[0];
 
-  // space for the workfunction
-  int *work = (int *) malloc( (max_length(x) + 1) * (max_length(table) + 1) * sizeof(int)); 
-  unsigned int *X = NULL, *T = NULL;
-  if ( bytes ){
-    X = (unsigned int *) malloc((ml_x + ml_t)*sizeof(int));
-    T = X + ml_x;
-  }
-  if ( ( work == NULL) | (bytes && X == NULL) ){
-    UNPROTECT(3); free(work); free(X);
-    error("%s\n","unable to allocate enough memory for workspace");
-  }
+  // convert to integer. 
+  Stringset *X = new_stringset(x, bytes);
+  Stringset *T = new_stringset(table, bytes);
 
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
 
-  double d = R_PosInf, d1 = R_PosInf;
+  #ifdef _OPENMP
+  int nthreads = INTEGER(nthrd)[0];
+  #pragma omp parallel num_threads(nthreads) default(none) \
+    shared(X, T, x, table, y, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, bytes, max_dist)
+  #endif
+  {
+    // space for the workfunction
+    int *work = (int *) malloc( (max_length(x) + 1) * (max_length(table) + 1) * sizeof(int)); 
 
-  int index, len_X, isna_X, len_T, isna_T;
-
-  for ( int i=0; i<nx; i++){
-    index = no_match;
-
-
-    X = get_elem(x, i, bytes, &len_X, &isna_X, X);
-    d1 = R_PosInf;
-    for ( int j=0; j<ntable; j++){
-
-      T = get_elem(table, j, bytes, &len_T, &isna_T, T);
-      if ( !isna_X && !isna_T ){        // both are char (usual case)
-        d = (double) lcs(
-          X, len_X, T, len_T, work
-        );
-        if ( d <= max_dist && d < d1){ 
-          index = j + 1;
-          if ( d == 0.0  ) break;
-          d1 = d;
+    double d = R_PosInf, d1 = R_PosInf;
+    int index, len_X, len_T;
+    unsigned int *str, **tab; 
+    #ifdef _OPENMP
+    #pragma omp for
+    #endif
+    for ( int i=0; i<nx; i++){
+      index = no_match;
+      len_X = X->str_len[i];
+      str = X->string[i];
+      tab = T->string;
+      d1 = R_PosInf;
+      for ( int j=0; j<ntable; j++, tab++){
+        len_T = T->str_len[j];
+        if ( len_X != NA_INTEGER && len_T != NA_INTEGER ){        // both are char (usual case)
+          d = (double) lcs(
+            str, len_X, *tab, len_T, work
+          );
+          if ( d <= max_dist && d < d1){ 
+            index = j + 1;
+            if ( d == 0.0  ) break;
+            d1 = d;
+          }
+        } else if ( len_X == NA_INTEGER && len_T == NA_INTEGER ) {  // both are NA
+          index = match_na ? j + 1 : no_match;
+          break;
         }
-      } else if ( isna_X && isna_T ) {  // both are NA
-        index = match_na ? j + 1 : no_match;
-        break;
       }
+      
+      y[i] = index;
     }
-    
-    y[i] = index;
-  }
-  if ( bytes ) free(X);
-  free(work);  
-  UNPROTECT(6);
+    free(work);
+  } // end of parallel region
+  free_stringset(X);
+  free_stringset(T);
+  UNPROTECT(8);
+  if (nx < 0) error("Unable to allocate enough memory");
   return(yy);
 }

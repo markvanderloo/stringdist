@@ -22,7 +22,9 @@
 #include <Rdefines.h>
 #include "utils.h"
 #include <string.h>
-
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 
 
@@ -32,7 +34,6 @@
  * matching two instances of the same character to the same position in b (which we treat read-only).
  */
 static int match_int(unsigned int a, unsigned int *b, int *guard, int width, int m){
-//Rprintf("width : %d \n",width);
   int i = 0;
   while ( 
       ( i < width ) && 
@@ -42,7 +43,6 @@ static int match_int(unsigned int a, unsigned int *b, int *guard, int width, int
   }
   // ugly edge case workaround
   if ( !(m && i==width) && b[i] == a ){
-//Rprintf("  guard[%d] %d b[%d]: %d\n",i,guard[i],i,b[i]);
     guard[i] = 1;
     return i;
   } 
@@ -112,7 +112,6 @@ static double jaro_winkler(
       // ugly workaround: I should rewrite match_int.
       max_reached = (right == y) ? 1 : 0;
       J =  match_int(a[i], b + left, work + left, right - left, max_reached);
-//Rprintf("i:%d, a[i] :%d, left - right: %d - %d, J: %d\n",i,a[i],left,right,J);
     }
 
     if ( J >= 0 ){
@@ -140,11 +139,13 @@ static double jaro_winkler(
 
 /*----------- R interface ------------------------------------------------*/
 
-SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight){
+SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight, SEXP useBytes, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
   PROTECT(p);
   PROTECT(weight);
+  PROTECT(useBytes);
+  PROTECT(nthrd);
 
   // find the length of longest strings
   int ml_a = max_length(a)
@@ -152,56 +153,65 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight){
     , na = length(a)
     , nb = length(b)
     , nt = MAX(na,nb)
-    , bytes = IS_CHARACTER(a);
-  
-  double pp = REAL(p)[0]
-    , *w = REAL(weight);
-
-  // workspace for worker function
-  int *work = (int *) malloc( sizeof(int) * MAX(ml_a,ml_b) );
-  unsigned int *s = NULL, *t = NULL;
-  if (bytes){
-    s = (unsigned int *) malloc((ml_a + ml_b) * sizeof(int));
-    t = s + ml_a;
-  }
-  if ( (work == NULL) | (bytes && s == NULL) ){
-     UNPROTECT(4); free(s); free(work);
-     error("Unable to allocate enough memory");
-  }
-
+    , bytes = INTEGER(useBytes)[0];
+ 
   // output variable
   SEXP yy;
   PROTECT(yy = allocVector(REALSXP,nt));
-  double *y = REAL(yy);
+  double *y = REAL(yy)
+    , pp = REAL(p)[0]
+    , *w = REAL(weight);
 
-  // compute distances, skipping NA's
-  int i=0,j=0, len_s, len_t, isna_s, isna_t;
 
-  for ( int k=0; k < nt; 
-      ++k 
-    , i = RECYCLE(i+1,na)
-    , j = RECYCLE(j+1,nb) ){
+  #ifdef _OPENMP 
+  int  nthreads = INTEGER(nthrd)[0];
+  #pragma omp parallel num_threads(nthreads) default(none) \
+      shared(y, w, pp, R_PosInf, NA_REAL, bytes, na, nb, ml_a, ml_b, nt, a, b)
+  #endif
+  {
+    // workspace for worker function
+    int *work = (int *) malloc( sizeof(int) * MAX(ml_a,ml_b) );
+    unsigned int *s = NULL, *t = NULL;
+    s = (unsigned int *) malloc((2L + ml_a + ml_b) * sizeof(int));
+    t = s + ml_a + 1L;
+    if ( (work == NULL) | (bytes && s == NULL) ) nt = -1;
 
-    s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-    t = get_elem(b, j, bytes, &len_t, &isna_t, t);
-    if ( isna_s || isna_t ){
-      y[k] = NA_REAL;
-      continue;
-    } else { // jaro-winkler distance
-      y[k] = jaro_winkler(s, t, len_s, len_t, pp, w, work);
-    } 
+
+    // compute distances, skipping NA's
+    int len_s, len_t, isna_s, isna_t
+      , i = 0, j = 0, ID = 0, num_threads = 1;
+
+    #ifdef _OPENMP
+    ID = omp_get_thread_num();
+    num_threads = omp_get_num_threads();
+    i = recycle(ID-num_threads, num_threads, na);
+    j = recycle(ID-num_threads, num_threads, nb);
+    #endif
+    for ( int k = ID; k < nt; k += num_threads){
+      get_elem1(a, i, bytes, &len_s, &isna_s, s);
+      get_elem1(b, j, bytes, &len_t, &isna_t, t);
+      if ( isna_s || isna_t ){
+        y[k] = NA_REAL;
+      } else { // jaro-winkler distance
+        y[k] = jaro_winkler(s, t, len_s, len_t, pp, w, work);
+      }
+      i = recycle(i, num_threads, na);
+      j = recycle(j, num_threads, nb); 
+    }
+      
+    free(work);
+    free(s);
   }
-    
-  free(work);
-  if (bytes) free(s);
-  UNPROTECT(5);
+  UNPROTECT(7);
+  if ( nt < 0 ) error("Unable to allocate enough memory");
   return yy;
 }
 
 
 //-- Match function interface with R
 
-SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP weight, SEXP maxDist){
+SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p
+    , SEXP weight, SEXP maxDist, SEXP useBytes, SEXP nthrd){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
@@ -209,30 +219,25 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP wei
   PROTECT(p);
   PROTECT(weight);
   PROTECT(maxDist);
+  PROTECT(useBytes);
+  PROTECT(nthrd);
 
   int nx = length(x)
     , ntable = length(table)
     , no_match = INTEGER(nomatch)[0]
     , match_na = INTEGER(matchNA)[0]
-    , bytes = IS_CHARACTER(x)
+    , bytes = INTEGER(useBytes)[0]
     , ml_x = max_length(x)
-    , ml_t = max_length(table);
+    , ml_t = max_length(table)
+    , nthreads = INTEGER(nthrd)[0];
 
   double pp = REAL(p)[0]
     , *w = REAL(weight)
     , max_dist = REAL(maxDist)[0] == 0.0 ? R_PosInf : REAL(maxDist)[0];
   
-  // workspace for worker function
-  int *work = (int *) malloc( sizeof(int) * MAX(ml_x, ml_t) );
-  unsigned int *X = NULL, *T = NULL;
-  if (bytes){
-    X = (unsigned int *) malloc( (ml_x + ml_t) * sizeof(int));
-    T = X + ml_x;
-  }
-  if ( (work == NULL) | (bytes && X == NULL) ){
-    UNPROTECT(7); free(work); free(X);
-    error ("Unable to allocate enough memory\n");
-  }
+  // convert to integer. 
+  Stringset *X = new_stringset(x, bytes);
+  Stringset *T = new_stringset(table, bytes);
 
   // output vector
   SEXP yy;
@@ -240,38 +245,52 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p, SEXP wei
   int *y = INTEGER(yy);
 
 
-  double d = R_PosInf, d1 = R_PosInf;
-  int index, isna_X, isna_T, len_X,len_T;
+  #ifdef _OPENMP
+  #pragma omp parallel num_threads(nthreads) default(none) \
+    shared(X,T, y, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, bytes,ml_x,ml_t,pp,w, max_dist)
+  #endif
+  {
+    // workspace for worker function
+    int *work = (int *) malloc( sizeof(int) * MAX(ml_x, ml_t) );
+    double d = R_PosInf, d1 = R_PosInf;
+    int index, len_X,len_T;
+    unsigned int *str, **tab;
 
+    #ifdef _OPENMP
+    #pragma omp for
+    #endif
+    for ( int i=0; i<nx; i++){
+      index = no_match;
+      len_X = X->str_len[i];
+      str = X->string[i];
+      tab = T->string;
+      d1 = R_PosInf;
+      for ( int j=0; j<ntable; j++, tab++){
+        len_T = T->str_len[j];
 
-  for ( int i=0; i<nx; i++){
-    index = no_match;
-    X = get_elem(x, i, bytes, &len_X, &isna_X, X);
-    d1 = R_PosInf;
-    for ( int j=0; j<ntable; j++){
-      T = get_elem(table, j, bytes, &len_T, &isna_T, T);
-
-      if ( !isna_X && !isna_T ){        // both are char (usual case)
-        d = jaro_winkler(X, T, len_X, len_T, pp, w, work);
-        if ( d > max_dist ){
-          continue;
-        } else if ( d > -1.0 && d < d1){ 
-          index = j + 1;
-          if ( ABS(d) < 1e-14 ) break; // exact match
-          d1 = d;
+        if ( len_X != NA_INTEGER && len_T != NA_INTEGER ){        // both are char (usual case)
+          d = jaro_winkler(str, *tab, len_X, len_T, pp, w, work);
+          if ( d > max_dist ){
+            continue;
+          } else if ( d > -1.0 && d < d1){ 
+            index = j + 1;
+            if ( ABS(d) < 1e-14 ) break; // exact match
+            d1 = d;
+          }
+        } else if ( len_X == NA_INTEGER && len_T == NA_INTEGER ) {  // both are NA
+          index = match_na ? j + 1 : no_match;
+          break;
         }
-      } else if ( isna_X && isna_T ) {  // both are NA
-        index = match_na ? j + 1 : no_match;
-        break;
       }
-    }
-    
-    y[i] = index;
-  }   
-
-  if (bytes) free(X); 
-  free(work);
-  UNPROTECT(8);
+      
+      y[i] = index;
+    }   
+    free(work);
+  } // end of parallel region
+  free_stringset(X);
+  free_stringset(T);
+  UNPROTECT(10);
+  if ( nx < 0 ) error ("Unable to allocate enough memory");
   return(yy);
 }
 

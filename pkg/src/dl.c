@@ -38,7 +38,9 @@
 #include <R.h>
 #include <Rdefines.h>
 #include "utils.h"
-
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 /* Our unsorted dictionary  */
 /* Note we use character ints, not chars. */
@@ -171,165 +173,171 @@ static double distance(
 /* End of workhorse */
 
 // -- interface with R 
-
-
-SEXP R_dl(SEXP a, SEXP b, SEXP weight){
+SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
   PROTECT(weight);
+  PROTECT(useBytes);
+  PROTECT(nthrd);
    
   int na = length(a)
     , nb = length(b)
     , nt = (na > nb) ? na : nb
-    , bytes = IS_CHARACTER(a)
+    , bytes = INTEGER(useBytes)[0]
     , ml_a = max_length(a)
     , ml_b = max_length(b);
-  
+ 
   double *w = REAL(weight);
-
-  /* claim space for workhorse */
-  unsigned int *s=NULL, *t=NULL;
-  dictionary *dict = new_dictionary( ml_a + ml_b + 1 );
-
-  double *scores = (double *) malloc( (ml_a + 3) * (ml_b + 2) * sizeof(double) );
-
-  int slen = (ml_a + ml_b + 2) * sizeof(int);
-  s = (unsigned int *) malloc(slen);
-
-  if ( (scores == NULL) | ( s == NULL ) ){
-    UNPROTECT(3); free(scores); free(s);
-    error("Unable to allocate enough memory");
-  } 
-
-  t = s + ml_a + 1;
-  memset(s, 0, slen);
-
 
   // output
   SEXP yy; 
   PROTECT(yy = allocVector(REALSXP, nt));
   double *y = REAL(yy);
 
-  int i=0, j=0, len_s, len_t, isna_s, isna_t;
-  unsigned int *s1, *t1;
-  for ( int k=0; k < nt; ++k
-    , i = RECYCLE(i+1,na)
-    , j = RECYCLE(j+1,nb)
-  ){
-    if (bytes){
-      s = get_elem(a, i, bytes, &len_s, &isna_s, s);
-      t = get_elem(b, j, bytes, &len_t, &isna_t, t);
-    } else { // make sure there's an extra 0 at the end of the string.
-      s1 = get_elem(a, i, bytes, &len_s, &isna_s, s);
-      t1 = get_elem(b, j, bytes, &len_t, &isna_t, t);
-      memcpy(s,s1,len_s*sizeof(int));
-      memcpy(t,t1,len_t*sizeof(int));
-    }
-    if ( isna_s || isna_t ){
-      y[k] = NA_REAL;
-      continue;
-    }
 
-    y[k] = distance(
-     s, t, len_s, len_t,
-     w, dict, scores
-    );
-    if (y[k] < 0 ) y[k] = R_PosInf;
-    memset(s, 0, slen);
+
+  #ifdef _OPENMP 
+  int  nthreads = INTEGER(nthrd)[0];
+  #pragma omp parallel num_threads(nthreads) default(none) \
+      shared(y, w, R_PosInf, NA_REAL, bytes, na, nb, nt, ml_a, ml_b, a, b)
+  #endif
+  {
+    /* claim space for workhorse */
+    unsigned int *s=NULL, *t=NULL;
+    dictionary *dict = new_dictionary( ml_a + ml_b + 1 );
+
+    double *scores = (double *) malloc( (ml_a + 3) * (ml_b + 2) * sizeof(double) );
+
+    int slen = (ml_a + ml_b + 2) * sizeof(int);
+    s = (unsigned int *) malloc(slen);
+
+    if ( (scores == NULL) | ( s == NULL ) ){
+      nt = -1;
+    } else {
+      t = s + ml_a + 1;
+      memset(s, 0, slen);
+    }
+    /* start working */
+    
+    int k, len_s, len_t, isna_s, isna_t
+      , i = 0, j = 0, ID = 0, num_threads = 1;
+
+    #ifdef _OPENMP
+    ID = omp_get_thread_num();
+    num_threads = omp_get_num_threads();
+    i = recycle(ID-num_threads, num_threads, na);
+    j = recycle(ID-num_threads, num_threads, nb);
+    #endif
+
+    for ( k=ID; k < nt; k += num_threads ){
+      get_elem1(a, i, bytes, &len_s, &isna_s, s);
+      get_elem1(b, j, bytes, &len_t, &isna_t, t);
+      if ( isna_s || isna_t ){
+        y[k] = NA_REAL;
+      } else {
+        y[k] = distance(
+          s, t, len_s, len_t,
+          w, dict, scores
+        );
+        if (y[k] < 0 ) y[k] = R_PosInf;
+      }
+      i = recycle(i, num_threads, na);
+      j = recycle(j, num_threads, nb);
+      memset(s, 0, slen);
+    }
+    
+    free_dictionary(dict);
+    free(scores);
+    free(s);
   }
-  
-  free_dictionary(dict);
-  free(scores);
-  free(s);
-  UNPROTECT(4);
+  UNPROTECT(6);
+  if (nt < 0)  error("Unable to allocate enough memory");
+ 
   return yy;
 } 
 
+
 //-- Match function interface with R
 
-SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight, SEXP maxDistance){
+SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
+    , SEXP weight, SEXP maxDistance, SEXP useBytes, SEXP nthrd){
   PROTECT(x);
   PROTECT(table);
   PROTECT(nomatch);
   PROTECT(matchNA);
   PROTECT(weight);
   PROTECT(maxDistance);
+  PROTECT(useBytes);
+  PROTECT(nthrd);
 
   int nx = length(x)
     , ntable = length(table)
     , no_match = INTEGER(nomatch)[0]
     , match_na = INTEGER(matchNA)[0]
-    , bytes = IS_CHARACTER(x)
+    , bytes = INTEGER(useBytes)[0]
     , ml_x = max_length(x)
     , ml_t = max_length(table);
 
   double *w = REAL(weight);
   double maxDist = REAL(maxDistance)[0];
-  
-  /* claim space for workhorse */
-  dictionary *dict = new_dictionary( ml_x + ml_t + 1 );
-  double *scores = (double *) malloc( (ml_x + 3) * (ml_t + 2) * sizeof(double) );
 
-  unsigned int *X = NULL, *T = NULL;
-
-  X = (unsigned int *) malloc( (ml_x + ml_t + 2) * sizeof(int) );
-
-  if ( (scores == NULL) ||  (X == NULL) ){
-    UNPROTECT(6); free(X); free(scores); 
-    error("Unable to allocate enough memory");
-  }
-
-  T = X + ml_x + 1;
-  memset(X, 0, (ml_x + ml_t + 2)*sizeof(int));
-
-
+  // convert to integer. 
+  Stringset *X = new_stringset(x, bytes);
+  Stringset *T = new_stringset(table, bytes);
+ 
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
+  #ifdef _OPENMP
+  int nthreads = INTEGER(nthrd)[0];
+  #pragma omp parallel num_threads(nthreads) default(none) \
+    shared(X, T, y, w, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, bytes, ml_x, ml_t, maxDist)
+  #endif
+  {
+    /* claim space for workhorse */
+    dictionary *dict = new_dictionary( ml_x + ml_t + 1L );
+    double *scores = (double *) malloc( (ml_x + 3L) * (ml_t + 2L) * sizeof(double) );
 
-  double d = R_PosInf, d1 = R_PosInf;
-  int index, len_X, len_T, isna_X, isna_T;
-  unsigned int *X1, *T1;
-  for ( int i=0; i<nx; i++){
-    index = no_match;
-    if ( bytes ){
-      X = get_elem(x, i , bytes, &len_X, &isna_X, X);
-    } else {
-      X1 = get_elem(x, i , bytes, &len_X, &isna_X, X);
-      memcpy(X, X1, len_X*sizeof(int));
-    }
-    d1 = R_PosInf;
+    double d = R_PosInf, d1 = R_PosInf;
+    int index, len_X, len_T;
+    unsigned int *str, **tab;
 
-    for ( int j=0; j<ntable; j++){
-      if ( bytes ){
-        T = get_elem(table, j, bytes, &len_T, &isna_T, T);
-      } else {
-        T1 = get_elem(table, j, bytes, &len_T, &isna_T, T);
-        memcpy(T, T1, len_T * sizeof(int));
-      }
-      if ( !isna_X && !isna_T ){        // both are char (usual case)
-        d = distance(
-          X, T, len_X, len_T, w, dict, scores
-        );
-        memset(T,0, (ml_t+1)*sizeof(int));
-        if ( d <= maxDist && d < d1){ 
-          index = j + 1;
-          if ( fabs(d) < 1e-14 ) break;
-          d1 = d;
+    #ifdef _OPENMP
+    #pragma omp for
+    #endif
+    for ( int i=0; i<nx; i++){
+      index = no_match;
+      len_X = X->str_len[i];
+      d1 = R_PosInf;
+      str = X->string[i];
+      tab = T->string;
+      for ( int j=0; j<ntable; j++, tab++){
+        len_T = T->str_len[j];
+
+        if ( len_X != NA_INTEGER &&  len_T != NA_INTEGER ){      // both are char (usual case)
+          d = distance(
+            str, *tab, len_X, len_T, w, dict, scores
+          );
+          if ( d <= maxDist && d < d1){ 
+            index = j + 1;
+            if ( fabs(d) < 1e-14 ) break;
+            d1 = d;
+          }
+        } else if ( len_X == NA_INTEGER && len_T == NA_INTEGER ) {  // both are NA
+          index = match_na ? j + 1 : no_match;
+          break;
         }
-      } else if ( isna_X && isna_T ) {  // both are NA
-        index = match_na ? j + 1 : no_match;
-        break;
       }
-    }
-    
-    y[i] = index;
-    memset(X,0,(ml_x + 1)*sizeof(int));
-  }  
-  UNPROTECT(7);
-  free(X);
-  free_dictionary(dict);
-  free(scores);
+      
+      y[i] = index;
+    }  
+    free_dictionary(dict);
+    free(scores);
+  } // end of parallel region
+  free_stringset(X);
+  free_stringset(T);
+  UNPROTECT(9);
+  if (nx < 0) error("Unable to allocate enough memory");
   return(yy);
 }
