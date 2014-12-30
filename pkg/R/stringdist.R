@@ -247,6 +247,8 @@ stringdist <- function(a, b
   , maxDist=Inf, q=1, p=0
   , nthread = getOption("sd_num_thread")
 ){
+  if (maxDist < Inf)
+    message("Argument 'maxDist' is deprecated for function 'stringdist'")
   # note: enc2utf8 is very efficient when the native encoding is already UTF-8.
   a <- as.character(a)
   b <- as.character(b)
@@ -299,7 +301,9 @@ stringdistmatrix <- function(a, b
   , useNames=FALSE, ncores=1, cluster=NULL
   , nthread = getOption("sd_num_thread")
 ){
-  
+  if (maxDist < Inf)
+    message("Argument 'maxDist' is deprecated for function 'stringdistmatrix'") 
+ 
   a <- as.character(a)
   b <- as.character(b)
 
