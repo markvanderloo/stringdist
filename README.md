@@ -27,7 +27,11 @@ distance functions. Distance functions include:
 * Jaro, and Jaro-Winker distance
 * Soundex-based string distance.
 
-Besides the above the functions, `qgrams` tabulates the qgrams in a `character` vector.
+Also, there are some utility functions:
+
+* `qgrams()` tabulates the qgrams in one or more `character` vectors.
+* `phonetic()` computes phonetic codes of strings (currently only soundex)
+* `printable_ascii()` is a utility function that detects non-printable ascii or non-ascii characters.
 
 Resources
 ----------
