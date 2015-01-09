@@ -33,7 +33,7 @@ stringdist("ab","abc",method="h")
 # in the strings from beginning to end
 stringdist("hello","HeLl0",method="h")
 
-# The lcm (longest common substring) distance returns the number of 
+# The lcs (longest common substring) distance returns the number of 
 # characters that are not part of the lcs.
 #
 # Here, the lcs is either 'a' or 'b' and one character cannot be paired:

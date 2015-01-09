@@ -21,17 +21,6 @@ RECYCLEWARNING <- NULL
 #'
 #' Note that this excludes tab (as it is a control character).
 #'
-#' @section Some tips on character encoding and transliteration:
-#' Some algorithms (like soundex) are defined only on the printable ASCII character set. This excludes any character
-#' with accents for example. Translating accented characters to the non-accented ones is a form of transliteration. On
-#' many systems running R (but not all!) you can achieve this with 
-#' 
-#' \code{iconv(x,to="ASCII//TRANSLIT")}, 
-#' 
-#' where \code{x} is your character vector. See the documentation of \code{\link[base]{iconv}} for details.
-#'
-#' The \code{stringi} package (Gagolewski and Tartanus) should work on any system. The command 
-#' \code{stringi::stri_trans_general(x,"Latin-ASCII")} transliterates character vector \code{x} to ASCII.
 #' 
 #' @example ../examples/printable_ascii.R
 #'

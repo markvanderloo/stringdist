@@ -1,13 +1,24 @@
 #' A package for string distance calculation and approximate string matching.
 #'
-#' @name stringdist-package
-#' @docType package
-#' @useDynLib stringdist
-#' @import parallel
+#' @section Introduction:
 #'
-#' @section Supported distances:
+#' The \pkg{stringdist} package offers fast and platform-independent string metrics. 
+#' It's main purpose is to compute various string distances and to do approximate text matching between character vectors.
+#' Besides documentation for each function, the main topics documented are:
+#' 
+#' \itemize{
+#' \item{\code{\link{stringdist-metrics}} -- string metrics supported by the package}
+#' \item{\code{\link{stringdist-encoding}} -- how encoding is handled by the package}
+#' \item{\code{\link{stringdist-parallelization}} -- on multithreading }
+#' }
 #'
-#'
+#' @section Acknowledgements:
+#' \itemize{
+#'   \item{The code for the full Damerau-Levenshtein distance was adapted from Nick Logan's
+#'   \href{https://github.com/ugexe/Text--Levenshtein--Damerau--XS/blob/master/damerau-int.c}{public github repository}.}
+#'   \item{C code for converting UTF-8 to integer was copied from the R core for performance reasons.}
+#'   \item{The code for soundex conversion was kindly contributed by Jan van der Laan.}
+#' }
 #' @section Citation:
 #' If you would like to cite this package, please cite the \href{http://journal.r-project.org/archive/2014-1/loo.pdf}{R Journal Paper}: 
 #' \itemize{
@@ -15,6 +26,11 @@
 #'  R Journal 6(1) pp 111-122}
 #' }
 #' Or use \code{citation('stringdist')} to get a bibtex item.
+#'
+#' @name stringdist-package
+#' @docType package
+#' @useDynLib stringdist
+#' @import parallel
 #'
 #'
 #' 
@@ -24,90 +40,34 @@
   
 #' Compute distance metrics between strings
 #'
-#' @section Details:
+#' 
 #' \code{stringdist} computes pairwise string distances between elements of \code{character} vectors 
 #' \code{a} and \code{b}, where the vector with less elements is recycled. 
-#' 
 #' \code{stringdistmatrix} computes the string distance matrix with rows according to
 #' \code{a} and columns according to \code{b}.
 #' 
 #' 
-#' A short description of these algorithms is provided \link[=stringdist-package]{here}, or
-#' see the \href{http://journal.r-project.org/archive/2014-1/loo.pdf}{R Journal Paper} (external link) for
-#' more formal descriptions.
 #' 
-#' @section Encoding issues:
-#' If \code{bytes=FALSE}, input strings are re-encoded to \code{utf8} an then to \code{integer}
-#' vectors prior to the distance calculation (since the underlying \code{C}-code expects \code{unsigned int}s). 
-#' This double conversion is necessary as it seems the only way to
-#' reliably convert (possibly multibyte) characters to integers on all systems
-#' supported by \code{R}. \code{R}'s native \code{\link[utils]{adist}} function does this as well. 
+#' @section Note on paralellization of \code{stringdistmatrix}:
 #'
-#' If \code{bytes=TRUE}, the input strings are treated as if each byte was a
-#' single character. This may be significantly faster since it avoids
-#' conversion of \code{utf8} to integer with \code{\link[base]{utf8ToInt}} (up to a factor of 3, for strings of 5-25 characters).
-#' However, results may depend on the (possibly multibyte)  character encoding scheme
-#' and note that \code{R}'s internal encoding scheme is OS-dependent. 
-#' If you're sure that all your input is \code{ASCII},  you can safely set 
-#' \code{useBytes=TRUE} to profit from the speed gain on any platform. 
-#'
-#' See base \code{R}'s \code{\link[base]{Encoding}} and
-#' \code{\link[base]{iconv}} documentation for details on how \code{R} handles
-#' character encoding. 
-#'
-#' @section Unicode normalisation:
-#' In \code{utf-8}, the same (accented) character may be represented as several byte sequences. For example, an u-umlaut
-#' can be represented with a single byte code or as a byte code representing \code{'u'} followed by a modifier byte code
-#' that adds the umlaut. The \href{http://cran.r-project.org/web/packages/stringi/}{stringi} package 
-#' of Gagolevski and Tartanus offers unicode normalisation tools. 
-#'
-#'
-#' @section Paralellization:
-#'
-#' By default \code{stringdist} and \code{stringdistmatrix} will use \code{getOption("sd_num_thread")} threads.
-#' When the package is loaded, this option is set to the smaller of the number of available cores or the
-#' environment variable \code{OMP_THREAD_LIMIT}, if available. The number of cores is detected with
-#' \code{parallel::detectCores}. Using the maximum number of threads is not allways the fastest option.
-#' At least one core will also be occupied with for example OS services, so it may be faster to use one core less
-#' than the maximum number of cores.
-#' 
 #' In older versions (<0.9) of \code{stringdist}, the \code{cluster} and \code{ncores} argument were the only 
-#' paralellization options, and only for \code{stringdistmatrix}. These options are based on the parallel package 
+#' paralellization options, and only for \code{stringdistmatrix}. These options are based on the \pkg{parallel} package 
 #' which starts multiple R-sessions to run R code in parallel. If you're running R on a single machine it is both 
-#' faster and easier to use the default multithreading (so do not specify \code{ncores} or \code{cluster}).
+#' faster and easier to use the default multithreading, so do not specify \code{ncores} or \code{cluster} in such a case.
 #'
-#' As of the introduction of the \code{nthreads} argument, the \code{ncores} is mostly useless, although it still works.
-#' If \code{ncores>0}, a local cluster of running R-sessions is set up automatically. Each R-session will use \code{nthread}
+#' As of the introduction of the \code{nthreads} argument, the \code{ncores} argument is mostly useless, although it still works.
+#' If \code{ncores>0}, a local cluster of R-sessions is set up automatically. Each R-session will use \code{nthread}
 #' threads.
 #'
 #' The \code{cluster} argument is only interesting when the cluster is set up over different physical nodes. For example when
 #' setting up a network of nodes accross physically different machines. In each node, \code{nthread} threads will be used.
 #'
 #'
-#' @section Acknowledgements:
-#' The code for the full Damerau-Levenshtein distance was adapted from Nick Logan's
-#' \href{https://github.com/ugexe/Text--Levenshtein--Damerau--XS/blob/master/damerau-int.c}{public github repository}.
-#' 
-#' C code for converting UTF-8 to integer was copied from the R core.
-#'
-#' @section Other:
-#'
-#' \itemize{
-#'
-#' \item{Raffael Vogler wrote a nice 
-#' \href{http://www.joyofdata.de/blog/comparison-of-string-distance-algorithms/}{blog}
-#' comparing different string distances in this package.
-#'}
-#'
-#'}
-#'
-#'
 #'
 #' @param a R object (target); will be converted by \code{as.character}.
 #' @param b R object (source); will be converted by \code{as.character}.
 #' @param method Method for distance calculation. The default is \code{"osa"}, see \code{\link{stringdist-metrics}}.
-#' @param useBytes Perform byte-wise comparison. \code{useBytes=TRUE} is faster but may yield different
-#' 	results depending on character encoding. See also below, under ``encoding issues''.
+#' @param useBytes Perform byte-wise comparison, see \code{\link{stringdist-encoding}}.
 #' @param weight For \code{method='osa'} or \code{'dl'}, the penalty for deletion, insertion, substitution and transposition, in that order.
 #'   When \code{method='lv'}, the penalty for transposition is ignored. When \code{method='jw'}, the weights associated with characters
 #'   of \code{a}, characters from \code{b} and the transposition weight, in that order.
@@ -118,13 +78,15 @@
 #' @param q  Size of the \eqn{q}-gram; must be nonnegative. Only applies to \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
 #' @param p Penalty factor for Jaro-Winkler distance. The valid range for \code{p} is \code{0 <= p <= 0.25}. 
 #'  If \code{p=0} (default), the Jaro-distance is returned. Applies only to \code{method='jw'}.
-#' @param nthread (positive integer) Number of threads used by the underlying C-code. The default is the number of cores
-#'  detected by \code{\link[parallel]{detectCores}}.
+#' @param nthread Maximum number of threads to use. By default, a sensible number of threads is chosen, see \code{\link{stringdist-parallelization}}. 
+#'  
 #'
 #'
 #' @return For \code{stringdist},  a vector with string distances of size \code{max(length(a),length(b))}.
-#'  For \code{stringdistmatrix}, a \code{length(a)xlength(b)} \code{matrix}. The returned distance is
-#'  nonnegative if it can be computed, \code{NA} if any of the two argument strings is \code{NA} and \code{Inf}
+#'  
+#'  For \code{stringdistmatrix}, a \code{length(a)xlength(b)} \code{matrix}. 
+#'  
+#'  Distances are nonnegative if they can be computed, \code{NA} if any of the two argument strings is \code{NA} and \code{Inf}
 #'  when \code{maxDist} is exceeded or, in case of the hamming distance, when the two compared strings have different length.
 #'  
 #'  
@@ -173,13 +135,8 @@ stringdist <- function(a, b
 
 
 #' @param useNames Use input vectors as row and column names?
-#' @param ncores Number of cores to use. If \code{ncores>1}, a local cluster is
-#' created using \code{\link[parallel]{makeCluster}}. Parallelisation is over \code{b}, so 
-#' the speed gain by parallelisation is highest when \code{b} has less elements than \code{a}.
-#' @param cluster (Optional) a custom cluster, created with
-#' \code{\link[parallel]{makeCluster}}. If \code{cluster} is not \code{NULL},
-#' \code{ncores} is ignored.
-#'
+#' @param ncores [DEPRECATED AND WILL BE REMOVED]. Optionally use \code{nthreads} in stead. See below under parallelization of \code{stringdistmatrix}.
+#' @param cluster (Optional) a custom cluster, created with \code{\link[parallel]{makeCluster}}. 
 #'
 #'
 #' @rdname stringdist
@@ -192,7 +149,11 @@ stringdistmatrix <- function(a, b
   , nthread = getOption("sd_num_thread")
 ){
   if (maxDist < Inf)
-    message("Argument 'maxDist' is deprecated for function 'stringdistmatrix'") 
+    message("Argument 'maxDist' is deprecated for function 'stringdistmatrix'. This argument will be removed in the future.") 
+  if (ncores > 1 ){
+    message("Argument 'ncores' is deprecated as stringdist now uses multithreading by default. This argument is currently ignored and will be removed in the future.")
+    ncores <- 1
+  }
  
   a <- as.character(a)
   b <- as.character(b)

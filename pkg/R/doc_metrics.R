@@ -24,7 +24,7 @@
 #' contain typo's, the Jaro-Winkler distance may be of use. If you are comparing names
 #' that were written down after hearing them, a phonetic distance may be a better choice.
 #'
-#' Currently, the following distance metrics are supported in \pkg{stringdist}.
+#' Currently, the following distance metrics are supported by \pkg{stringdist}.
 #' \tabular{ll}{
 #'    \bold{Method name} \tab \bold{Description}\cr
 #'    \code{osa} \tab Optimal string aligment, (restricted Damerau-Levenshtein distance).\cr
@@ -40,46 +40,48 @@
 #' }
 #'
 #'
+#' @section A short description of string metrics supported by \pkg{stringdist}:
 #'
-#' @section String Metrics Supported by \pkg{stringdist}:
+#' See \href{http://journal.r-project.org/archive/2014-1/loo.pdf}{Van der Loo
+#' (2014)} for an extensive description and references. The review papers of
+#' Navarro (2001) and Boytsov (2011) provide excellent technical overviews of
+#' respectively online and offline string matching algorithms.
 #' 
-#' \emph{Distances are measured between \code{character} variables \code{a} and \code{b}.}
-#'
-#' The \bold{Hamming distance} (\code{hamming}) counts the number of 
+#' The \bold{Hamming distance} (\code{method='hamming'}) counts the number of 
 #' character substitutions that turns \code{b} into \code{a}. If \code{a} 
 #' and \code{b} have different number of characters the distance is \code{Inf}. 
 #'
-#' The \bold{Levenshtein distance} (\code{lv}) counts the number of 
+#' The \bold{Levenshtein distance} (\code{method='lv'}) counts the number of 
 #' deletions, insertions and substitutions necessary to turn \code{b} into 
 #' \code{a}. This method is equivalent to \code{R}'s native \code{\link[utils]{adist}} 
 #' function. 
 #'
-#' The \bold{Optimal String Alignment distance} (\code{osa}) is like the Levenshtein 
+#' The \bold{Optimal String Alignment distance} (\code{method='osa'}) is like the Levenshtein 
 #' distance but also allows transposition of adjacent characters. Here, each 
 #' substring  may be edited only once. (For example, a character cannot be transposed twice
 #' to move it forward in the string). 
 #'
-#' The \bold{full Damerau-Levensthein distance} (\code{dl}) allows for multiple 
-#' edits on substrings. 
+#' The \bold{full Damerau-Levensthein distance} (\code{method='dl'}) is like the optimal 
+#' string alignment distance except that it allows for multiple edits on substrings. 
 #'
-#' The \bold{longest common substring} is defined as the longest string that can be 
+#' The \bold{longest common substring} (method='lcs') is defined as the longest string that can be 
 #' obtained by pairing characters from \code{a} and \code{b} while keeping the order 
 #' of characters intact. The \bold{lcs-distance} is defined as the number of unpaired characters. 
 #' The distance is equivalent to the edit distance allowing only deletions and insertions, 
 #' each with weight one. 
 #'
-#' A \bold{\eqn{q}-gram} is a subsequence of \eqn{q} \emph{consecutive} 
+#' A \bold{\eqn{q}-gram} (method='qgram') is a subsequence of \eqn{q} \emph{consecutive} 
 #' characters of a string. If \eqn{x} (\eqn{y}) is the vector of counts
 #' of \eqn{q}-gram occurrences in \code{a} (\code{b}), the \bold{\eqn{q}-gram distance} 
 #' is given by the sum over the absolute differences \eqn{|x_i-y_i|}.
 #' The computation is aborted when \code{q} is is larger than the length of 
 #' any of the strings. In that case \code{Inf}  is returned.
 #'
-#' The \bold{cosine distance} is computed as \eqn{1-x\cdot y/(\|x\|\|y\|)}, where \eqn{x} and 
+#' The \bold{cosine distance} (method='cosine') is computed as \eqn{1-x\cdot y/(\|x\|\|y\|)}, where \eqn{x} and 
 #' \eqn{y} were defined above.
 #' 
 #' Let \eqn{X} be the set of unique \eqn{q}-grams in \code{a} and \eqn{Y} the set of unique 
-#' \eqn{q}-grams in \code{b}. The \bold{Jaccard distance} is given by \eqn{1-|X\cap Y|/|X\cup Y|}.
+#' \eqn{q}-grams in \code{b}. The \bold{Jaccard distance} (\code{method='jaccard'}) is given by \eqn{1-|X\cap Y|/|X\cup Y|}.
 #'
 #' The \bold{Jaro distance} (\code{method='jw'}, \code{p=0}), is a number
 #' between 0 (exact match) and 1 (completely dissimilar) measuring 
@@ -98,14 +100,14 @@
 #' matched but they occur in different order in string \code{a} and \code{b}.
 #'  
 #' The \bold{Jaro-Winkler distance} (\code{method=jw}, \code{0<p<=0.25}) adds a
-#' correction term to the Jaro-distance. It is defined as \eqn{d - l*p*d}, where
+#' correction term to the Jaro-distance. It is defined as \eqn{d - l\cdot p\cdot d}, where
 #' \eqn{d} is the Jaro-distance. Here,  \eqn{l} is obtained by counting, from
 #' the start of the input strings, after how many characters the first
 #' character mismatch between the two strings occurs, with a maximum of four. The
 #' factor \eqn{p} is a penalty factor, which in the work of Winkler is often
 #' chosen \eqn{0.1}.
 #'
-#' For the \bold{soundex} method, strings are translated to a soundex code 
+#' For the \bold{soundex} distance (method='soundex'), strings are translated to a soundex code 
 #' (see \code{\link{phonetic}} for a specification). The
 #' distance between strings is 0 when they have the same soundex code,
 #' otherwise 1. Note that soundex recoding is only meaningful for characters
@@ -128,8 +130,14 @@
 #'  G. Navarro (2001). \emph{A guided tour to approximate string matching}. ACM Computing Surveys \bold{33} 31-88.
 #' }
 #' }
-#' @seealso \code{\link{stringdist}}, \code{\link{stringdistmatrix}}, \code{\link{amatch}}
+#' @seealso
+#' \itemize{ 
+#'  \item{Functions using string metrics: \code{\link{stringdist}}, \code{\link{stringdistmatrix}}, \code{\link{amatch}}}
+#'  \item{Encoding issues: \code{\link{stringdist-encoding}}  }
+#' }
 #' 
 #' @name stringdist-metrics
 #' @rdname stringdist-metrics
-invisible(NULL)
+{}
+
+

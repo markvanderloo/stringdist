@@ -1,9 +1,11 @@
 version 0.9.0
 - C-code underlying stringdist and amatch now automatically use multithreading based on openMP. 
   The default number of threads is governed by options('sd_num_thread'). 
-- stringdist, stringdistmatrix, and amatch gain nthread argument which can overwrite the default number of threads.
-- Argument 'maxDist' is phased out for 'stringdist' and 'stringdistmatrix'. Specifying it now causes a message.
+- stringdist, stringdistmatrix, amatch and ain gain nthread argument which can overwrite the default maximum number of threads.
+- Argument 'maxDist' is phased out for 'stringdist' and 'stringdistmatrix'. Specifying it causes a message.
+- Argument 'ncores' is phased out for 'stringdistmatrix'. It is now ignored and specifying it causes a message.
 - bugfix in amatch/dl. In certain cases, the best match went undetected.
+- Documentation improved and rearranged with string metrics, encoding, and parallelization now documented as separate topics.
 
 version 0.8.2
 - Fixed a few warnings issued by the CLANG compiler (thanks to Brian Ripley). This fixes a bug in amatch/jaccard
