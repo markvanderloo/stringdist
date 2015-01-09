@@ -38,6 +38,14 @@ Resources
 * A [paper](http://journal.r-project.org/archive/2014-1/loo.pdf) on stringdist has been published in the R-journal 
 * [Slides](http://www.slideshare.net/MarkVanDerLoo/stringdist-use-r2014) of te _useR!2014_ conference.
 
+Note to users: deprecated arguments at version 0.9 (January 2015)
+---------------
+The following arguments have become obsolete and will eventually be removed:
+
+* Argument `maxDist` for functions `stringdist` and `stringdistmatrix` (not `amatch`).
+* Argument `ncores` for function `stringdistmatrix` (obsolete because 0.9 uses multithreading by default).
+
+
 
 Note to users: breaking update at version 0.5 (june 2013)
 -------------
