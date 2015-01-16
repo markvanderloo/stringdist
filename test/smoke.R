@@ -1,9 +1,10 @@
 # smoke tests.
 set.seed(1864)
 
-dyn.load("../pkg/src/stringdist.so")
-for (f in dir("../pkg/R/",full.names=TRUE)) d <- source(f)
-options(sd_num_thread=4)
+#dyn.load("../pkg/src/stringdist.so")
+#for (f in dir("../pkg/R/",full.names=TRUE)) d <- source(f)
+#options(sd_num_thread=4)
+library(stringdist)
 
 # printable ascii
 pascii <- sapply(33:126,intToUtf8)

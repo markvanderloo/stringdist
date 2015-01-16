@@ -3,7 +3,24 @@
 #' @section Introduction:
 #'
 #' The \pkg{stringdist} package offers fast and platform-independent string metrics. 
-#' It's main purpose is to compute various string distances and to do approximate text matching between character vectors.
+#' Its main purpose is to compute various string distances and to do
+#' approximate text matching between character vectors. A typical use is to 
+#' match strings that are not precisely the same. For example
+#'
+#' \code{  amatch(c("hello","g'day"),c("hi","hallo","ola"),maxDist=2)}
+#'
+#' returns \code{c(2,NA)} since \code{"hello"} matches closest with \code{"hallo"}, and within
+#' the maximum (optimal string alignment) distance. The second element, \code{"g'day"},
+#' matches closest with \code{"ola"} but since the distance equals 4, no match is reported.
+#'
+#' A second typica use is to compute string distances. For example 
+#'
+#' \code{  stringdist(c("g'day"),c("hi","hallo","ola"))}
+#'
+#' Returns \code{c(5,5,4)} since these are the distances between \code{"g'day"} and
+#' respectively \code{"hi"}, \code{"hallo"}, and \code{"ola"}.
+#'
+#'
 #' Besides documentation for each function, the main topics documented are:
 #' 
 #' \itemize{

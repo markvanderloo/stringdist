@@ -19,7 +19,7 @@
 #' very useful in practice and have many applications.
 #'
 #' The metric you need to choose for an application strongly depends on both the nature
-#' of the string (what does the text represent?) and the cause of dissimilarities between the
+#' of the string (what does the string represent?) and the cause of dissimilarities between the
 #' strings you are measuring. For example, if you are comparing human-typed names that may
 #' contain typo's, the Jaro-Winkler distance may be of use. If you are comparing names
 #' that were written down after hearing them, a phonetic distance may be a better choice.
