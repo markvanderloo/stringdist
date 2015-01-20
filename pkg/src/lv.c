@@ -31,7 +31,7 @@
  * - Simplified from restricted DL pseudocode at http://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance
  * - Extended with custom weights and maxDistance
  */
-static double lv(
+double lv_dist(
   unsigned int *a, int na, 
   unsigned int *b, int nb, 
   int bytes,
@@ -126,7 +126,7 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
       if (isna_s || isna_t){
         y[k] = NA_REAL;
       } else {
-        y[k] = lv(
+        y[k] = lv_dist(
             s, len_s
           , t, len_t
           , bytes, w, scores 
@@ -205,7 +205,7 @@ SEXP R_match_lv(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight
       for ( int j=0; j<ntable; j++, tab++){
         len_T = T->str_len[j];
         if ( len_X != NA_INTEGER && len_T != NA_INTEGER ){        // both are char (usual case)
-          d = lv(
+          d = lv_dist(
             str, len_X, *tab, len_T, 0, w, work
           );
           if ( d <= maxDist && d < d1){ 

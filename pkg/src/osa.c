@@ -31,7 +31,7 @@
  * - See pseudocode at http://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance
  * - Extended with custom weights and maxDistance
  */
-static double osa(unsigned int *a, int na, unsigned int *b, int nb, double *weight, double *scores){
+double osa_dist(unsigned int *a, int na, unsigned int *b, int nb, double *weight, double *scores){
 
   if (!na){
     return (double) nb;
@@ -131,7 +131,7 @@ SEXP R_osa(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
       if (isna_s || isna_t){
         y[k] = NA_REAL;
       } else {
-        y[k] = osa(
+        y[k] = osa_dist(
            s, len_s 
          , t, len_t
          , w, scores
@@ -212,7 +212,7 @@ SEXP R_match_osa(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight
       for ( int j=0; j<ntable; j++, tab++){
         len_T = T->str_len[j];
         if (len_X != NA_INTEGER && len_T != NA_INTEGER ){        // both are char (usual case)
-          d = osa(
+          d = osa_dist(
             str, len_X, *tab, len_T, w, work
           );
           if ( d <= maxDist && d < d1){ 
