@@ -194,8 +194,7 @@ static unsigned int soundex(const unsigned int* str, unsigned int str_len, unsig
   return nfail;
 }
 
-static double soundex_dist(unsigned int *a, unsigned int *b, unsigned int a_len, 
-    unsigned int b_len, unsigned int *nfail) {
+static double soundex_dist(unsigned int *a, int a_len, unsigned int *b, int b_len, unsigned int *nfail) {
 
   unsigned int sa[4];
   unsigned int sb[4];
@@ -342,7 +341,7 @@ SEXP R_soundex_dist(SEXP a, SEXP b, SEXP useBytes, SEXP nthrd) {
       if (isna_s || isna_t) {
         y[k] = NA_REAL;
       } else { 
-        y[k] = soundex_dist(s, t, len_s, len_t, &ifail);
+        y[k] = soundex_dist(s, len_s, t, len_t, &ifail);
       } 
       i = recycle(i, num_threads, na);
       j = recycle(j, num_threads, nb);
@@ -421,7 +420,7 @@ SEXP R_match_soundex(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP useByt
       for (int j=0; j<ntable; ++j, ++tab) {
         len_T = T->str_len[j];
         if ( len_X != NA_INTEGER && len_T != NA_INTEGER ) {        // both are char (usual case)
-          d = soundex_dist(str, *tab, len_X, len_T, &ifail);
+          d = soundex_dist(str, len_X, *tab, len_T, &ifail);
           if (d < 0.5) { // exact match as d can only take on values 0 and 1
             index = j + 1;
             break;

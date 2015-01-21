@@ -34,7 +34,6 @@
 double lv_dist(
   unsigned int *a, int na, 
   unsigned int *b, int nb, 
-  int bytes,
   double *weight, 
   double *scores){
   if (!na){
@@ -129,7 +128,7 @@ SEXP R_lv(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
         y[k] = lv_dist(
             s, len_s
           , t, len_t
-          , bytes, w, scores 
+          , w, scores 
         );
         if (y[k] < 0 ) y[k] = R_PosInf;
       }
@@ -206,7 +205,7 @@ SEXP R_match_lv(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP weight
         len_T = T->str_len[j];
         if ( len_X != NA_INTEGER && len_T != NA_INTEGER ){        // both are char (usual case)
           d = lv_dist(
-            str, len_X, *tab, len_T, 0, w, work
+            str, len_X, *tab, len_T, w, work
           );
           if ( d <= maxDist && d < d1){ 
             index = j + 1;

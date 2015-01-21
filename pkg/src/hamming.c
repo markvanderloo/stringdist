@@ -32,9 +32,10 @@
 #include <omp.h>
 #endif
 
-static int hamming(unsigned int *a, unsigned int *b, int n){
-  int h=0;
-    for(int i=0; i<n; ++i){
+static double hamming_dist(unsigned int *a, int len_a, unsigned int *b, int len_b){
+  double h=0;
+    if (len_a != len_b) return 1.0/0.0;
+    for(int i=0; i < len_a; ++i){
      if (a[i] != b[i]) h++;
     }
   return h;
@@ -92,7 +93,7 @@ SEXP R_hm(SEXP a, SEXP b, SEXP useBytes, SEXP nthrd){
       } else if ( len_s != len_t ){
           y[k] = R_PosInf;
       } else {
-        y[k] = (double) hamming(s, t, len_s);
+        y[k] = hamming_dist(s, len_s, t, len_t);
       }
       i = recycle(i, num_threads, na);
       j = recycle(j, num_threads, nb);
@@ -154,7 +155,7 @@ SEXP R_match_hm(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
         len_T = T->str_len[j];
         if ( len_X != len_T ) continue;
         if ( len_X != NA_INTEGER && len_T != NA_INTEGER ){        // both are char (usual case)
-          d = (double) hamming( str, *tab, len_X );
+          d = hamming_dist( str, len_X, *tab, len_T );
           if ( d <= max_dist && d < d1){ 
             index = j + 1;
             if ( d == 0.0 ) break;

@@ -27,17 +27,7 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-
-/* binary tree; dictionary of qgrams */
-
-typedef struct qnode {
-  unsigned int *qgram; // the q-gram.
-  double *n;           // (vector of) counts.
-  struct qnode *left;
-  struct qnode *right;
-} qtree;
-
-
+#include "qtree.h"
 
 
 
@@ -198,6 +188,17 @@ static void *alloc(type t){
 /* -- END OF ALLOCATOR -- */
 
 
+// helper functions
+static qtree *new_qtree(int q, int nstr){
+  init_shelf(q, nstr);
+  return NULL;
+}
+
+static void free_qtree(){
+  clear_shelf();
+}
+
+
 /* Lexicographical comparison of two qgrams.
  * output:
  * -1 : q1 < q2
@@ -209,16 +210,6 @@ static int compare(unsigned int *q1, unsigned int *q2, int q){
   if (q1[0] > q2[0]) return 1;
   if (q1[0] < q2[0]) return -1;
   return compare( q1 + 1, q2 + 1, q - 1 );
-}
-
-// helper functions
-static qtree *new_qtree(int q, int nstr){
-  init_shelf(q, nstr);
-  return NULL;
-}
-
-static void free_qtree(){
-  clear_shelf();
 }
 
 
@@ -273,7 +264,6 @@ static qtree *push_string(unsigned int *str, int strlen, unsigned int q, qtree *
 
 
 
-/* The real work starts here */
 
 /* get qgram-distance from tree and set all qgram-freqencies 
  * to 0 (so the tree can be reused).
@@ -343,11 +333,11 @@ static void getjaccard(qtree *Q, double *d){
  * -1   : infinite distance
  * -2   : Not enough memory
  */
-static double qgram_tree(
+static double qgram_dist(
     unsigned int *s, 
+    int x,
     unsigned int *t, 
-    unsigned int x,
-    unsigned int y,
+    int y,
     unsigned int q, 
     qtree *Q,
     int distance
@@ -450,7 +440,7 @@ SEXP R_qgram_tree(SEXP a, SEXP b, SEXP qq, SEXP distance, SEXP useBytes, SEXP nt
       if ( isna_s || isna_t ){
         y[k] = NA_REAL;
       } else {
-        y[k] = qgram_tree(s, t, len_s, len_t, q, Q, dist);
+        y[k] = qgram_dist(s, len_s, t, len_t, q, Q, dist);
         if (y[k] == -2.0){
           UNPROTECT(5);
           error("Unable to allocate enough memory");
@@ -531,8 +521,8 @@ SEXP R_match_qgram_tree(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP qq
       for ( int j=0; j<ntable; j++, tab++){
         len_T = T->str_len[j];
         if ( len_X != NA_INTEGER && len_T != NA_INTEGER ){ // both are char (usual case)
-          d = qgram_tree(
-            str, *tab, len_X, len_T, q, Q, dist
+          d = qgram_dist(
+            str, len_X, *tab, len_T, q, Q, dist
           );
           if ( d == -2.0 ) nx = -1;
           if ( d > max_dist ){

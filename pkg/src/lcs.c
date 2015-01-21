@@ -29,7 +29,7 @@
 /* Longest common substring
  * - basically edit distance, only allowing insertions and deletions, at the cost of 1.
  */
-static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int *scores){
+static double lcs_dist(unsigned int *a, int na, unsigned int *b, int nb, double *scores){
   if (!na){
     return (double) nb;
   }
@@ -61,8 +61,8 @@ static int lcs(unsigned int *a, int na, unsigned int *b, int nb, int *scores){
       
     }
   }
-  int score = scores[I*J - 1];
-  return score;
+   
+  return scores[I*J - 1];
 }
 
 //-- interface with R
@@ -93,8 +93,8 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP useBytes, SEXP nthrd){
   #endif
   {
     // space for the workfunction
-    int *scores; 
-    scores = (int *) malloc( (ml_a + 1) * (ml_b + 1) * sizeof(int)); 
+    double *scores; 
+    scores = (double *) malloc( (ml_a + 1) * (ml_b + 1) * sizeof(int)); 
 
     unsigned int *s = NULL, *t = NULL;
     s = (unsigned int *) malloc( (2L + ml_a + ml_b) * sizeof(int));
@@ -118,7 +118,7 @@ SEXP R_lcs(SEXP a, SEXP b, SEXP useBytes, SEXP nthrd){
       if ( isna_s || isna_t ){
         y[k] = NA_REAL;
       } else {
-        y[k] = lcs(s, len_s, t, len_t, scores );
+        y[k] = lcs_dist(s, len_s, t, len_t, scores );
         if (y[k] < 0 ) y[k] = R_PosInf;
       }
       i = recycle(i, num_threads, na);
@@ -170,7 +170,7 @@ SEXP R_match_lcs(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
   #endif
   {
     // space for the workfunction
-    int *work = (int *) malloc( (max_length(x) + 1) * (max_length(table) + 1) * sizeof(int)); 
+    double *work = (double *) malloc( (max_length(x) + 1) * (max_length(table) + 1) * sizeof(int)); 
 
     double d = R_PosInf, d1 = R_PosInf;
     int index, len_X, len_T;
@@ -187,7 +187,7 @@ SEXP R_match_lcs(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
       for ( int j=0; j<ntable; j++, tab++){
         len_T = T->str_len[j];
         if ( len_X != NA_INTEGER && len_T != NA_INTEGER ){        // both are char (usual case)
-          d = (double) lcs(
+          d = (double) lcs_dist(
             str, len_X, *tab, len_T, work
           );
           if ( d <= max_dist && d < d1){ 

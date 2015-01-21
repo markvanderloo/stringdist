@@ -33,7 +33,7 @@
  * Parameter 'guard; indicates which elements of b have been matched before to avoid
  * matching two instances of the same character to the same position in b (which we treat read-only).
  */
-static int match_int(unsigned int a, unsigned int *b, int *guard, int width, int m){
+static int match_int(unsigned int a, unsigned int *b, double *guard, int width, int m){
   int i = 0;
   while ( 
       ( i < width ) && 
@@ -71,14 +71,14 @@ static double get_l(unsigned int *a, unsigned int *b, int n){
  * work : workspace, minimally of length max(x,y)
  *
  */
-static double jaro_winkler(
+static double jaro_winkler_dist(
              unsigned int *a, 
-             unsigned int *b,
              int x,
+             unsigned int *b,
              int y,
              double p,
              double *w,
-             int *work
+             double *work
         ){
 
   // edge case
@@ -170,7 +170,7 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight, SEXP useBytes, SEXP nthrd){
   #endif
   {
     // workspace for worker function
-    int *work = (int *) malloc( sizeof(int) * MAX(ml_a,ml_b) );
+    double *work = (double *) malloc( sizeof(double) * MAX(ml_a,ml_b) );
     unsigned int *s = NULL, *t = NULL;
     s = (unsigned int *) malloc((2L + ml_a + ml_b) * sizeof(int));
     t = s + ml_a + 1L;
@@ -193,7 +193,7 @@ SEXP R_jw(SEXP a, SEXP b, SEXP p, SEXP weight, SEXP useBytes, SEXP nthrd){
       if ( isna_s || isna_t ){
         y[k] = NA_REAL;
       } else { // jaro-winkler distance
-        y[k] = jaro_winkler(s, t, len_s, len_t, pp, w, work);
+        y[k] = jaro_winkler_dist(s, len_s, t, len_t, pp, w, work);
       }
       i = recycle(i, num_threads, na);
       j = recycle(j, num_threads, nb); 
@@ -251,7 +251,7 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p
   #endif
   {
     // workspace for worker function
-    int *work = (int *) malloc( sizeof(int) * MAX(ml_x, ml_t) );
+    double *work = (double *) malloc( sizeof(double) * MAX(ml_x, ml_t) );
     double d = R_PosInf, d1 = R_PosInf;
     int index, len_X,len_T;
     unsigned int *str, **tab;
@@ -269,7 +269,7 @@ SEXP R_match_jw(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA, SEXP p
         len_T = T->str_len[j];
 
         if ( len_X != NA_INTEGER && len_T != NA_INTEGER ){        // both are char (usual case)
-          d = jaro_winkler(str, *tab, len_X, len_T, pp, w, work);
+          d = jaro_winkler_dist(str, len_X, *tab, len_T, pp, w, work);
           if ( d > max_dist ){
             continue;
           } else if ( d > -1.0 && d < d1){ 

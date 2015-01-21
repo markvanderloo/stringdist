@@ -41,16 +41,10 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-
-/* Our unsorted dictionary  */
-/* Note we use character ints, not chars. */
+#include "dictionary.h"
 
 
-typedef struct {
-  unsigned int *key;
-  unsigned int *value;
-  unsigned int length;
-} dictionary;
+
 
 static void reset_dictionary(dictionary *d){
   int nbytes = sizeof(unsigned int)*d->length;
@@ -98,16 +92,13 @@ static unsigned int which(dictionary *d, unsigned int key){
   return i;
 }
 
-/* End of Dictionary Stuff */
 
-
-/* All calculations/work are done here */
 // note: src (tgt) will be indexed to their x + 1 (y+1).
-static double distance(
+static double dl_dist(
       unsigned int *src,
+      int x,
       unsigned int *tgt,
-      unsigned int x,
-      unsigned int y,
+      int y,
       double *weight,
       dictionary *dict,
       double *scores
@@ -235,8 +226,8 @@ SEXP R_dl(SEXP a, SEXP b, SEXP weight, SEXP useBytes, SEXP nthrd){
       if ( isna_s || isna_t ){
         y[k] = NA_REAL;
       } else {
-        y[k] = distance(
-          s, t, len_s, len_t,
+        y[k] = dl_dist(
+          s, len_s, t,  len_t,
           w, dict, scores
         );
         if (y[k] < 0 ) y[k] = R_PosInf;
@@ -316,8 +307,8 @@ SEXP R_match_dl(SEXP x, SEXP table, SEXP nomatch, SEXP matchNA
         len_T = T->str_len[j];
 
         if ( len_X != NA_INTEGER &&  len_T != NA_INTEGER ){      // both are char (usual case)
-          d = distance(
-            str, *tab, len_X, len_T, w, dict, scores
+          d = dl_dist(
+            str, len_X, *tab, len_T, w, dict, scores
           );
           if ( d <= maxDist && d < d1){ 
             index = j + 1;
