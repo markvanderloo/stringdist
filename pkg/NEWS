@@ -1,4 +1,5 @@
 version 0.9.1
+- Safer core detection to avoid a failure under Cygwin (thanks to Lauri Koobas)
 
 version 0.9.0
 - C-code underlying stringdist and amatch now automatically use multithreading based on openMP. 
