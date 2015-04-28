@@ -1,11 +1,18 @@
 
 RECYCLEWARNING <- NULL
 
+# calling message from .onLoad gives a NOTE on build, so we avoid it here.
+mymsg <- message
 
 .onLoad <- function(libname, pkgname){
   RECYCLEWARNING <<- gettext(tryCatch( (1:2)+(1:3),warning=function(w) w$message ))
 
   nthread = parallel::detectCores()
+
+  if ( is.na(nthread) || !is.numeric(nthread) ){
+    nthread <- 1L
+    mymsg("Could not detect number of cores, defaulting to 1.")
+  }
 
   omp_thread_limit = as.numeric(Sys.getenv("OMP_THREAD_LIMIT"))
   if ( is.na(omp_thread_limit) ) omp_thread_limit <- nthread
