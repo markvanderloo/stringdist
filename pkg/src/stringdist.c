@@ -113,7 +113,7 @@ double stringdist(Stringdist *S, unsigned int *str_a, int len_a, unsigned int *s
     case jw :
       d = jaro_winkler_dist(str_a, len_a, str_b, len_b, S->p, S->weight, S->work);
     case soundex :
-      d = soundex_dist(str_a,len_a,str_b, len_b, &ifail);
+      d = soundex_dist(str_a, len_a, str_b, len_b, &ifail);
       break;
     default :
       break;
