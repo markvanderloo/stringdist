@@ -206,7 +206,8 @@ stringdistmatrix <- function(a, b
   )
   if (method == 'jw') weight <- weight[c(2,1,3)]
   if (ncores==1){
-    x <- sapply(b,do_dist, USE.NAMES=FALSE, a,method,weight,maxDist, q, p,useBytes, nthread)
+    x <- vapply(b,do_dist, USE.NAMES=FALSE, FUN.VALUE=numeric(length(a))
+          , a,method,weight,maxDist, q, p,useBytes, nthread)
   } else {
     if ( is.null(cluster) ){
       cluster <- makeCluster(ncores)
@@ -218,7 +219,11 @@ stringdistmatrix <- function(a, b
     x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q, p, useBytes, nthread)
     if (turn_cluster_off) stopCluster(cluster)
   }
-  if (!useNames)  as.matrix(x) else structure(as.matrix(x), dimnames=list(rowns,colns))
+  if (!useNames){  
+    matrix(x,nrow=length(a),ncol=length(b)) 
+  } else {
+    structure(matrix(x,nrow=length(a),ncol=length(b), dimnames=list(rowns,colns)))
+  }
 }
 
 
