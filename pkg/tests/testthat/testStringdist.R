@@ -389,6 +389,9 @@ test_that("dimensions work out",{
     expect_equivalent(
         dim(stringdistmatrix(c("aa","bb","cc"),c("aa","cc"),useBytes=TRUE)),
         c(3,2)
+    ) 
+    expect_equivalent( # bug #28
+      dim(stringdistmatrix('foo',letters[1:3])), c(1,3)
     )
 })
 
