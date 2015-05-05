@@ -52,7 +52,7 @@ static void reset_dictionary(dictionary *d){
   memset(d->value, 0, nbytes);
 }
 
-static dictionary *new_dictionary(unsigned int length){
+dictionary *new_dictionary(unsigned int length){
   dictionary *d = (dictionary *) malloc(sizeof(dictionary));
   if ( d == NULL ){
     return NULL;
@@ -70,10 +70,12 @@ static dictionary *new_dictionary(unsigned int length){
   return d;
 }
 
-static void free_dictionary(dictionary *d){
-  free(d->key);
-  free(d->value);
-  free(d);
+void free_dictionary(dictionary *d){
+  if ( d != NULL ){
+    free(d->key);
+    free(d->value);
+    free(d);
+  }
 }
 
 static void uniquePush(dictionary *d, unsigned int key){
@@ -94,7 +96,7 @@ static unsigned int which(dictionary *d, unsigned int key){
 
 
 // note: src (tgt) will be indexed to their x + 1 (y+1).
-static double dl_dist(
+double dl_dist(
       unsigned int *src,
       int x,
       unsigned int *tgt,

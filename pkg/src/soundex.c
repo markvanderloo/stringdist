@@ -194,7 +194,7 @@ static unsigned int soundex(const unsigned int* str, unsigned int str_len, unsig
   return nfail;
 }
 
-static double soundex_dist(unsigned int *a, int a_len, unsigned int *b, int b_len, unsigned int *nfail) {
+double soundex_dist(unsigned int *a, int a_len, unsigned int *b, int b_len, unsigned int *nfail) {
 
   unsigned int sa[4];
   unsigned int sb[4];

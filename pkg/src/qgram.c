@@ -189,12 +189,12 @@ static void *alloc(type t){
 
 
 // helper functions
-static qtree *new_qtree(int q, int nstr){
+qtree *new_qtree(int q, int nstr){
   init_shelf(q, nstr);
   return NULL;
 }
 
-static void free_qtree(){
+void free_qtree(){
   clear_shelf();
 }
 
@@ -333,7 +333,7 @@ static void getjaccard(qtree *Q, double *d){
  * -1   : infinite distance
  * -2   : Not enough memory
  */
-static double qgram_dist(
+double qgram_dist(
     unsigned int *s, 
     int x,
     unsigned int *t, 

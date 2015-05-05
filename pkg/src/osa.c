@@ -31,7 +31,7 @@
  * - See pseudocode at http://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance
  * - Extended with custom weights and maxDistance
  */
-static double osa_dist(unsigned int *a, int na, unsigned int *b, int nb, double *weight, double *scores){
+double osa_dist(unsigned int *a, int na, unsigned int *b, int nb, double *weight, double *scores){
 
   if (!na){
     return (double) nb;

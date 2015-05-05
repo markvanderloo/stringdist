@@ -26,11 +26,13 @@
 
 #define MAX(X,Y) ((X) < (Y) ? (X) : (Y))
 
+// todo: remove spurious include.
+#include <R.h>
 
 /* 
  *
  *
- *
+ * TODO check for memory allocation failure
  */
 Stringdist *open_stringdist(Distance d, int str_len_a, int str_len_b, ...){
   va_list args;
@@ -38,41 +40,48 @@ Stringdist *open_stringdist(Distance d, int str_len_a, int str_len_b, ...){
 
   Stringdist *S = (Stringdist *) malloc(sizeof(Stringdist)); 
   (*S) = (Stringdist) {d, NULL, NULL, NULL, NULL, 0L, 0.0};
-  
   switch (d){
     case osa :
       S->work = (double *) malloc( (str_len_a + 1) * (str_len_b + 1) * sizeof(double)); 
       S->weight = (double *) malloc(4*sizeof(double));
       memcpy(S->weight, va_arg(args, double *), 4*sizeof(double));
+      break;
     case lv :
       S->work = (double *) malloc( (str_len_a + 1) * (str_len_b + 1) *sizeof(double));
       S->weight = (double *) malloc(3 * sizeof(double));
       memcpy(S->weight, va_arg(args, double *), 3*sizeof(double));
+      break;
     case dl :
       S->dict = new_dictionary( str_len_a + str_len_b + 1);
       S->work = (double *) malloc( (str_len_a + 3) * (str_len_b + 3) * sizeof(double)); 
       S->weight = (double *) malloc(4*sizeof(double));
       memcpy(S->weight, va_arg(args, double *), 4*sizeof(double));
+      break;
     case hamming :
       break;
     case lcs :
       S->work = (double *) malloc( (str_len_a + 1) * (str_len_b + 1) *sizeof(double));
+      break;
     case qgram :
       S->tree = new_qtree(va_arg(args, unsigned int), 2L); 
+      break;
     case cosine :
       S->tree = new_qtree(va_arg(args, unsigned int), 2L); 
+      break;
     case jaccard :
       S->tree = new_qtree(va_arg(args, unsigned int), 2L); 
+      break;
     case jw :
       S->work = (double *) malloc( sizeof(double) * MAX(str_len_a,str_len_b));
       S->weight = (double *) malloc(3*sizeof(double));
       memcpy(S->weight, va_arg(args, double *), 3*sizeof(double));
       S->p = va_arg(args, double);
+      break;
     case soundex :
       break;
     default :
       break;
-      // set errno, return NULL
+      //TODO: set errno, return NULL
   };
 
   va_end(args);
@@ -84,7 +93,9 @@ void close_stringdist(Stringdist *S){
   free(S->work);
   free(S->weight);
   free_dictionary(S->dict);
-  free_qtree(S->tree);
+  if (S->distance == qgram || S->distance == cosine || S->distance == jaccard){
+    free_qtree(S->tree);
+  }
   free(S);
 }
 
@@ -95,32 +106,31 @@ double stringdist(Stringdist *S, unsigned int *str_a, int len_a, unsigned int *s
   unsigned int ifail;
   switch(S->distance){
     case osa :
-      d = osa_dist(str_a, len_a, str_b, len_b, S->weight, S->work);
+     return osa_dist(str_a, len_a, str_b, len_b, S->weight, S->work);
     case lv :
-      d = lv_dist( str_a, len_a, str_b, len_b, S->weight, S->work);
+      return lv_dist( str_a, len_a, str_b, len_b, S->weight, S->work);
     case dl :
-      d = dl_dist(str_a, len_a, str_b, len_b, S->weight, S->dict, S->work);
+      return dl_dist(str_a, len_a, str_b, len_b, S->weight, S->dict, S->work);
     case hamming :
-      d = hamming_dist(str_a, len_a, str_b, len_b);
+      return hamming_dist(str_a, len_a, str_b, len_b);
     case lcs :
-      d = lcs_dist(str_a, len_a, str_b, len_b, S->work); 
+      return lcs_dist(str_a, len_a, str_b, len_b, S->work); 
     case qgram :
-      d = qgram_dist(str_a, len_a, str_b, len_b, S->q, S->tree, 0L);
+      return qgram_dist(str_a, len_a, str_b, len_b, S->q, S->tree, 0L);
     case cosine :
-      d = qgram_dist(str_a, len_a, str_b, len_b, S->q, S->tree, 1L);
+      return qgram_dist(str_a, len_a, str_b, len_b, S->q, S->tree, 1L);
     case jaccard :
-      d = qgram_dist(str_a, len_a, str_b, len_b, S->q, S->tree, 2L);
+      return qgram_dist(str_a, len_a, str_b, len_b, S->q, S->tree, 2L);
     case jw :
-      d = jaro_winkler_dist(str_a, len_a, str_b, len_b, S->p, S->weight, S->work);
+      return jaro_winkler_dist(str_a, len_a, str_b, len_b, S->p, S->weight, S->work);
     case soundex :
-      d = soundex_dist(str_a, len_a, str_b, len_b, &ifail);
+      return soundex_dist(str_a, len_a, str_b, len_b, &ifail);
       break;
     default :
       break;
       // set errno, return -1
   }
-
-  return d;
+    return d;
 }
 
 

@@ -29,7 +29,7 @@
 /* Longest common substring
  * - basically edit distance, only allowing insertions and deletions, at the cost of 1.
  */
-static double lcs_dist(unsigned int *a, int na, unsigned int *b, int nb, double *scores){
+double lcs_dist(unsigned int *a, int na, unsigned int *b, int nb, double *scores){
   if (!na){
     return (double) nb;
   }

@@ -71,7 +71,7 @@ static double get_l(unsigned int *a, unsigned int *b, int n){
  * work : workspace, minimally of length max(x,y)
  *
  */
-static double jaro_winkler_dist(
+double jaro_winkler_dist(
              unsigned int *a, 
              int x,
              unsigned int *b,

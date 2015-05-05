@@ -24,6 +24,7 @@
 
 #include "dictionary.h"
 #include "qtree.h"
+#include "dist.h"
 
 typedef enum Distance { osa, lv, dl, hamming, lcs, qgram, cosine, jaccard, jw, soundex} Distance;
 typedef struct {

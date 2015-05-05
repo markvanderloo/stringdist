@@ -32,7 +32,7 @@
 #include <omp.h>
 #endif
 
-static double hamming_dist(unsigned int *a, int len_a, unsigned int *b, int len_b){
+double hamming_dist(unsigned int *a, int len_a, unsigned int *b, int len_b){
   double h=0;
     if (len_a != len_b) return 1.0/0.0;
     for(int i=0; i < len_a; ++i){
