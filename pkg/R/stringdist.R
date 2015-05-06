@@ -236,21 +236,32 @@ char2int <- function(x){
   lapply(enc2utf8(x),utf8ToInt)
 }
 
+#  enum-type in stringdist.h
+METHODS <-c(
+    osa     = 0L
+  , lv      = 1L
+  , dl      = 2L
+  , hamming = 3L
+  , lcs     = 4L
+  , qgram   = 5L
+  , cosine  = 6L
+  , jaccard = 7L
+  , jw      = 8L
+  , soundex = 9L
+)
 
 
 do_dist <- function(a, b, method, weight, maxDist, q, p, useBytes=FALSE, nthread=1L){
-  d <- switch(method,
-    osa     = .Call('R_osa'   , a, b, as.double(weight), useBytes, nthread),
-    lv      = .Call('R_lv'    , a, b, as.double(weight), useBytes, nthread),
-    dl      = .Call('R_dl'    , a, b, as.double(weight), useBytes, nthread),
-    hamming = .Call('R_hm'    , a, b, useBytes, nthread),
-    lcs     = .Call('R_lcs'   , a, b, useBytes, nthread),
-    qgram   = .Call('R_qgram_tree' , a, b, as.integer(q), 0L, useBytes, nthread),
-    cosine  = .Call('R_qgram_tree' , a, b, as.integer(q), 1L, useBytes, nthread),
-    jaccard = .Call('R_qgram_tree' , a, b, as.integer(q), 2L, useBytes, nthread),
-    jw      = .Call('R_jw'    , a, b, as.double(p), as.double(weight), useBytes, nthread),
-    soundex = .Call('R_soundex_dist', a, b, useBytes, nthread)
+  method <- METHODS[method]
+  if ( is.na(method) ){
+    stop(sprintf("method '%s' is not defined",method))
+  }
+
+  d <- .Call("R_stringdist", a, b, method
+    , weight, as.double(p), as.integer(q)
+    , as.integer(useBytes), as.integer(nthread)
   )
+
   if (maxDist < Inf ){
     d[!is.na(d) & d > maxDist] <- Inf
   }

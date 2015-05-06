@@ -42,7 +42,9 @@ static Stringdist *R_open_stringdist(Distance d, int max_len_a, int max_len_b, S
   return sd;
 }
 
-SEXP R_stringdist(SEXP a, SEXP b, SEXP method, SEXP weight, SEXP p, SEXP q, SEXP useBytes, SEXP nthrd){
+SEXP R_stringdist(SEXP a, SEXP b, SEXP method
+  , SEXP weight, SEXP p, SEXP q
+  , SEXP useBytes, SEXP nthrd){
   PROTECT(a);
   PROTECT(b);
   PROTECT(method);
