@@ -252,13 +252,16 @@ METHODS <-c(
 
 
 do_dist <- function(a, b, method, weight, maxDist, q, p, useBytes=FALSE, nthread=1L){
+  if (method=='soundex' && !all(printable_ascii(a) & printable_ascii(b)) ){
+    warning("Non-printable ascii or non-ascii characters in soundex. Results may be unreliable. See ?printable_ascii.")
+  }
   method <- METHODS[method]
   if ( is.na(method) ){
     stop(sprintf("method '%s' is not defined",method))
   }
 
   d <- .Call("R_stringdist", a, b, method
-    , weight, as.double(p), as.integer(q)
+    , as.double(weight), as.double(p), as.integer(q)
     , as.integer(useBytes), as.integer(nthread)
   )
 

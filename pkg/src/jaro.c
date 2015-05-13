@@ -37,13 +37,13 @@ static int match_int(unsigned int a, unsigned int *b, double *guard, int width, 
   int i = 0;
   while ( 
       ( i < width ) && 
-      ( b[i] != a || (b[i] == a && guard[i])) 
+      ( b[i] != a || (b[i] == a && guard[i] > 0)) 
   ){
     ++i;
   }
   // ugly edge case workaround
   if ( !(m && i==width) && b[i] == a ){
-    guard[i] = 1;
+    guard[i] = 1.0;
     return i;
   } 
   return -1;
@@ -92,7 +92,8 @@ double jaro_winkler_dist(
     y = x;
     x = z;
   }
-  memset(work,0, sizeof(int) * y);
+
+  for (int k=0; k<MAX(x,y); k++) work[k] = 0.0;
 
   // max transposition distance
   int M = MAX(MAX(x,y)/2 - 1,0);
@@ -124,7 +125,7 @@ double jaro_winkler_dist(
   if ( m < 1 ){
     d = 1.0;
   } else {
-    d = 1.0 - (1.0/3.0)*(w[0]*m/x + w[1]*m/y + w[2]*(m-t)/m);
+    d = 1.0 - (1.0/3.0)*(w[0]*m/((double) x) + w[1]*m/((double) y) + w[2]*(m-t)/m);
   }
 
   // Winkler's penalty factor
@@ -132,7 +133,6 @@ double jaro_winkler_dist(
     int n = MIN(MIN(x,y),4);
     d =  d - get_l(a,b,n)*p*d; 
   }
-
   return d;
 }
 

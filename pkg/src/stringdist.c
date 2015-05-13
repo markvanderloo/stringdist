@@ -24,7 +24,7 @@
 #include "dist.h"
 #include "stringdist.h"
 
-#define MAX(X,Y) ((X) < (Y) ? (X) : (Y))
+#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 
 // todo: remove spurious include.
 #include <R.h>
@@ -39,7 +39,7 @@ Stringdist *open_stringdist(Distance d, int str_len_a, int str_len_b, ...){
   va_start(args, str_len_b);
 
   Stringdist *S = (Stringdist *) malloc(sizeof(Stringdist)); 
-  (*S) = (Stringdist) {d, NULL, NULL, NULL, NULL, 0L, 0.0};
+  (*S) = (Stringdist) {d, NULL, NULL, NULL, NULL, 0L, 0.0, 0L};
   switch (d){
     case osa :
       S->work = (double *) malloc( (str_len_a + 1) * (str_len_b + 1) * sizeof(double)); 
@@ -73,7 +73,7 @@ Stringdist *open_stringdist(Distance d, int str_len_a, int str_len_b, ...){
       break;
     case jw :
       S->work = (double *) malloc( sizeof(double) * MAX(str_len_a,str_len_b));
-      S->weight = (double *) malloc(3*sizeof(double));
+      S->weight = (double *) malloc(3L*sizeof(double));
       memcpy(S->weight, va_arg(args, double *), 3*sizeof(double));
       S->p = va_arg(args, double);
       break;
@@ -92,7 +92,10 @@ Stringdist *open_stringdist(Distance d, int str_len_a, int str_len_b, ...){
 void close_stringdist(Stringdist *S){
   free(S->work);
   free(S->weight);
-  free_dictionary(S->dict);
+
+  if (S->distance == dl){
+    free_dictionary(S->dict);
+  }
   if (S->distance == qgram || S->distance == cosine || S->distance == jaccard){
     free_qtree(S->tree);
   }
@@ -103,7 +106,7 @@ void close_stringdist(Stringdist *S){
 
 double stringdist(Stringdist *S, unsigned int *str_a, int len_a, unsigned int *str_b, int len_b){
   double d = -1.0;
-  unsigned int ifail;
+
   switch(S->distance){
     case osa :
      return osa_dist(str_a, len_a, str_b, len_b, S->weight, S->work);
@@ -124,8 +127,7 @@ double stringdist(Stringdist *S, unsigned int *str_a, int len_a, unsigned int *s
     case jw :
       return jaro_winkler_dist(str_a, len_a, str_b, len_b, S->p, S->weight, S->work);
     case soundex :
-      return soundex_dist(str_a, len_a, str_b, len_b, &ifail);
-      break;
+      return soundex_dist(str_a, len_a, str_b, len_b, &(S->ifail));
     default :
       break;
       // set errno, return -1

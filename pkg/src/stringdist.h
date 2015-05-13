@@ -41,6 +41,8 @@ typedef struct {
   unsigned int q;
   // Winkler's penalty factor
   double p;
+  // fail indicator
+  unsigned int ifail;
 } Stringdist;
 
 Stringdist *open_stringdist(Distance, int, int, ...);

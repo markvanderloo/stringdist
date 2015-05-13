@@ -35,12 +35,15 @@ static Stringdist *R_open_stringdist(Distance d, int max_len_a, int max_len_b, S
   } else if ( d == qgram || d == cosine || d == jaccard ){
     sd = open_stringdist(d, max_len_a, max_len_b, (unsigned int) INTEGER(q)[0]);
   } else if ( d == jw ){
-    sd = open_stringdist(d, max_len_a, max_len_b, (double) REAL(p)[0]);
+    sd = open_stringdist(d, max_len_a, max_len_b, REAL(weight), REAL(p)[0]);
   } else if (d == soundex) {
     sd = open_stringdist(d, max_len_a, max_len_b);
   }
+
   return sd;
 }
+
+
 
 SEXP R_stringdist(SEXP a, SEXP b, SEXP method
   , SEXP weight, SEXP p, SEXP q
@@ -108,9 +111,11 @@ SEXP R_stringdist(SEXP a, SEXP b, SEXP method
       i = recycle(i, num_threads, na);
       j = recycle(j, num_threads, nb);
     }
-     
+    
+
     close_stringdist(sd);
-    if (bytes) free(s);
+
+    free(s);
   } // end of parallel region
 
   UNPROTECT(9);
