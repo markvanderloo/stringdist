@@ -197,8 +197,8 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
         if (len_X != NA_INTEGER && len_T != NA_INTEGER ){        // both are char (usual case)
           d = stringdist(sd, str, len_X, *tab, len_T);
           if ( d <= maxDist && d < d1){ 
-            index = j + 1;
-            if ( d == 0.0 ) break;
+index = j + 1;
+            if ( ABS(d) < 1e-14 ) break; // exact match
             d1 = d;
           }
         } else if ( len_X == NA_INTEGER && len_T == NA_INTEGER ) {  // both are NA
@@ -215,6 +215,7 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
   free_stringset(T);
   UNPROTECT(12);
   if (nx < 0 ) error("Unable to allocate enough memory");
+
   return(yy);
 } // end R_amatch
 

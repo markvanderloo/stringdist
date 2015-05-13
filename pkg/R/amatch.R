@@ -69,7 +69,6 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   }
 
   method <- match.arg(method)
-  method <- METHODS[method]
   if ( is.na(method) ){
     stop(sprintf("method '%s' is not defined",method))
   }
@@ -87,8 +86,8 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
       , nthread > 0
   )
-  if (maxDist==Inf && !method %in% c('osa','lv','dl','hm','lcs') ) maxDist <- 0L;
   if (method == 'jw') weight <- weight[c(2,1,3)]
+  method <- METHODS[method]
 
   .Call("R_amatch", x, table, method
     , as.integer(nomatch), as.integer(matchNA)
