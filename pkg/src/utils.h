@@ -20,6 +20,11 @@
 #ifndef sd_utils_h
 #define sd_utils_h
 
+#define USE_RINTERNALS
+#include <stdlib.h>
+#include <R.h>
+#include <Rdefines.h>
+
 /* integer recycling macro  */
 #define RECYCLE(X,Y) ( (X) == (Y) ? 0 : (X) )
 
