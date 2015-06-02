@@ -1,9 +1,9 @@
 
 
 # Calculate the similarity using the default method of optimal string alignment
-similarity("ca", "abc")
+stringsim("ca", "abc")
 
 # Calculate the similarity using the Jaro-Winkler method
 # The p argument is passed on to stringdist
-similarity('MARTHA','MATHRA',method='jw', p=0.1)
+stringsim('MARTHA','MATHRA',method='jw', p=0.1)
 

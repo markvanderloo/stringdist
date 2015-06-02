@@ -1,6 +1,6 @@
 #' Compute similarity scores between strings
 #'
-#' \code{similarity} computes pairwise string similarities between elements of
+#' \code{stringsim} computes pairwise string similarities between elements of
 #' \code{character} vectors \code{a} and \code{b}, where the vector with less
 #' elements is recycled. 
 #'
@@ -25,9 +25,9 @@
 #' possible distance. This results in a score between 0 and 1, with 1
 #' corresponding to perfect similarity and 0 to complete dissimilarity.
 #'
-#' @example ../examples/similarity.R
+#' @example ../examples/stringsim.R
 #' @export
-similarity <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
+stringsim <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
   "qgram", "cosine", "jaccard", "jw", "soundex"), q = 1, ...) {
   # Make sure that b is not longer than a; this means that the length of the 
   # output vector equals that of a, which helps in the following code
