@@ -1,5 +1,6 @@
 version 0.9.1
-- internal: rewrite of the R/C interface, saving about 1/3 of C-code, making extending easier.
+- Specifying 'ncores' is ignored and now causes a warning
+- internal: rewrite of the R/C interface, saving about 1/3 of C-code, making extending easier
 - bugfix in stringdistmatrix: output was transposed when length(a)==1 (Thanks to github user cpoonolly)
 - Safer core detection to avoid a failure under Cygwin (thanks to Lauri Koobas)
 

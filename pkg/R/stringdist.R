@@ -168,7 +168,7 @@ stringdistmatrix <- function(a, b
   if (maxDist < Inf)
     message("Argument 'maxDist' is deprecated for function 'stringdistmatrix'. This argument will be removed in the future.") 
   if (ncores > 1 ){
-    message("Argument 'ncores' is deprecated as stringdist now uses multithreading by default. This argument is currently ignored and will be removed in the future.")
+    warning("Argument 'ncores' is deprecated as stringdist now uses multithreading by default. This argument is currently ignored and will be removed in the future.")
     ncores <- 1
   }
  
