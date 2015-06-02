@@ -76,10 +76,6 @@
 #' If \code{ncores>0}, a local cluster of R-sessions is set up automatically. Each R-session will use \code{nthread}
 #' threads.
 #'
-#' The \code{cluster} argument is only interesting when the cluster is set up over different physical nodes. For example when
-#' setting up a network of nodes accross physically different machines. In each node, \code{nthread} threads will be used.
-#'
-#'
 #'
 #' @param a R object (target); will be converted by \code{as.character}.
 #' @param b R object (source); will be converted by \code{as.character}.
@@ -153,7 +149,7 @@ stringdist <- function(a, b
 
 #' @param useNames Use input vectors as row and column names?
 #' @param ncores [DEPRECATED AND WILL BE REMOVED]. Optionally use \code{nthreads} in stead. See below under parallelization of \code{stringdistmatrix}.
-#' @param cluster (Optional) a custom cluster, created with \code{\link[parallel]{makeCluster}}. 
+#' @param cluster [DEPRECATED AND WILL BE REMOVED].  A custom cluster, created with \code{\link[parallel]{makeCluster}}. 
 #'
 #'
 #' @rdname stringdist
@@ -166,12 +162,15 @@ stringdistmatrix <- function(a, b
   , nthread = getOption("sd_num_thread")
 ){
   if (maxDist < Inf)
-    message("Argument 'maxDist' is deprecated for function 'stringdistmatrix'. This argument will be removed in the future.") 
+    warning("Argument 'maxDist' is deprecated for function 'stringdistmatrix'. This argument will be removed in the future.") 
   if (ncores > 1 ){
     warning("Argument 'ncores' is deprecated as stringdist now uses multithreading by default. This argument is currently ignored and will be removed in the future.")
     ncores <- 1
   }
- 
+  if ( !is.null(cluster) ){
+    message("Argument 'cluster' is deprecaterd as stringdust now uses multithreading by default. The argument is currently ignored and will be removed in the future")
+  }
+  
   a <- as.character(a)
   b <- as.character(b)
 
@@ -205,24 +204,14 @@ stringdistmatrix <- function(a, b
       , nthread > 0
   )
   if (method == 'jw') weight <- weight[c(2,1,3)]
-  if (ncores==1){
-    x <- vapply(b,do_dist, USE.NAMES=FALSE, FUN.VALUE=numeric(length(a))
-          , a,method,weight,maxDist, q, p,useBytes, nthread)
-  } else {
-    if ( is.null(cluster) ){
-      cluster <- makeCluster(ncores)
-      turn_cluster_off <- TRUE
-    } else {
-      stopifnot(inherits(cluster, 'cluster'))
-      turn_cluster_off <- FALSE
-    }
-    x <- parSapply(cluster, b,do_dist,a,method,weight,maxDist, q, p, useBytes, nthread)
-    if (turn_cluster_off) stopCluster(cluster)
-  }
-  if (!useNames){  
-    matrix(x,nrow=length(a),ncol=length(b)) 
-  } else {
+
+  x <- vapply(b, do_dist, USE.NAMES=FALSE, FUN.VALUE=numeric(length(a))
+          , a, method,weight,maxDist, q, p,useBytes, nthread)
+
+  if (useNames){  
     structure(matrix(x,nrow=length(a),ncol=length(b), dimnames=list(rowns,colns)))
+  } else {
+    matrix(x,nrow=length(a),ncol=length(b)) 
   }
 }
 
