@@ -290,7 +290,7 @@ SEXP R_lower_tri(SEXP a, SEXP method
       k_start = thread_id * p;
       k_end   = (thread_id < n_threads - 1 ) ? k_start + p : N;
       j = get_j(k_start,n);
-      i = k_start + j * (j - 2*n + 3)/2 + 1 - 1;
+      i = k_start + j * (j - 2*n + 3)/2;
     for ( int k=k_start; k < k_end; k++ ){
       i++;
       get_elem1(a, i, bytes, &len_s, &isna_s, s);

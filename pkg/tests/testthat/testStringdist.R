@@ -413,10 +413,17 @@ test_that('stringdistmatrix yields correct distances',{
     stringdistmatrix(v,v,useBytes=TRUE)
     , matrix(c(d11,d12,d12,d22),nrow=2,ncol=2)
   )
-
-
-
 })
+
+test_that("stringdistmatrix with single argument",{
+  d <- stringdistmatrix(c("aap","noot","mies","boom","roos","vis"))
+  expect_equal(class(d),"dist")
+  expect_equal(length(d),15)
+  d <- stringdistmatrix(c("a",NA,"b"))
+  expect_equal(sum(is.na(d)),2)
+})
+
+
 context("stringdist: useBytes")
 test_that("useBytes gets NA",{
   expect_true(is.na(stringdist('a',NA,method='osa',useBytes=TRUE)))
