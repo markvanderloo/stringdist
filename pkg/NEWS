@@ -1,4 +1,6 @@
 version 0.9.1
+- New function 'stringsim' computes string similarities between 0 and 1 based on 'stringdist'
+- Calling 'stringdistmatrix' with a single argument returns an object of class 'dist'
 - Argument 'cluster' to stringdistmatrix is phased out. It is now ignored with a message.
 - Specifying 'ncores' was already ignored but now also causes a warning
 - internal: rewrite of the R/C interface, saving about 1/3 of C-code, making extending easier
