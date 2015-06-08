@@ -170,6 +170,35 @@ stringdistmatrix <- function(a, b
   if ( !is.null(cluster) ){
     message("Argument 'cluster' is deprecaterd as stringdust now uses multithreading by default. The argument is currently ignored and will be removed in the future")
   }
+
+  method <- match.arg(method)
+  nthread <- as.integer(nthread)
+  stopifnot(
+    all(is.finite(weight))
+    , all(weight > 0)
+    , all(weight <=1)
+    , q >= 0
+    , p <= 0.25
+    , p >= 0
+    , is.logical(useBytes)
+    , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
+    , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
+    , ncores > 0
+    , nthread > 0
+  )
+  if (method == 'jw') weight <- weight[c(2,1,3)]
+  
+  
+  # if b is missing, generate a 'dist' object.  
+  if (missing(b)){ 
+    return( lower_tri(a
+        , method=method
+        , useBytes=useBytes
+        , weight=weight
+        , useNames=useNames
+        ,nthread=nthread)
+    )
+  }
   
   a <- as.character(a)
   b <- as.character(b)
@@ -188,22 +217,6 @@ stringdistmatrix <- function(a, b
    colns <- b
   }
 
-  method <- match.arg(method)
-  nthread <- as.integer(nthread)
-  stopifnot(
-      all(is.finite(weight))
-      , all(weight > 0)
-      , all(weight <=1)
-      , q >= 0
-      , p <= 0.25
-      , p >= 0
-      , is.logical(useBytes)
-      , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
-      , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
-      , ncores > 0
-      , nthread > 0
-  )
-  if (method == 'jw') weight <- weight[c(2,1,3)]
 
   x <- vapply(b, do_dist, USE.NAMES=FALSE, FUN.VALUE=numeric(length(a))
           , a, method,weight,maxDist, q, p,useBytes, nthread)
@@ -260,5 +273,29 @@ do_dist <- function(a, b, method, weight, maxDist, q, p, useBytes=FALSE, nthread
   d
 }
 
+# more efficient function that returns a square distance matrix as a 'stats::dist' object.
+lower_tri <- function(a
+   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex")
+   , useBytes = FALSE
+   , weight=c(d=1,i=1,s=1,t=1), q=1, p=0
+   , useNames=FALSE
+   , nthread = getOption("sd_num_thread")
+){
+  methnr <- METHODS[method]
+  if (is.na(method)){
+    stop(sprintf("method '%s' is not defined",method))
+  }
+  x <- .Call("R_lower_tri", as.character(a), methnr
+             , as.double(weight), as.double(p), as.integer(q)
+             , as.integer(useBytes), as.integer(nthread))
+  
+  attributes(x) <- list(class='dist'
+    , Size     = length(a)
+    , Diag   = FALSE
+    , Upper  = FALSE
+    , method = method)
+  if (useNames) attr(x,'Labels') <- a
 
+  x
+}
 

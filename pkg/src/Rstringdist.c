@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <R.h>
 #include <Rdefines.h>
+#include <math.h>
 #include "utils.h"
 #include "stringdist.h"
 #ifdef _OPENMP
@@ -220,6 +221,99 @@ index = j + 1;
 } // end R_amatch
 
 
+// Lower tridiagonal distance matrix for a single vector argument.
+
+static int get_j(int k, int n){
+  double nd = (double) n;
+  double kd = (double) k;
+  return (int) ceil( (2.*nd - 3.)/2. - sqrt(pow(nd-.5,2.) - 2.*(kd + 1.)) );
+}
+
+
+SEXP R_lower_tri(SEXP a, SEXP method
+  , SEXP weight, SEXP p, SEXP q
+  , SEXP useBytes, SEXP nthrd){
+
+  PROTECT(a);
+  PROTECT(method);
+  PROTECT(weight);
+  PROTECT(p);
+  PROTECT(q);
+  PROTECT(useBytes);
+  PROTECT(nthrd);
+
+  int n = length(a)
+    , bytes = INTEGER(useBytes)[0]
+    , ml = max_length(a)
+    , N = n*(n - 1)/2;
+  // output vector
+  SEXP yy;
+  PROTECT(yy = allocVector(REALSXP, N));
+  double *y = REAL(yy);
+
+
+  #ifdef _OPENMP 
+  int  nthreads = INTEGER(nthrd)[0];
+  nthreads = MIN(nthreads, n);
+  #pragma omp parallel num_threads(nthreads) default(none) \
+      shared(y,n,N, R_PosInf, NA_REAL, bytes, method, weight, p, q, ml, a)
+  #endif
+  {
+
+    Stringdist *sd = R_open_stringdist( (Distance) INTEGER(method)[0]
+        , ml, ml
+        , weight
+        , p
+        , q
+    );
+
+    unsigned int *s = NULL, *t = NULL;
+    s = (unsigned int *) malloc(( 2L + 2*ml) * sizeof(int));
+
+    if ( (sd==NULL) | (bytes && s == NULL) ) n = -1;
+    t = s + ml + 1L;
+      
+    int len_s, len_t, isna_s, isna_t
+      , i = 0, j = 0, p = 0
+      , thread_id = 0
+      , n_threads = 1
+      , col_max = n-1
+      , k_start = 0
+      , k_end = N;
+
+    #ifdef _OPENMP
+      thread_id  = omp_get_thread_num();
+      n_threads = omp_get_num_threads();
+    #endif
+      // some administration to parallelize the loop.
+      p = N / n_threads;
+      k_start = thread_id * p;
+      k_end   = (thread_id < n_threads - 1 ) ? k_start + p : N;
+      j = get_j(k_start,n);
+      i = k_start + j * (j - 2*n + 3)/2 + 1 - 1;
+    for ( int k=k_start; k < k_end; k++ ){
+      i++;
+      get_elem1(a, i, bytes, &len_s, &isna_s, s);
+      get_elem1(a, j, bytes, &len_t, &isna_t, t);
+      if (isna_s || isna_t){
+        y[k] = NA_REAL;
+      } else {
+        y[k] = stringdist(sd, s, len_s, t, len_t);
+        if ( y[k] < 0 ) y[k] = R_PosInf;
+      }
+      if ( i == col_max ){
+        j++;
+        i = j;
+      }
+    }
+    
+    close_stringdist(sd);
+  } // end of parallel region
+
+  UNPROTECT(8);
+  if (n < 0 ) error("Unable to allocate enough memory");
+  return(yy);
+}
 
 
 
