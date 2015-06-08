@@ -2,6 +2,14 @@
 # Simple example using optimal string alignment
 stringdist("ca","abc")
 
+# computing a 'dist' object
+d <- stringdistmatrix(c('foo','bar','boo','baz'))
+# try plot(hclust(d))
+
+# The following gives a matrix
+stringdistmatrix(c("foo","bar","boo"),c("baz","buz"))
+
+
 # The same example using Damerau-Levenshtein distance (multiple editing of substrings allowed)
 stringdist("ca","abc",method="dl")
 
