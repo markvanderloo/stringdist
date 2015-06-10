@@ -29,19 +29,12 @@
 #' @export
 stringsim <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
   "qgram", "cosine", "jaccard", "jw", "soundex"), q = 1, ...) {
-  # Make sure that b is not longer than a; this means that the length of the 
-  # output vector equals that of a, which helps in the following code
-  if (length(b) > length(a)) {
-    tmp <- a
-    a <- b
-    b <- a
-  }
   # Calculate the distance 
   method <- match.arg(method)
   dist <- stringdist::stringdist(a, b, method=method, q=q, ...)
   # Normalise the distance by dividing it by the maximum possible distance
   if (method == "hamming") {
-    max_dist <- nchar(a)
+    max_dist <- if (length(b) > length(a)) nchar(b) else nchar(a)
     max_dist[max_dist == 0] <- 1
     sim <- 1 - dist/max_dist
   } else if (method == "lcs") {

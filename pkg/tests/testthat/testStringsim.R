@@ -14,6 +14,12 @@ for (method in c("osa", "lv", "dl", "hamming", "lcs", "qgram", "cosine",
 
   test_that(paste0("Edge cases for ", method), {
     expect_that(stringsim(c("a", ""), "", method=method, q=0), equals(c(0, 1)))
+    
+    expect_that(stringsim(c("kkk", "bbb"), "bbb", method=method, q=0), 
+      equals(stringsim("bbb", c("kkk", "bbb"), method=method, q=0)))
   })
 }
+
+
+
 
