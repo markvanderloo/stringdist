@@ -110,7 +110,7 @@ stringdist <- function(a, b
   , nthread = getOption("sd_num_thread")
 ){
   if (maxDist < Inf)
-    message("Argument 'maxDist' is deprecated for function 'stringdist'")
+    warning("Argument 'maxDist' is deprecated for function 'stringdist'. This argument will be removed in the future.")   
   # note: enc2utf8 is very efficient when the native encoding is already UTF-8.
   a <- as.character(a)
   b <- as.character(b)
@@ -155,7 +155,7 @@ stringdistmatrix <- function(a, b
   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex")
   , useBytes = FALSE
   , weight=c(d=1,i=1,s=1,t=1),  maxDist=Inf, q=1, p=0
-  , useNames=FALSE, ncores=1, cluster=NULL
+  , useNames=c('none','strings','names'), ncores=1, cluster=NULL
   , nthread = getOption("sd_num_thread")
 ){
   if (maxDist < Inf)
@@ -168,6 +168,11 @@ stringdistmatrix <- function(a, b
     message("Argument 'cluster' is deprecaterd as stringdust now uses multithreading by default. The argument is currently ignored and will be removed in the future")
   }
 
+  # for backward compatability with stringdist <= 0.9.0
+  if (identical(useNames, FALSE)) useNames <- "none"
+  if (identical(useNames, TRUE)) useNames <- "strings"
+  useNames <- match.arg(useNames)
+  
   method <- match.arg(method)
   nthread <- as.integer(nthread)
   stopifnot(
@@ -193,13 +198,25 @@ stringdistmatrix <- function(a, b
         , useBytes=useBytes
         , weight=weight
         , useNames=useNames
-        ,nthread=nthread)
+        , nthread=nthread)
     )
   }
+
+    if (useNames == "names"){
+    rowns <- names(a)
+    colns <- names(b)
+  }
   
+  # NOTE: this strips off names
   a <- as.character(a)
   b <- as.character(b)
 
+  if (useNames=="strings"){
+    rowns <- a
+    colns <- b
+  } 
+  
+  
   if (!useBytes){
     a <- enc2utf8(a)
     b <- enc2utf8(b)
@@ -209,16 +226,12 @@ stringdistmatrix <- function(a, b
    return(matrix(numeric(0)))
   }
 
-  if (useNames){
-   rowns <- a
-   colns <- b
-  }
 
 
   x <- vapply(b, do_dist, USE.NAMES=FALSE, FUN.VALUE=numeric(length(a))
           , a, method,weight,maxDist, q, p,useBytes, nthread)
 
-  if (useNames){  
+  if (useNames %in% c("strings","names") ){  
     structure(matrix(x,nrow=length(a),ncol=length(b), dimnames=list(rowns,colns)))
   } else {
     matrix(x,nrow=length(a),ncol=length(b)) 
@@ -291,8 +304,9 @@ lower_tri <- function(a
     , Diag   = FALSE
     , Upper  = FALSE
     , method = method)
-  if (useNames) attr(x,'Labels') <- a
-
+  if (useNames == "strings") attr(x,"Labels") <- as.character(a)
+  if (useNames == "names" ) attr(x,"Labels") <- names(a)
+  
   x
 }
 

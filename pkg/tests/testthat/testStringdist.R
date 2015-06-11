@@ -27,14 +27,8 @@ test_that("Edge cases in OSA method",{
 
 })
 
-test_that("max distance is obeyed",{
-   expect_equal(stringdist("aa","bb",method='osa',maxDist=1), Inf)
-   # Thanks to Daniel Deckhard pointing to this bug
-   expect_equal(stringdist("abc","abc",method='osa',maxDist=1), 0)
-   expect_equal(stringdist("aa","bbb",method='osa',maxDist=2), Inf)
-   expect_equal(stringdist("bbb","aa",method='osa',maxDist=2), Inf)
-   expect_equal(stringdist("","abc",method='osa',maxDist=1), Inf)
-   expect_equal(stringdist("abc","",method='osa',maxDist=2), Inf)
+test_that("max distance yields warning",{
+  expect_warning(stringdist("abc","abc",method='osa',maxDist=1))
 })
 
 test_that("transpositions are found",{
@@ -79,14 +73,6 @@ test_that("Edge cases in Levenshtein method",{
    expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="lv"))),1)
 })
 
-test_that("max distance is obeyed",{
-   expect_equal(stringdist("aa","bb",method='lv',maxDist=1), Inf)
-   expect_equal(stringdist("abc","abc",method='lv',maxDist=1), 0)
-   expect_equal(stringdist("","abc",method='lv',maxDist=1), Inf)
-   expect_equal(stringdist("abc","",method='lv',maxDist=2), Inf)
-   expect_equal(stringdist("aa","bbb",method='lv',maxDist=2), Inf)
-   expect_equal(stringdist("bbb","aa",method='lv',maxDist=2), Inf)
-})
 
 test_that("Shortest argument is recycled",{
    expect_equal(stringdist(c('a','b'),'a',method='lv'),c(0,1))
@@ -122,15 +108,6 @@ test_that("Edge cases in DL method",{
    expect_equal(stringdist("a","a",method='dl'),0)
 })
 
-test_that("max distance is obeyed",{
-   expect_equal(stringdist("aa","bb",method='dl',maxDist=1),Inf)
-   expect_equal(stringdist("abc","abc",method='dl',maxDist=1), 0)
-   expect_equal(stringdist("","abc",method='dl',maxDist=2), Inf)
-   expect_equal(stringdist("abc","",method='dl',maxDist=2), Inf)
-   expect_equal(stringdist("aa","bbb",method='dl',maxDist=2), Inf)
-   expect_equal(stringdist("bbb","aa",method='dl',maxDist=2), Inf)
-   expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="dl"))),1)
-})
 
 test_that("Shortest argument is recycled",{
    expect_equal(stringdist(c('a','b'),'a',method='dl'),c(0,1))
@@ -169,14 +146,6 @@ test_that("Edge cases in LCS method",{
    expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="lcs"))),1)
 })
 
-test_that("max distance is obeyed",{
-   expect_equal(stringdist("aa","bb",method='lcs',maxDist=1),Inf)
-   expect_equal(stringdist("abc","abc",method='lcs',maxDist=1), 0)
-   expect_equal(stringdist("","abc",method='lcs',maxDist=1), Inf)
-   expect_equal(stringdist("abc","",method='lcs',maxDist=1), Inf)
-   expect_equal(stringdist("aa","bbb",method='lcs',maxDist=2), Inf)
-   expect_equal(stringdist("bbb","aa",method='lcs',maxDist=2), Inf)
-})
 
 test_that("Shortest argument is recycled",{
    expect_equal(stringdist(c('a','b'),'a',method='lcs'),c(0,2))
@@ -204,9 +173,6 @@ test_that("Unequal string lengths",{
   expect_equal(stringdist("a","aa",method="h"),Inf)
 })
 
-test_that("max distance is obeyed",{
-   expect_equal(stringdist("aa","bb",method='h',maxDist=1),Inf)
-})
 
 test_that("Shortest argument is recycled",{
    expect_equal(stringdist(c('a','b'),'a',method='h'),c(0,1))
@@ -415,12 +381,51 @@ test_that('stringdistmatrix yields correct distances',{
   )
 })
 
+test_that("stringdistmatrix gives correct labels",{
+  a <- c(k1="jan",k2="pier",k3="joris")
+  b <- c(f1 = "jip", f2="janneke")
+  expect_equal(
+    dimnames(stringdistmatrix(a,b,useNames=TRUE))
+    , list(as.character(a),as.character(b))
+  )
+  expect_equal(
+    dimnames(stringdistmatrix(a,b,useNames="strings"))
+    , list(as.character(a),as.character(b))
+  )  
+  expect_equal(
+    dimnames(stringdistmatrix(a,b,useNames="names"))
+    , list(c("k1","k2","k3"),c("f1","f2"))
+  )
+  
+})
+
+
 test_that("stringdistmatrix with single argument",{
   d <- stringdistmatrix(c("aap","noot","mies","boom","roos","vis"))
   expect_equal(class(d),"dist")
   expect_equal(length(d),15)
   d <- stringdistmatrix(c("a",NA,"b"))
   expect_equal(sum(is.na(d)),2)
+  
+  a <- c(k1 = "aap",k2="noot")
+  expect_true(is.null(attr(stringdistmatrix(a,useNames="none"),"Labels")))
+  expect_identical(stringdistmatrix(a,useNames="none"),stringdistmatrix(a,useNames=FALSE))
+  expect_equal(
+      attr(stringdistmatrix(a,useNames="strings"),"Labels")
+    , as.character(a)
+  )
+
+  expect_equal(
+    attr(stringdistmatrix(a,useNames=TRUE), "Labels")
+    , c("aap","noot")
+  )
+  
+  expect_equal(
+    attr(stringdistmatrix(a,useNames="names"), "Labels")
+    , c("k1","k2")
+  )
+  
+  
 })
 
 
