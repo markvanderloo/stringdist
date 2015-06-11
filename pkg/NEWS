@@ -1,4 +1,5 @@
 version 0.9.1
+- Argument 'useNames' of 'stringdistmatrix' now accepts 'none', 'strings', and 'names'
 - New function 'stringsim' computes string similarities between 0 and 1 based on 'stringdist'
 - Calling 'stringdistmatrix' with a single argument returns an object of class 'dist'
 - Argument 'cluster' to stringdistmatrix is phased out. It is now ignored with a message.
