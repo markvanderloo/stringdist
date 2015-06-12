@@ -2,7 +2,7 @@ language: r
 
 warnings_are_errors: false
 
-r_binary_packages
+r_binary_packages:
   - roxygen2
 
 before_install:
