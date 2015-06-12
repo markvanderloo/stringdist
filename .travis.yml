@@ -1,0 +1,15 @@
+language: r
+
+warnings_are_errors: false
+
+before_install:
+  - cp ./build/DESCRIPTION ./pkg
+  - cd ./pkg
+
+sudo: required
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+
