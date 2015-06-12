@@ -1,3 +1,5 @@
+![](http://cranlogs.r-pkg.org/badges/stringdist)
+
 stringdist
 ==========
 
