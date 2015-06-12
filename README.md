@@ -1,4 +1,4 @@
-![](http://cranlogs.r-pkg.org/badges/stringdist)
+![](http://cranlogs.r-pkg.org/badges/stringdist) According to [metacran](http://cranlogs.r-pkg.org/)
 
 stringdist
 ==========
