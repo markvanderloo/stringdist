@@ -1,4 +1,8 @@
-![](http://cranlogs.r-pkg.org/badges/stringdist) According to [metacran](http://cranlogs.r-pkg.org/)
+
+[![Build Status](https://travis-ci.org/markvanderloo/stringdist.svg?branch=master)](https://travis-ci.org/markvanderloo/stringdist)
+[![Coverage Status](https://coveralls.io/repos/markvanderloo/stringdist/badge.svg)](https://coveralls.io/r/markvanderloo/stringdist) ![](http://cranlogs.r-pkg.org/badges/stringdist)
+
+**note** The package actually builds and tests fine, but I'm still fiddling around with travis-ci settings :-)
 
 stringdist
 ==========
