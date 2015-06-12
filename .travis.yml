@@ -2,11 +2,13 @@ language: r
 
 warnings_are_errors: true
 
-r_binary_packages:
-  - roxygen2
-  - devtools
+# This seems to be ignored. So below I do an install from src
+#r_binary_packages:
+#  - roxygen2
+#  - devtools
 
 before_install:
+  - R -e "try({install.packages(c('roxygen2','devtools'),repos='http://cran.rstudio.com')})"
   - cp ./build/DESCRIPTION ./pkg
   - R -q -f roxygen.R
   - cd ./pkg
