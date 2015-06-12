@@ -9,8 +9,12 @@ r_binary_packages:
 r_github_packages:
   - jimhester/covr
 
-after_install:
+before_install:
   - cp ./build/DESCRIPTION ./pkg
+  - cd ./pkg
+
+after_install:
+  - cd ..
   - R -q -f roxygen.R
   - cd ./pkg
 
