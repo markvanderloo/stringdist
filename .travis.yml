@@ -2,14 +2,20 @@ language: r
 
 warnings_are_errors: true
 
+
 r_binary_packages:
   - roxygen2
-#  - devtools
+
+r_github_packages:
+  - jimhester/covr
 
 after_install:
   - cp ./build/DESCRIPTION ./pkg
   - R -q -f roxygen.R
   - cd ./pkg
+
+after_success:
+  - Rscript -e 'covr::codecov()'
 
 sudo: required
 
