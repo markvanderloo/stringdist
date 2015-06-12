@@ -1,6 +1,6 @@
 language: r
 
-warnings_are_errors: false
+warnings_are_errors: true
 
 r_binary_packages:
   - roxygen2
