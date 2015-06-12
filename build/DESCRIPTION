@@ -12,5 +12,6 @@ Version: 0.9.1
 Depends: R (>= 2.15.3)
 Imports: parallel
 URL: https://github.com/markvanderloo/stringdist
-Date: 2013-04-28
+BugReports: https://github.com/markvanderloo/stringdist/issues
+Date: 2015-06-12
 Suggests: testthat
