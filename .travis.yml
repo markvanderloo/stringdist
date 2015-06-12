@@ -2,10 +2,10 @@ language: r
 
 warnings_are_errors: true
 
-r_packages:
-  - roxygen2
-
+# The manual roxyten2 install is because I could not get
+# r_package_binaries or r_packages to work. It seems to be ignored.
 before_install:
+  - R -e "install.packages('roxygen2',repos='http://cran.rstudio.com/')"
   - cp ./build/DESCRIPTION ./pkg
   - R -q -f roxygen.R
   - cd ./pkg
