@@ -2,13 +2,11 @@ language: r
 
 warnings_are_errors: true
 
-# This seems to be ignored. So below I do an install from src
-#r_binary_packages:
-#  - roxygen2
-#  - devtools
+r_binary_packages:
+  - roxygen2
+  - devtools
 
-before_install:
-  - R -e "try({install.packages(c('roxygen2','devtools'),repos='http://cran.rstudio.com')})"
+after_install:
   - cp ./build/DESCRIPTION ./pkg
   - R -q -f roxygen.R
   - cd ./pkg
