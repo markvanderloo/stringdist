@@ -1,6 +1,8 @@
 
 [![Build Status](https://travis-ci.org/markvanderloo/stringdist.svg?branch=master)](https://travis-ci.org/markvanderloo/stringdist)
-[![Coverage Status](https://coveralls.io/repos/markvanderloo/stringdist/badge.svg)](https://coveralls.io/r/markvanderloo/stringdist) ![](http://cranlogs.r-pkg.org/badges/stringdist)
+[![Coverage Status](https://coveralls.io/repos/markvanderloo/stringdist/badge.svg)](https://coveralls.io/r/markvanderloo/stringdist) 
+[![CRAN](http://www.r-pkg.org/badges/version/stringdist)](http://cran.r-project.org/package=stringdist) 
+![Downloads](http://cranlogs.r-pkg.org/badges/stringdist)
 
 
 stringdist
