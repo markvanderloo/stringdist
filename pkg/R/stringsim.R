@@ -8,6 +8,7 @@
 #' @param b R object (source); will be converted by \code{as.character}.
 #' @param method Method for distance calculation. The default is \code{"osa"}, 
 #'   see \code{\link{stringdist-metrics}}.
+#' @param useBytes Perform byte-wise comparison, see \code{\link{stringdist-encoding}}.
 #' @param q  Size of the \eqn{q}-gram; must be nonnegative. Only applies to
 #'   \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
 #' @param ... additional arguments are passed on to \code{\link{stringdist}}.
@@ -28,10 +29,10 @@
 #' @example ../examples/stringsim.R
 #' @export
 stringsim <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
-  "qgram", "cosine", "jaccard", "jw", "soundex"), q = 1, ...) {
+  "qgram", "cosine", "jaccard", "jw", "soundex"), useBytes=FALSE, q = 1, ...) {
   # Calculate the distance 
   method <- match.arg(method)
-  dist <- stringdist::stringdist(a, b, method=method, q=q, ...)
+  dist <- stringdist::stringdist(a, b, method=method, useBytes=useBytes, q=q, ...)
 
   nctype <- if (useBytes) "bytes" else "char"
 
