@@ -32,29 +32,32 @@ stringsim <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
   # Calculate the distance 
   method <- match.arg(method)
   dist <- stringdist::stringdist(a, b, method=method, q=q, ...)
+
+  nctype <- if (useBytes) "bytes" else "char"
+
   # Normalise the distance by dividing it by the maximum possible distance
   if (method == "hamming") {
-    max_dist <- if (length(b) > length(a)) nchar(b) else nchar(a)
+    max_dist <- if (length(b) > length(a)) nchar(b,type=nctype) else nchar(a,type=nctype)
     max_dist[max_dist == 0] <- 1
     sim <- 1 - dist/max_dist
   } else if (method == "lcs") {
-    max_dist <- nchar(a) + nchar(b)
+    max_dist <- nchar(a,type=nctype) + nchar(b,type=nctype)
     max_dist[max_dist == 0] <- 1
     sim <- 1 - dist/max_dist
   } else if (method == "lv") {
-    max_dist <- pmax(nchar(a), nchar(b))
+    max_dist <- pmax(nchar(a,type=nctype), nchar(b,type=nctype))
     max_dist[max_dist == 0] <- 1
     sim <- 1 - dist/max_dist
   } else if (method == "osa") {
-    max_dist <- pmax(nchar(a), nchar(b))
+    max_dist <- pmax(nchar(a,type=nctype), nchar(b,type=nctype))
     max_dist[max_dist == 0] <- 1
     sim <- 1 - dist/max_dist
   } else if (method == "dl") {
-    max_dist <- pmax(nchar(a), nchar(b))
+    max_dist <- pmax(nchar(a,type=nctype), nchar(b,type=nctype))
     max_dist[max_dist == 0] <- 1
     sim <- 1 - dist/max_dist
   } else if (method == "qgram") {
-    max_dist <- (nchar(a) + nchar(b) - 2*q + 2)
+    max_dist <- (nchar(a,type=nctype) + nchar(b,type=nctype) - 2*q + 2)
     max_dist[max_dist < 0] <- 1
     sim <- 1 - dist/max_dist
   } else if (method == "cosine") {
