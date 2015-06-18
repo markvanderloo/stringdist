@@ -9,6 +9,7 @@ test_that("Argument parsing",{
    expect_error(stringdist("a","b",weight=c(-1,1,1,1)))
    expect_error(stringdist("a","b",weight=c(1,0,1,1)))
    expect_error(stringdist("a","b",weight=c(1,1,1,4)))
+   expect_warning(stringdist(letters[1:3],letters[1:2]))
 }) 
 
 
@@ -506,6 +507,9 @@ test_that("",{
   expect_equal(stringdist("r00d","rt",method='soundex'),0)  
   # consonants are not merged when a vowel in between
   expect_equal(stringdist("sock", "sck", method='soundex'),1)
+  x <- "Motorhead"
+  y <- paste0("Mot",intToUtf8(0x00F6),"rhead") # with o-umlaut
+  expect_warning(stringdist(x,y,method='soundex',useBytes=TRUE))  
 })
 
 test_that("Shortest argument is recycled",{

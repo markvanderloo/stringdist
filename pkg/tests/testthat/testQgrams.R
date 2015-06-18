@@ -12,4 +12,7 @@ test_that("qgram edge cases",{
   expect_equivalent(qgrams(c(''),q=0), as.matrix(table('')))          # empty string, q=0
 })
 
-
+test_that("qgrams",{
+  expect_equivalent(qgrams("a",q=1),array(1,dim=c(1,1)))
+  expect_equivalent(qgrams("a",q=1,useBytes=TRUE),array(1,dim=c(1,1)))
+})

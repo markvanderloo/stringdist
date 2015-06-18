@@ -20,7 +20,8 @@ Lee;L000
 NA;NA"
   testset <- read.csv2(textConnection(testset), stringsAsFactors=FALSE)
   expect_that(phonetic(testset$name,"soundex"), equals(testset$code))
-
+  expect_that(phonetic(testset$name,"soundex",useBytes=TRUE), equals(testset$code))
+  expect_warning(phonetic(paste0('Mot',intToUtf8(0x00F6),'rhead')))  
 }) 
 
 test_that("soundex handles encoding",{
