@@ -1,8 +1,8 @@
 
 [![Build Status](https://travis-ci.org/markvanderloo/stringdist.svg?branch=master)](https://travis-ci.org/markvanderloo/stringdist)
 [![Coverage Status](https://coveralls.io/repos/markvanderloo/stringdist/badge.svg)](https://coveralls.io/r/markvanderloo/stringdist) 
-[![CRAN](http://www.r-pkg.org/badges/version/stringdist)](http://cran.r-project.org/package=stringdist) 
-![Downloads](http://cranlogs.r-pkg.org/badges/stringdist)
+[![CRAN](http://www.r-pkg.org/badges/version/stringdist)](http://cran.r-project.org/web/packages/stringdist/NEWS)
+[![Downloads](http://cranlogs.r-pkg.org/badges/stringdist)](http://cran.r-project.org/package=stringdist/) 
 
 
 stringdist
@@ -11,12 +11,11 @@ stringdist
 * Approximate matching and string distance calculations for R. 
 * All distance and matching operations are system- and encoding-independent.
 
-Current CRAN version: **0.9.0** [NEWS](http://cran.r-project.org/web/packages/stringdist/NEWS)
-
-The package offers four main functions:
+The package offers the following main functions:
 
 * `stringdist`  computes pairwise distances between two input character vectors (shorter one is recycled)
-* `stringdistmatrix` computes the distance matrix between two input character vectors, optionally running in parallel.
+* `stringdistmatrix` computes the distance matrix for one or two vectors
+* `stringsim` computes a string similarity between 0 and 1, based on `stringdist`
 * `amatch` is a fuzzy matching equivalent of R's native `match` function
 * `ain` is a fuzzy matching equivalent of R's native `%in%` operator
 
