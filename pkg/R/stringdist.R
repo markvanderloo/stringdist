@@ -139,6 +139,7 @@ stringdist <- function(a, b
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
       , nthread > 0
   )
+
   if (method == 'jw') weight <- weight[c(2,1,3)]
   do_dist(b, a, method, weight, maxDist, q, p, useBytes, nthread)
 }
@@ -188,6 +189,7 @@ stringdistmatrix <- function(a, b
     , ncores > 0
     , nthread > 0
   )
+  
   if (method == 'jw') weight <- weight[c(2,1,3)]
   
   

@@ -27,6 +27,10 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
+#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
+
 // TODO: catch error and report.
 static Stringdist *R_open_stringdist(Distance d, int max_len_a, int max_len_b, SEXP weight, SEXP p, SEXP q){
 
@@ -64,7 +68,8 @@ SEXP R_stringdist(SEXP a, SEXP b, SEXP method
     , ml_a = max_length(a)
     , ml_b = max_length(b)
     , nt = (na > nb) ? na : nb;
-  
+ 
+ 
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(REALSXP, nt));
@@ -72,7 +77,7 @@ SEXP R_stringdist(SEXP a, SEXP b, SEXP method
 
 
   #ifdef _OPENMP 
-  int  nthreads = INTEGER(nthrd)[0];
+  int  nthreads = MIN(INTEGER(nthrd)[0],MAX(na,nb));
   #pragma omp parallel num_threads(nthreads) default(none) \
       shared(y,na,nb, R_PosInf, NA_REAL, bytes, method, weight, p, q, ml_a, ml_b, nt, a, b)
   #endif
@@ -166,7 +171,7 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
   int *y = INTEGER(yy);
   
   #ifdef _OPENMP
-  int nthreads = INTEGER(nthrd)[0];
+  int nthreads = MIN(INTEGER(nthrd)[0],nx);
   #pragma omp parallel num_threads(nthreads) default(none) \
     shared(X, T, y, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, bytes, ml_x, ml_t, method, weight, p, q, maxDist)
   #endif
@@ -253,7 +258,7 @@ SEXP R_lower_tri(SEXP a, SEXP method
 
 
   #ifdef _OPENMP 
-  int  nthreads = INTEGER(nthrd)[0];
+  int  nthreads = MIN(INTEGER(nthrd)[0],N);
   nthreads = MIN(nthreads, n);
   #pragma omp parallel num_threads(nthreads) default(none) \
       shared(y,n,N, R_PosInf, NA_REAL, bytes, method, weight, p, q, ml, a)

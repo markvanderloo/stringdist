@@ -40,11 +40,17 @@
 #endif
 #include "dictionary.h"
 
-
-
+/*
+static void print_dict(dictionary *d){
+  for ( int i=0; i<d->length; i++){
+    Rprintf("d[%d] = %d; ", i, d->key[i]);
+  }
+  Rprintf("\n");
+}
+*/
 
 static void reset_dictionary(dictionary *d){
-  int nbytes = sizeof(unsigned int)*d->length;
+  int nbytes = sizeof(unsigned int)*(d->length);
   memset(d->key  , 0, nbytes);
   memset(d->value, 0, nbytes);
 }
@@ -74,6 +80,7 @@ void free_dictionary(dictionary *d){
     free(d);
   }
 }
+
 
 static void uniquePush(dictionary *d, unsigned int key){
   int i=0;
