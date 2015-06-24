@@ -171,9 +171,9 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
   int *y = INTEGER(yy);
   
   #ifdef _OPENMP
-  int nthreads = MIN(INTEGER(nthrd)[0],nx);
+  int nthreads = MAX(MIN(INTEGER(nthrd)[0],nx),0);
   #pragma omp parallel num_threads(nthreads) default(none) \
-    shared(X, T, y, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, bytes, ml_x, ml_t, method, weight, p, q, maxDist)
+    shared(X, T, y, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, ml_x, ml_t, method, weight, p, q, maxDist)
   #endif
   {
     /* claim space for workhorse */
@@ -203,7 +203,7 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
         if (len_X != NA_INTEGER && len_T != NA_INTEGER ){        // both are char (usual case)
           d = stringdist(sd, str, len_X, *tab, len_T);
           if ( d <= maxDist && d < d1){ 
-index = j + 1;
+            index = j + 1;
             if ( ABS(d) < 1e-14 ) break; // exact match
             d1 = d;
           }
@@ -212,15 +212,15 @@ index = j + 1;
           break;
         }
       }
-      
       y[i] = index;
     }
+    str=NULL;
+    tab=NULL;
     close_stringdist(sd);
   } // end of parallel region
   free_stringset(X);
   free_stringset(T);
   UNPROTECT(12);
-  if (nx < 0 ) error("Unable to allocate enough memory");
 
   return(yy);
 } // end R_amatch
@@ -311,7 +311,8 @@ SEXP R_lower_tri(SEXP a, SEXP method
         i = j;
       }
     }
-    
+
+    free(s);
     close_stringdist(sd);
   } // end of parallel region
 

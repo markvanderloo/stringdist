@@ -280,6 +280,7 @@ SEXP R_soundex(SEXP x, SEXP useBytes) {
     }
     // cleanup and return
     check_fail(nfail);
+    free(s);
     UNPROTECT(3);
     return y;
   }
