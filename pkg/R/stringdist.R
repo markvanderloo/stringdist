@@ -54,11 +54,14 @@
 #' @name stringdist-package
 #' @docType package
 #' @useDynLib stringdist
-#' @import parallel
+#' @import parallel methods
 #'
 #'
 #' 
 {}
+
+
+
 
 
   
@@ -87,6 +90,7 @@
 #' @param p Penalty factor for Jaro-Winkler distance. The valid range for \code{p} is \code{0 <= p <= 0.25}. 
 #'  If \code{p=0} (default), the Jaro-distance is returned. Applies only to \code{method='jw'}.
 #' @param nthread Maximum number of threads to use. By default, a sensible number of threads is chosen, see \code{\link{stringdist-parallelization}}. 
+#' @param ... Options passed to other methods.
 #'  
 #' @seealso \code{\link{stringsim}}, \code{\link{qgrams}}
 #'
@@ -102,7 +106,18 @@
 #'  
 #' @example ../examples/stringdist.R
 #' @export
-stringdist <- function(a, b
+setGeneric("stringdist", function(a,b,...) standardGeneric("stringdist"))
+
+
+#' @rdname stringdist
+setMethod("stringdist",c("list","list"), function(a,b,...){
+  stopifnot(all_int(a), all_int(b))
+
+  print("listy list!")
+})
+
+#' @rdname stringdist
+setMethod("stringdist",c("ANY","ANY"), function(a, b
   , method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw","soundex")
   , useBytes = FALSE
   , weight=c(d=1,i=1,s=1,t=1) 
@@ -142,11 +157,11 @@ stringdist <- function(a, b
 
   if (method == 'jw') weight <- weight[c(2,1,3)]
   do_dist(b, a, method, weight, maxDist, q, p, useBytes, nthread)
-}
+})
 
 
 #' @param useNames Use input vectors as row and column names?
-#' @param ncores [DEPRECATED AND WILL BE REMOVED|2016]. Use \code{nthreads} in stead. This argument is ignored.
+#' @param ncores [DEPRECATED AND WILL BE REMOVED|2016]. Use \code{nthread} in stead. This argument is ignored.
 #' @param cluster [DEPRECATED AND WILL BE REMOVED|2016].  A custom cluster, created with \code{\link[parallel]{makeCluster}}. 
 #'
 #'
@@ -311,4 +326,7 @@ lower_tri <- function(a
   
   x
 }
+
+
+
 

@@ -322,5 +322,40 @@ SEXP R_lower_tri(SEXP a, SEXP method
 }
 
 
+// helper function to determine  whether all is INTSXP
+
+SEXP R_all_int(SEXP X){
+  PROTECT(X);
+  SEXP all_char;
+  all_char = PROTECT(allocVector(LGLSXP,1L));
+
+  int n = length(X);
+  LOGICAL(all_char)[0] =  1L;
+  for (int i=0; i<n; i++){
+    if (TYPEOF(VECTOR_ELT(X,i)) != INTSXP){
+      LOGICAL(all_char)[0] = 0L;
+      break;
+    }
+  }
+
+  UNPROTECT(2);
+  return all_char;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

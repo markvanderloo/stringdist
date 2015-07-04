@@ -150,7 +150,7 @@ static int utf8_to_int(const char *str, unsigned int *outbuf){
 }
 
 
-/* todo: catch *len=-1 */
+
 unsigned int *get_elem1(SEXP x, int i, int bytes, int *len, int *isna, unsigned int *c){
 
   *isna = ( STRING_ELT(x,i) == NA_STRING );
