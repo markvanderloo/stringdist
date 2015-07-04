@@ -72,7 +72,8 @@ of the code is written in `C`, the development version may crash your `R`-sessio
 
 #### Resources
 
-* A [paper](http://journal.r-project.org/archive/2014-1/loo.pdf) on stringdist has been published in the R-journal * [Slides](http://www.slideshare.net/MarkVanDerLoo/stringdist-use-r2014) of te _useR!2014_ conference.
+* A [paper](http://journal.r-project.org/archive/2014-1/loo.pdf) on stringdist has been published in the R-journal
+* [Slides](http://www.slideshare.net/MarkVanDerLoo/stringdist-use-r2014) of te _useR!2014_ conference.
 
 #### Note to users: deprecated arguments as of >= 0.9.0, >= 0.9.2
 
