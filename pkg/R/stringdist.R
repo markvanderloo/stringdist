@@ -110,10 +110,42 @@ setGeneric("stringdist", function(a,b,...) standardGeneric("stringdist"))
 
 
 #' @rdname stringdist
-setMethod("stringdist",c("list","list"), function(a,b,...){
+setMethod("stringdist",c("list","list"), function(a, b
+  , method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw","soundex")
+  , weight=c(d=1,i=1,s=1,t=1) 
+  , q=1, p=0
+  , nthread = getOption("sd_num_thread")
+){
   stopifnot(all_int(a), all_int(b))
-
-  print("listy list!")
+  
+  stopifnot(
+    all(is.finite(weight))
+    , all(weight > 0)
+    , all(weight <=1)
+    , q >= 0
+    , p <= 0.25
+    , p >= 0
+    , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
+    , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
+    , nthread > 0
+  )
+  
+  
+  if (length(a) == 0 || length(b) == 0){ 
+    return(numeric(0))
+  }
+  if ( max(length(a),length(b)) %% min(length(a),length(b)) != 0 ){
+    warning(RECYCLEWARNING)
+  }
+  method <- match.arg(method)
+  nthread <- as.integer(nthread)
+  if (method == 'jw') weight <- weight[c(2,1,3)]
+  do_dist(a=b, b=a
+    , method=method
+    , weight=weight
+    , q=q
+    , p=p
+    , nthread=nthread)
 })
 
 #' @rdname stringdist
@@ -126,6 +158,20 @@ setMethod("stringdist",c("ANY","ANY"), function(a, b
 ){
   if (maxDist < Inf)
     warning("Argument 'maxDist' is deprecated for function 'stringdist'. This argument will be removed in the future.")   
+
+  stopifnot(
+    all(is.finite(weight))
+    , all(weight > 0)
+    , all(weight <=1)
+    , q >= 0
+    , p <= 0.25
+    , p >= 0
+    , is.logical(useBytes)
+    , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
+    , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
+    , nthread > 0
+  )
+  
   # note: enc2utf8 is very efficient when the native encoding is already UTF-8.
   a <- as.character(a)
   b <- as.character(b)
@@ -133,7 +179,7 @@ setMethod("stringdist",c("ANY","ANY"), function(a, b
     a <- enc2utf8(a)
     b <- enc2utf8(b)
   }
-
+  
   if (length(a) == 0 || length(b) == 0){ 
     return(numeric(0))
   }
@@ -142,21 +188,16 @@ setMethod("stringdist",c("ANY","ANY"), function(a, b
   }
   method <- match.arg(method)
   nthread <- as.integer(nthread)
-  stopifnot(
-      all(is.finite(weight))
-      , all(weight > 0)
-      , all(weight <=1)
-      , q >= 0
-      , p <= 0.25
-      , p >= 0
-      , is.logical(useBytes)
-      , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
-      , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
-      , nthread > 0
-  )
 
   if (method == 'jw') weight <- weight[c(2,1,3)]
-  do_dist(b, a, method, weight, maxDist, q, p, useBytes, nthread)
+  do_dist(a=b, b=a
+    , method=method
+    , weight=weight
+    , maxDist=maxDist
+    , q=q
+    , p=p
+    , useBytes=useBytes
+    , nthread=nthread)
 })
 
 
@@ -167,7 +208,54 @@ setMethod("stringdist",c("ANY","ANY"), function(a, b
 #'
 #' @rdname stringdist
 #' @export
-stringdistmatrix <- function(a, b
+setGeneric("stringdistmatrix", function(a,...) standardGeneric("stringdistmatrix"))
+
+#' @rdname stringdist
+setMethod("stringdistmatrix", "list", function(a, b
+   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex")
+   , weight=c(d=1,i=1,s=1,t=1),  q=1, p=0
+   , useNames=c('none','names')
+   , nthread = getOption("sd_num_thread")
+){
+  useNames <- match.arg(useNames)
+  method <- match.arg(method)
+  nthread <- as.integer(nthread)
+  if (method == 'jw') weight <- weight[c(2,1,3)]
+  stopifnot(all_int(a))
+
+  # if b is missing, generate a 'dist' object.  
+  if (missing(b)){ 
+    return( lower_tri(a
+        , method=method
+        , weight=weight
+        , useNames=useNames
+        , nthread=nthread)
+    )
+  }
+  stopifnot(is.list(b),all_int(b))
+  if (length(a) == 0 || length(b) == 0){ 
+    return(matrix(numeric(0)))
+  }
+  
+  if (useNames == "names"){
+    rowns <- names(a)
+    colns <- names(b)
+  }
+  
+  
+  x <- vapply(b, do_dist, USE.NAMES=FALSE, FUN.VALUE=numeric(length(a))
+        , b=a, method=method, weight=weight, q=q, p=p, nthread)
+  
+  if (useNames == "names" ){  
+    structure(matrix(x,nrow=length(a),ncol=length(b), dimnames=list(rowns,colns)))
+  } else {
+    matrix(x,nrow=length(a),ncol=length(b)) 
+  }
+  
+})
+
+#' @rdname stringdist
+setMethod("stringdistmatrix", "ANY", function(a, b
   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex")
   , useBytes = FALSE
   , weight=c(d=1,i=1,s=1,t=1),  maxDist=Inf, q=1, p=0
@@ -207,9 +295,13 @@ stringdistmatrix <- function(a, b
   
   if (method == 'jw') weight <- weight[c(2,1,3)]
   
-  
   # if b is missing, generate a 'dist' object.  
   if (missing(b)){ 
+    if (useNames == "names"){
+      a <- setNames(as.character(a),names(a))
+    } else {
+      a <- as.character(a)
+    }
     return( lower_tri(a
         , method=method
         , useBytes=useBytes
@@ -219,7 +311,7 @@ stringdistmatrix <- function(a, b
     )
   }
 
-    if (useNames == "names"){
+  if (useNames == "names"){
     rowns <- names(a)
     colns <- names(b)
   }
@@ -243,8 +335,6 @@ stringdistmatrix <- function(a, b
    return(matrix(numeric(0)))
   }
 
-
-
   x <- vapply(b, do_dist, USE.NAMES=FALSE, FUN.VALUE=numeric(length(a))
           , a, method,weight,maxDist, q, p,useBytes, nthread)
 
@@ -253,7 +343,7 @@ stringdistmatrix <- function(a, b
   } else {
     matrix(x,nrow=length(a),ncol=length(b)) 
   }
-}
+})
 
 
 char2int <- function(x){
@@ -266,7 +356,7 @@ char2int <- function(x){
 }
 
 #  enum-type in stringdist.h
-METHODS <-c(
+METHODS <- c(
     osa     = 0L
   , lv      = 1L
   , dl      = 2L
@@ -280,7 +370,8 @@ METHODS <-c(
 )
 
 
-do_dist <- function(a, b, method, weight, maxDist, q, p, useBytes=FALSE, nthread=1L){
+do_dist <- function(a, b, method, weight, maxDist=Inf, q, p, useBytes=FALSE, nthread=1L){
+  
   if (method=='soundex' && !all(printable_ascii(a) & printable_ascii(b)) ){
     warning("Non-printable ascii or non-ascii characters in soundex. Results may be unreliable. See ?printable_ascii.")
   }
@@ -312,7 +403,8 @@ lower_tri <- function(a
   if (is.na(method)){
     stop(sprintf("method '%s' is not defined",method))
   }
-  x <- .Call("R_lower_tri", as.character(a), methnr
+  
+  x <- .Call("R_lower_tri", a, methnr
              , as.double(weight), as.double(p), as.integer(q)
              , as.integer(useBytes), as.integer(nthread))
   

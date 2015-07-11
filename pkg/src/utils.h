@@ -63,7 +63,7 @@ unsigned int max_length(SEXP);
  * A pointer to the integer representation of the i'th object in x.
  *
  */
-unsigned int *get_elem(SEXP x, int i, int bytes, int *len, int *isna, unsigned int *c);
+unsigned int *get_elem(SEXP x, int i, int bytes, int intdist, int *len, int *isna, unsigned int *c);
 
 unsigned int *get_elem1(SEXP x, int i, int bytes, int *len, int *isna, unsigned int *c);
 

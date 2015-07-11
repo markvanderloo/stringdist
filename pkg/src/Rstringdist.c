@@ -67,8 +67,8 @@ SEXP R_stringdist(SEXP a, SEXP b, SEXP method
     , bytes = INTEGER(useBytes)[0]
     , ml_a = max_length(a)
     , ml_b = max_length(b)
-    , nt = (na > nb) ? na : nb;
- 
+    , nt = (na > nb) ? na : nb
+    , intdist = TYPEOF(a) == VECSXP ? 1 : 0; // expect lists of integers? 
  
   // output vector
   SEXP yy;
@@ -79,7 +79,7 @@ SEXP R_stringdist(SEXP a, SEXP b, SEXP method
   #ifdef _OPENMP 
   int  nthreads = MIN(INTEGER(nthrd)[0],MAX(na,nb));
   #pragma omp parallel num_threads(nthreads) default(none) \
-      shared(y,na,nb, R_PosInf, NA_REAL, bytes, method, weight, p, q, ml_a, ml_b, nt, a, b)
+      shared(y,na,nb, R_PosInf, NA_REAL, bytes, intdist, method, weight, p, q, ml_a, ml_b, nt, a, b)
   #endif
   {
 
@@ -106,8 +106,8 @@ SEXP R_stringdist(SEXP a, SEXP b, SEXP method
     j = recycle(ID-num_threads, num_threads, nb);
     #endif
     for ( int k=ID; k < nt; k += num_threads ){
-      get_elem1(a, i, bytes, &len_s, &isna_s, s);
-      get_elem1(b, j, bytes, &len_t, &isna_t, t);
+      get_elem(a, i, bytes, intdist, &len_s, &isna_s, s);
+      get_elem(b, j, bytes, intdist, &len_t, &isna_t, t);
       if (isna_s || isna_t){
         y[k] = NA_REAL;
       } else {
@@ -250,7 +250,8 @@ SEXP R_lower_tri(SEXP a, SEXP method
   int n = length(a)
     , bytes = INTEGER(useBytes)[0]
     , ml = max_length(a)
-    , N = n*(n - 1)/2;
+    , N = n*(n - 1)/2
+    , intdist = TYPEOF(a) == VECSXP ? 1 : 0; // expect list of integer vectors? 
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(REALSXP, N));
@@ -261,7 +262,7 @@ SEXP R_lower_tri(SEXP a, SEXP method
   int  nthreads = MIN(INTEGER(nthrd)[0],N);
   nthreads = MIN(nthreads, n);
   #pragma omp parallel num_threads(nthreads) default(none) \
-      shared(y,n,N, R_PosInf, NA_REAL, bytes, method, weight, p, q, ml, a)
+      shared(y,n,N, R_PosInf, NA_REAL, bytes, intdist, method, weight, p, q, ml, a)
   #endif
   {
 
@@ -298,8 +299,9 @@ SEXP R_lower_tri(SEXP a, SEXP method
       i = k_start + j * (j - 2*n + 3)/2;
     for ( int k=k_start; k < k_end; k++ ){
       i++;
-      get_elem1(a, i, bytes, &len_s, &isna_s, s);
-      get_elem1(a, j, bytes, &len_t, &isna_t, t);
+      get_elem(a, i, bytes, intdist, &len_s, &isna_s, s);
+      get_elem(a, j, bytes, intdist, &len_t, &isna_t, t);
+
       if (isna_s || isna_t){
         y[k] = NA_REAL;
       } else {

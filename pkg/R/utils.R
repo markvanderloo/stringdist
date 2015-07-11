@@ -62,7 +62,7 @@ printable_ascii <- function(x){
 # check whether all elements of a list are of type 'integer'.
 # x MUST be a list.
 all_int <- function(x){
-  .Call("R_all_int")
+  .Call("R_all_int",x)
 }
 
 

@@ -149,22 +149,51 @@ static int utf8_to_int(const char *str, unsigned int *outbuf){
   }
 }
 
-
-
 unsigned int *get_elem1(SEXP x, int i, int bytes, int *len, int *isna, unsigned int *c){
 
   *isna = ( STRING_ELT(x,i) == NA_STRING );
   if (bytes){
     (*len)  = length(STRING_ELT(x,i));
     for (int j=0; j < *len; j++ ){
-      c[j] =  CHAR(STRING_ELT(x,i))[j];
+      c[j] = CHAR(STRING_ELT(x,i))[j];
     }
       c[*len] = 0;
   } else {
     (*len)  = utf8_to_int( CHAR(STRING_ELT(x,i)), c);
+    if ( *len < 0 ){
+      error("Encountered byte sequence not representing an utf-8 character.\n");
+    }
   }
-  if ( *len < 0 ){
-    error("Encountered byte sequence not representing an utf-8 character.\n");
+  return  c;
+}
+
+
+// Get one element from x (VECSXP or STRSXP) convert to usigned int if necessary and store in c
+// TODO: this can probably be a bit optimized by decreasing the use of the *_ELT macros.
+unsigned int *get_elem(SEXP x, int i, int bytes, int intdist, int *len, int *isna, unsigned int *c){
+
+  if ( intdist ){
+    // we need a copy with trailing zero in this case since some distances 
+    // (e.g the dl-distance) expects this
+    *isna = ( INTEGER(VECTOR_ELT(x,i))[0] == NA_INTEGER );
+    (*len) = length(VECTOR_ELT(x,i));
+    // this implicitly converts from int to unsigned int (but that should not influence the result).
+    memcpy(c , INTEGER(VECTOR_ELT(x,i)), (*len) * sizeof(int));
+    c[*len] = 0;
+  } else {
+    *isna = ( STRING_ELT(x,i) == NA_STRING );
+    if (bytes){
+      (*len)  = length(STRING_ELT(x,i));
+      for (int j=0; j < *len; j++ ){
+        c[j] = CHAR(STRING_ELT(x,i))[j];
+      }
+        c[*len] = 0;
+    } else {
+      (*len)  = utf8_to_int( CHAR(STRING_ELT(x,i)), c);
+      if ( *len < 0 ){
+        error("Encountered byte sequence not representing an utf-8 character.\n");
+      }
+    }
   }
   return  c;
 }
