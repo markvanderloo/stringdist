@@ -39,6 +39,37 @@ Also, there are some utility functions:
 * `phonetic()` computes phonetic codes of strings (currently only soundex)
 * `printable_ascii()` is a utility function that detects non-printable ascii or non-ascii characters.
 
+
+Installation
+------------
+To install the latest release from CRAN, open an R terminal and type
+
+`install.packages('stringdist')`
+
+Beta versions are released through my [drat](http://www.r-pkg.org/pkg/drat) repository. These versions build and pass all current tests correctly on Linux
+but builds have not been tested on all architectures that [CRAN](http://cran.r-projecet.org) supports. Windows users will also need to
+have [rtools](http://cran.r-project.org/bin/windows/Rtools/) installed.
+
+```
+drat::addRepo("markvanderloo")
+install.packages("stringdist")
+```
+
+To obtain the package from the very latest source code open a `bash` terminal (or `git bash` if you work under Windows
+with `msysgit`) and type
+
+```
+git clone https://github.com/markvanderloo/stringdist.git
+cd stringdist
+bash ./build.bash
+R CMD INSTALL output/stringdist_*.tar.gz
+```
+
+Warning: the github version can change any time and may not even build properly. As most
+of the code is written in `C`, the development version may crash your `R`-session.
+
+
+
 Resources
 ----------
 * A [paper](http://journal.r-project.org/archive/2014-1/loo.pdf) on stringdist has been published in the R-journal 
@@ -69,23 +100,5 @@ integers. I'm abandoning this expressing all distances as `double` (R `numeric`)
 to use `Inf`.
 
 
-Installation
-------------
-To install the latest release from CRAN, open an R terminal and type
-
-`install.packages('stringdist')`
-
-To obtain the package from source code open a `bash` terminal (or `git bash` if you work under Windows
-with `msysgit`) and type
-
-```
-git clone https://github.com/markvanderloo/stringdist.git
-cd stringdist
-bash ./build.bash
-R CMD INSTALL output/stringdist_*.tar.gz
-```
-
-Warning: the github version can change any time and may not even build properly. As most
-of the code is written in `C`, the development version may crash your `R`-session.
 
 

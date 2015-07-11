@@ -60,6 +60,8 @@
 #' 
 {}
 
+setGeneric("stringdist", function(a,b,...) standardGeneric("stringdist"))
+
 
 
 
