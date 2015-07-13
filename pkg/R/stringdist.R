@@ -20,13 +20,20 @@
 #' Returns \code{c(5,5,4)} since these are the distances between \code{"g'day"} and
 #' respectively \code{"hi"}, \code{"hallo"}, and \code{"ola"}.
 #'
-#' A third typical use would be to compute a \code{dist} object, that can be 
-#' used to cluster text strings.
+#' A third typical use would be to compute a \code{dist} object. The command
 #' 
 #' \code{stringdistmatrix(c("foo","bar","boo","baz"))}
 #'
-#' Returns an object of class \code{dist} that can be used by clustering algorithms in 
-#' the \code{cluster} package (such as \code{hclust}).
+#' returns an object of class \code{dist} that can be used by clustering algorithms
+#' such as \code{stats::hclust}.
+#'
+#' A fourth use is to compute string distances between general sequences, represented as 
+#' integer vectors (which must be stored in a \code{list}):
+#'
+#' \code{stringdist( list(c(1L,1L,2L)), list(c(1L,2L,1L),c(2L,3L,1L,2L)) )}
+#'
+#' The above code yields the vector \code{c(1,2)} (the first shorter first argument is 
+#' recycled over the longer second argument)
 #'
 #' Besides documentation for each function, the main topics documented are:
 #' 
@@ -70,14 +77,19 @@ setGeneric("stringdist", function(a,b,...) standardGeneric("stringdist"))
 #' Compute distance metrics between strings
 #'
 #' 
-#' \code{stringdist} computes pairwise string distances between elements of \code{character} vectors 
-#' \code{a} and \code{b}, where the vector with less elements is recycled. 
+#' \code{stringdist} computes pairwise string distances between elements of 
+#' \code{a} and \code{b}, where the argument with less elements is recycled. 
 #' \code{stringdistmatrix} computes the string distance matrix with rows according to
-#' \code{a} and columns according to \code{b}.
+#' \code{a} and columns according to \code{b}. 
 #' 
 #'
-#' @param a R object (target); will be converted by \code{as.character}.
-#' @param b R object (source); will be converted by \code{as.character}. This argument is optional for 
+#' @section Distances between \code{list}s of \code{integer} vectors:
+#' When arguments \code{a} and/or \code{b} are \code{list}s with \code{integer} vectors, each
+#' integer vector is treated analogously to a text string, including the possible use of \code{names}. Also see the examples.
+#'
+#'
+#' @param a R object (target); will be converted by \code{as.character}, unless it is a \code{list} containing \code{integer} vectors.
+#' @param b R object (source); will be converted by \code{as.character}, unless it is a \code{list} containing \code{integer} vectors. This argument is optional for 
 #'      \code{stringdistmatrix} (see section \code{Value}).
 #' @param method Method for distance calculation. The default is \code{"osa"}, see \code{\link{stringdist-metrics}}.
 #' @param useBytes Perform byte-wise comparison, see \code{\link{stringdist-encoding}}.
@@ -98,12 +110,12 @@ setGeneric("stringdist", function(a,b,...) standardGeneric("stringdist"))
 #'
 #' @return For \code{stringdist},  a vector with string distances of size \code{max(length(a),length(b))}.
 #'  
-#'  For \code{stringdistmatrix}: if both \code{a} and \code{b} are passed, 
-#'  a \code{length(a)xlength(b)} \code{matrix}. If only a single \code{character} vector \code{a} is given
-#'  an object of class \code{\link[stats]{dist}} is returned.
+#' For \code{stringdistmatrix}: if both \code{a} and \code{b} are passed, 
+#' a \code{length(a)xlength(b)} \code{matrix}. If a single argument \code{a} is given
+#' an object of class \code{\link[stats]{dist}} is returned.
 #'  
-#'  Distances are nonnegative if they can be computed, \code{NA} if any of the two argument strings is \code{NA} and \code{Inf}
-#'  when \code{maxDist} is exceeded or, in case of the hamming distance, when the two compared strings have different length.
+#' Distances are nonnegative if they can be computed, \code{NA} if any of the two argument strings is \code{NA} and \code{Inf}
+#' when \code{maxDist} is exceeded or, in case of the hamming distance, when the two compared strings have different length.
 #'  
 #'  
 #' @example ../examples/stringdist.R
