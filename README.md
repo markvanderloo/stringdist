@@ -5,8 +5,7 @@
 [![Downloads](http://cranlogs.r-pkg.org/badges/stringdist)](http://cran.r-project.org/package=stringdist/) 
 
 
-stringdist
-==========
+## stringdist
 
 * Approximate matching and string distance calculations for R. 
 * All distance and matching operations are system- and encoding-independent.
@@ -40,8 +39,9 @@ Also, there are some utility functions:
 * `printable_ascii()` is a utility function that detects non-printable ascii or non-ascii characters.
 
 
-Installation
-------------
+
+#### Installation
+
 To install the latest release from CRAN, open an R terminal and type
 
 `install.packages('stringdist')`
@@ -70,35 +70,18 @@ of the code is written in `C`, the development version may crash your `R`-sessio
 
 
 
-Resources
-----------
-* A [paper](http://journal.r-project.org/archive/2014-1/loo.pdf) on stringdist has been published in the R-journal 
+#### Resources
+
+* A [paper](http://journal.r-project.org/archive/2014-1/loo.pdf) on stringdist has been published in the R-journal
 * [Slides](http://www.slideshare.net/MarkVanDerLoo/stringdist-use-r2014) of te _useR!2014_ conference.
 
-Note to users: deprecated arguments at version 0.9 (January 2015)
----------------
-The following arguments have become obsolete and will eventually be removed:
+#### Note to users: deprecated arguments as of >= 0.9.0, >= 0.9.2
 
+Parallelization used to be based on R's ```parallel``` package, that works by spawning several R sessions in the background. As of version 0.9.0, ```stringdist``` uses the more efficient ```openMP``` protocol to parallelize everything under the hood. 
+
+The following arguments have become obsolete and will be removed somewhere in 2016:
+* Argument `cluster` for function `stringdistmatrix`.
 * Argument `maxDist` for functions `stringdist` and `stringdistmatrix` (not `amatch`).
-* Argument `ncores` for function `stringdistmatrix` (obsolete because 0.9 uses multithreading by default).
-
-
-
-Note to users: breaking update at version 0.5 (june 2013)
--------------
-Up to version `<=0.5`, `stringdist` returned `-1` to indicate that either
-
-* `maxDist` is exceeded, or
-* the distance is undefined between two input strings
-
-*From version `>=0.6`, this will be replaced by `Inf`.* The main reason:
-
-* This allows easier comparison using `<` and `<=`
-
-The old convention stemmed from the fact that some distances (e.g. q-gram, hamming) are strictly
-integers. I'm abandoning this expressing all distances as `double` (R `numeric`) which allows me
-to use `Inf`.
-
-
+* Argument `ncores` for function `stringdistmatrix` 
 
 
