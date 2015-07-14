@@ -220,20 +220,31 @@ Stringset *new_stringset(SEXP str, int bytes){
 
   int *t = s->str_len;
   unsigned int *d = s->data;
-  for (size_t i=0L; i < nstr; i++, t++){
-    if ( STRING_ELT(str,i) == NA_STRING ){
-      (*t) = NA_INTEGER; 
-    } else {
-      if (bytes){
+
+  if ( bytes ){
+    for (size_t i=0L; i < nstr; i++, t++){
+      if ( STRING_ELT(str,i) == NA_STRING ){
+        (*t) = NA_INTEGER; 
+      } else {
         (*t) = char_to_int(CHAR(STRING_ELT(str,i)), d);
+        s->string[i] = d;
+        (*(d + (*t))) = 0L; // append a zero.
+        d += (*t) + 1L;
+      }
+    }
+  } else {
+    for (size_t i=0L; i < nstr; i++, t++){
+      if ( STRING_ELT(str,i) == NA_STRING ){
+        (*t) = NA_INTEGER; 
       } else {
         (*t) = utf8_to_int(CHAR(STRING_ELT(str,i)), d); 
+        s->string[i] = d;
+        (*(d + (*t))) = 0L; // append a zero.
+        d += (*t) + 1L;
       }
-      s->string[i] = d;
-      (*(d + (*t))) = 0L; // append a zero.
-      d += (*t) + 1L;
     }
   }
+
   return s;
 }
 
