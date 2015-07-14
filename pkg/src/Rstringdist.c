@@ -184,6 +184,7 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
         , p
         , q
     );
+
     double d = R_PosInf, d1 = R_PosInf;
     int index, len_X, len_T;
     unsigned int *str;

@@ -1,3 +1,6 @@
+version 0.9.3
+- bugfix in dl, lv, osa distance: weights were not taken into account properly (thanks to Zach Price)
+
 version 0.9.2
 - Update  fixing some errors (missing documentation, tests) in the 0.9.1 release.
 - Fixed a few possible memory leaks.
