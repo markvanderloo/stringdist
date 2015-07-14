@@ -32,9 +32,10 @@
 #' \code{incomparables} option.
 #'
 #' 
-#' @param x elements to be approximately matched: will be coerced to
-#'   \code{character}.
-#' @param table lookup table for matching. Will be coerced to \code{character}.
+#' @param x elements to be approximately matched: will be coerced to 
+#'   \code{character} unless it is a list consisting of \code{integer} vectors.
+#' @param table lookup table for matching. Will be coerced to \code{character}
+#'   unless it is a list consting of \code{integer} vectors.
 #' @param nomatch The value to be returned when no match is found. This is
 #'   coerced to integer.
 #' @param matchNA Should \code{NA}'s be matched? Default behaviour mimics the 
@@ -70,7 +71,10 @@
 #'
 #' @example ../examples/amatch.R
 #' @export
-amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
+setGeneric("amatch", function(x,table,...) standardGeneric("amatch"))
+
+#' @rdname amatch
+setMethod("amatch",c("ANY","ANY"), function(x, table, nomatch=NA_integer_, matchNA=TRUE
   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw", "soundex") 
   , useBytes = FALSE
   , weight=c(d=1,i=1,s=1,t=1)
@@ -86,9 +90,6 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   }
 
   method <- match.arg(method)
-  if ( is.na(method) ){
-    stop(sprintf("method '%s' is not defined",method))
-  }
   stopifnot(
       all(is.finite(weight))
       , all(weight > 0)
@@ -105,6 +106,9 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   )
   if (method == 'jw') weight <- weight[c(2,1,3)]
   method <- METHODS[method]
+  if ( is.na(method) ){
+    stop(sprintf("method '%s' is not defined",method))
+  }
 
   .Call("R_amatch", x, table, method
     , as.integer(nomatch), as.integer(matchNA)
@@ -113,7 +117,49 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
     , as.integer(nthread)
   )
 
-}
+})
+
+#' @rdname amatch
+setMethod("amatch",c("list","list"), function(x, table, nomatch=NA_integer_, matchNA=TRUE
+  , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw", "soundex") 
+  , useBytes = FALSE
+  , weight=c(d=1,i=1,s=1,t=1)
+  , maxDist=0.1, q=1, p=0
+  , nthread = getOption("sd_num_thread")){
+
+  stopifnot(all_int(x),all_int(table))
+  
+  method <- match.arg(method)
+  stopifnot(
+      all(is.finite(weight))
+      , all(weight > 0)
+      , all(weight <=1)
+      , q >= 0
+      , p <= 0.25
+      , p >= 0
+      , matchNA %in% c(TRUE,FALSE)
+      , maxDist > 0
+      , is.logical(useBytes)
+      , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
+      , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
+      , nthread > 0
+  )
+  if (method == 'jw') weight <- weight[c(2,1,3)]
+  method <- METHODS[method]
+  if ( is.na(method) ){
+    stop(sprintf("method '%s' is not defined",method))
+  }
+
+  .Call("R_amatch", x, table, method
+    , as.integer(nomatch), as.integer(matchNA)
+    , as.double(weight), as.double(p), as.integer(q)
+    , as.double(maxDist), as.integer(useBytes)
+    , as.integer(nthread)
+  )
+
+})
+
+
 
 #' @param ... parameters to pass to \code{amatch} (except \code{nomatch})
 #'

@@ -156,14 +156,15 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
     , match_na = INTEGER(matchNA)[0]
     , bytes = INTEGER(x)[0]
     , ml_x = max_length(x)
-    , ml_t = max_length(table);
+    , ml_t = max_length(table)
+    , intdist = TYPEOF(x) == VECSXP ? 1 : 0; // list of integers?
 
 
   double maxDist = REAL(maxDistance)[0];
 
   // convert to integer. 
-  Stringset *X = new_stringset(x, bytes);
-  Stringset *T = new_stringset(table, bytes);
+  Stringset *X = new_stringset(x, bytes, intdist);
+  Stringset *T = new_stringset(table, bytes, intdist);
 
   // output vector
   SEXP yy;

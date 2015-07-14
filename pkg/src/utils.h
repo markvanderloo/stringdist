@@ -105,7 +105,7 @@ static inline int recycle(int i, int nthreads, int ni){
  *
  *
  */
-Stringset *new_stringset(SEXP str, int bytes);
+Stringset *new_stringset(SEXP str, int bytes, int intdist);
 
 /* Clean up a Stringset. */
 void free_stringset(Stringset *s);

@@ -200,7 +200,7 @@ static int char_to_int(const char *str, unsigned int *outbuf){
   return str_len;
 }
 
-Stringset *new_stringset(SEXP str, int bytes){
+Stringset *new_stringset(SEXP str, int bytes, int intdist){
   size_t nstr = length(str);
   Stringset *s;
   s = (Stringset *) malloc(sizeof(Stringset));
@@ -209,8 +209,15 @@ Stringset *new_stringset(SEXP str, int bytes){
   s->str_len = (int *) malloc(nstr * sizeof(int));
 
   size_t nbytes = 0L;
-  for (size_t i=0; i<nstr; i++){
-    nbytes += length(STRING_ELT(str,i));
+
+  if ( intdist ){
+    for (size_t i=0; i<nstr; i++){
+      nbytes += length(VECTOR_ELT(str,i));
+    }
+  } else {
+    for (size_t i=0; i<nstr; i++){
+      nbytes += length(STRING_ELT(str,i));
+    }
   }
 
   s->string = (unsigned int **) malloc(nstr * sizeof(int *));
@@ -221,7 +228,19 @@ Stringset *new_stringset(SEXP str, int bytes){
   int *t = s->str_len;
   unsigned int *d = s->data;
 
-  if ( bytes ){
+  if ( intdist ){
+    for (size_t i=0L; i < nstr; i++, t++){
+      if ( INTEGER(VECTOR_ELT(str,i))[0] == NA_INTEGER ){
+        (*t) = NA_INTEGER; 
+      } else {
+        (*t) = length(VECTOR_ELT(str,i));
+        memcpy(d, INTEGER(VECTOR_ELT(str,i)), (*t)*sizeof(int) );
+        s->string[i] = d;
+        (*(d + (*t))) = 0L; // append a zero.
+        d += (*t) + 1L;
+      }
+    }
+  } else if ( bytes ){
     for (size_t i=0L; i < nstr; i++, t++){
       if ( STRING_ELT(str,i) == NA_STRING ){
         (*t) = NA_INTEGER; 
