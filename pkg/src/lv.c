@@ -43,12 +43,11 @@ double lv_dist(
   int I = na+1, L = na+1, J = nb+1;
   double sub;
 
-
   for ( i = 0; i < I; ++i ){
-    scores[i] = i;
+    scores[i] = i * weight[0];
   }
   for ( j = 1; j < J; ++j, L += I ){
-   scores[L] = j;
+   scores[L] = j * weight[0];
   }
 
   int M;

@@ -55,6 +55,25 @@ test_that("weights are handled correctly",{
       stringdist("abc","ac",method='osa',weight=c(0.5,1,1,1)),
       stringdist("ac","abc",method='osa',weight=c(1,0.5,1,1))
    )
+  expect_equal(
+    stringdist("ABC", "BC", method = "lv", weight = c(i=.1, d=.1, s=.1)),.1
+  )
+  expect_equal(
+    stringdist("ABC", "BC", method = "lv", weight = c(i=.1, d=.1, s=1)),.1
+  )
+  
+  expect_equal(
+    stringdist("ABC", "BC", method = "osa", weight = c(i=.1, d=.1, s=.1,t=.1)),.1
+  )
+  expect_equal(
+    stringdist("ABC", "BC", method = "osa", weight = c(i=.1, d=.1, s=1,t=.1)),.1
+  )
+  expect_equal(
+    stringdist("ABC", "BC", method = "dl", weight = c(i=.1, d=.1, s=.1,t=.1)),.1
+  )
+  expect_equal(
+    stringdist("ABC", "BC", method = "dl", weight = c(i=.1, d=.1, s=1,t=.1)),.1
+  )
 })
 
 test_that("NA's are handled correctly",{

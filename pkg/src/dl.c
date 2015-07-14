@@ -135,14 +135,14 @@ double dl_dist(
   /* j = tgt index */
   for(i=1;i<=x;i++){ 
     uniquePush(dict,src[i]);
-    scores[(i+1) * (y + 2) + 1] = i;
+    scores[(i+1) * (y + 2) + 1] = i * weight[0];
     scores[(i+1) * (y + 2) + 0] = score_ceil;
     swapCount = 0;
     
     for(j=1;j<=y;j++){
       if(i == 1) {
         uniquePush(dict,tgt[j]);
-        scores[1 * (y + 2) + (j + 1)] = j;
+        scores[1 * (y + 2) + (j + 1)] = j * weight[0];
         scores[0 * (y + 2) + (j + 1)] = score_ceil;
       }
       targetCharCount = dict->value[which(dict, tgt[j-1])];
