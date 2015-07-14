@@ -65,7 +65,6 @@ unsigned int max_length(SEXP);
  */
 unsigned int *get_elem(SEXP x, int i, int bytes, int intdist, int *len, int *isna, unsigned int *c);
 
-unsigned int *get_elem1(SEXP x, int i, int bytes, int *len, int *isna, unsigned int *c);
 
 /* (mutlithreaded) recycling.
  *

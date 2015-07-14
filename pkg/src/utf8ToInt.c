@@ -149,24 +149,6 @@ static int utf8_to_int(const char *str, unsigned int *outbuf){
   }
 }
 
-unsigned int *get_elem1(SEXP x, int i, int bytes, int *len, int *isna, unsigned int *c){
-
-  *isna = ( STRING_ELT(x,i) == NA_STRING );
-  if (bytes){
-    (*len)  = length(STRING_ELT(x,i));
-    for (int j=0; j < *len; j++ ){
-      c[j] = CHAR(STRING_ELT(x,i))[j];
-    }
-      c[*len] = 0;
-  } else {
-    (*len)  = utf8_to_int( CHAR(STRING_ELT(x,i)), c);
-    if ( *len < 0 ){
-      error("Encountered byte sequence not representing an utf-8 character.\n");
-    }
-  }
-  return  c;
-}
-
 
 // Get one element from x (VECSXP or STRSXP) convert to usigned int if necessary and store in c
 // TODO: this can probably be a bit optimized by decreasing the use of the *_ELT macros.

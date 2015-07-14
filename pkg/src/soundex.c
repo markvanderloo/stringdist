@@ -240,7 +240,7 @@ SEXP R_soundex(SEXP x, SEXP useBytes) {
     char sndx[5];
     unsigned int sndx_int[4];
     for (int i = 0; i < n; ++i) {
-      get_elem1(x, i, bytes, &len_s, &isna_s, s);
+      get_elem(x, i, bytes,0L, &len_s, &isna_s, s);
       if (isna_s) {
         SET_STRING_ELT(y, i, R_NaString);
       } else { 
@@ -263,7 +263,7 @@ SEXP R_soundex(SEXP x, SEXP useBytes) {
     unsigned int nfail = 0;
     int len_s, isna_s;
     for (int i = 0; i < n; ++i) {
-      get_elem1(x, i, bytes, &len_s, &isna_s, s);
+      get_elem(x, i, bytes, 0L, &len_s, &isna_s, s);
       if (isna_s) {
         SEXP sndx = allocVector(INTSXP, 1);
         PROTECT(sndx);
