@@ -143,7 +143,7 @@ setGeneric("stringdist", function(a,b,...) standardGeneric("stringdist"))
 
 #' @rdname stringdist
 setMethod("stringdist",c("list","list"), function(a, b
-  , method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw","soundex")
+  , method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw")
   , weight=c(d=1,i=1,s=1,t=1) 
   , q=1, p=0
   , nthread = getOption("sd_num_thread")
@@ -246,7 +246,7 @@ setGeneric("stringdistmatrix", function(a,...) standardGeneric("stringdistmatrix
 
 #' @rdname stringdist
 setMethod("stringdistmatrix", "list", function(a, b
-   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex")
+   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw")
    , weight=c(d=1,i=1,s=1,t=1),  q=1, p=0
    , useNames=c('none','names')
    , nthread = getOption("sd_num_thread")

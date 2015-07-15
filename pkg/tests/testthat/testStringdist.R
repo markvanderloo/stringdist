@@ -55,6 +55,7 @@ test_that("weights are handled correctly",{
       stringdist("abc","ac",method='osa',weight=c(0.5,1,1,1)),
       stringdist("ac","abc",method='osa',weight=c(1,0.5,1,1))
    )
+  # Thanks to Zach Price for reporting this bug.
   expect_equal(
     stringdist("ABC", "BC", method = "lv", weight = c(i=.1, d=.1, s=.1)),.1
   )
