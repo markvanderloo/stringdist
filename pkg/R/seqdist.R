@@ -31,7 +31,7 @@
 #' and \code{b} of length \code{max(length(a),length(b)}.
 #' 
 #' For \code{seqdistmatrix} there are two options. If \code{b} is missing, the 
-#' \code{\link[base]{dist}} object corresponding to the \code{length(a) X
+#' \code{\link[stats]{dist}} object corresponding to the \code{length(a) X
 #' length(a)} distance matrix is returned. If \code{b} is specified, the
 #' \code{length(a) X length(b)} distance matrix is returned.
 #'    
@@ -50,7 +50,7 @@ seqdist <- function(a, b
   stopifnot(all_int(a), all_int(b))
   
   stopifnot(
-    , is.list(a)
+    is.list(a)
     , is.list(b)
     , all(is.finite(weight))
     , all(weight > 0)
@@ -83,6 +83,7 @@ seqdist <- function(a, b
 
 #' @param useNames label the output matrix with \code{names(a)} and \code{names(b)}?
 #' @rdname seqdist
+#' @export 
 seqdistmatrix <- function(a, b
    , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw")
    , weight=c(d=1,i=1,s=1,t=1),  q=1, p=0
