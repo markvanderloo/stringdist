@@ -1,4 +1,5 @@
 version 0.9.3
+- added seqdist and seqdistmatrix: compute metrics between integer vectors.
 - small c-side code optimizations
 - bugfix in dl, lv, osa distance: weights were not taken into account properly (thanks to Zach Price)
 
