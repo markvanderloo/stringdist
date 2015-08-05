@@ -68,12 +68,6 @@
 #' 
 {}
 
-setGeneric("stringdist", function(a,b,...) standardGeneric("stringdist"))
-
-
-
-
-
   
 #' Compute distance metrics between strings
 #'
@@ -85,17 +79,9 @@ setGeneric("stringdist", function(a,b,...) standardGeneric("stringdist"))
 #' \code{a} and columns according to \code{b}.
 #' 
 #'
-#' @section Distances between \code{list}s of \code{integer} vectors: When
-#'   arguments \code{a} and/or \code{b} are \code{list}s with \code{integer}
-#'   vectors, each integer vector is treated analogously to a text string,
-#'   including the possible use of \code{names}. Also see the examples.
-#'
-#'
-#' @param a R object (target); will be converted by \code{as.character}, unless
-#'   it is a \code{list} containing \code{integer} vectors.
-#' @param b R object (source); will be converted by \code{as.character}, unless
-#'   it is a \code{list} containing \code{integer} vectors. This argument is
-#'   optional for \code{stringdistmatrix} (see section \code{Value}).
+#' @param a R object (target); will be converted by \code{as.character}
+#' @param b R object (source); will be converted by \code{as.character}
+#'   This argument is optional for \code{stringdistmatrix} (see section \code{Value}).
 #' @param method Method for distance calculation. The default is \code{"osa"},
 #'   see \code{\link{stringdist-metrics}}.
 #' @param useBytes Perform byte-wise comparison, see
@@ -119,9 +105,8 @@ setGeneric("stringdist", function(a,b,...) standardGeneric("stringdist"))
 #'   Jaro-distance is returned. Applies only to \code{method='jw'}.
 #' @param nthread Maximum number of threads to use. By default, a sensible
 #'   number of threads is chosen, see \code{\link{stringdist-parallelization}}.
-#' @param ... Options passed to other methods.
 #'  
-#' @seealso \code{\link{stringsim}}, \code{\link{qgrams}}
+#' @seealso \code{\link{stringsim}}, \code{\link{qgrams}}, \code{\link{seqdist}}
 #'
 #' @return For \code{stringdist},  a vector with string distances of size
 #'   \code{max(length(a),length(b))}.
@@ -138,50 +123,7 @@ setGeneric("stringdist", function(a,b,...) standardGeneric("stringdist"))
 #'  
 #' @example ../examples/stringdist.R
 #' @export
-setGeneric("stringdist", function(a,b,...) standardGeneric("stringdist"))
-
-
-#' @rdname stringdist
-setMethod("stringdist",c("list","list"), function(a, b
-  , method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw")
-  , weight=c(d=1,i=1,s=1,t=1) 
-  , q=1, p=0
-  , nthread = getOption("sd_num_thread")
-){
-  stopifnot(all_int(a), all_int(b))
-  
-  stopifnot(
-    all(is.finite(weight))
-    , all(weight > 0)
-    , all(weight <=1)
-    , q >= 0
-    , p <= 0.25
-    , p >= 0
-    , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
-    , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
-    , nthread > 0
-  )
-  
-  
-  if (length(a) == 0 || length(b) == 0){ 
-    return(numeric(0))
-  }
-  if ( max(length(a),length(b)) %% min(length(a),length(b)) != 0 ){
-    warning(RECYCLEWARNING)
-  }
-  method <- match.arg(method)
-  nthread <- as.integer(nthread)
-  if (method == 'jw') weight <- weight[c(2,1,3)]
-  do_dist(a=b, b=a
-    , method=method
-    , weight=weight
-    , q=q
-    , p=p
-    , nthread=nthread)
-})
-
-#' @rdname stringdist
-setMethod("stringdist",c("ANY","ANY"), function(a, b
+stringdist <- function(a, b
   , method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw","soundex")
   , useBytes = FALSE
   , weight=c(d=1,i=1,s=1,t=1) 
@@ -230,7 +172,7 @@ setMethod("stringdist",c("ANY","ANY"), function(a, b
     , p=p
     , useBytes=useBytes
     , nthread=nthread)
-})
+}
 
 
 #' @param useNames Use input vectors as row and column names?
@@ -242,54 +184,8 @@ setMethod("stringdist",c("ANY","ANY"), function(a, b
 #'
 #' @rdname stringdist
 #' @export
-setGeneric("stringdistmatrix", function(a,...) standardGeneric("stringdistmatrix"))
-
 #' @rdname stringdist
-setMethod("stringdistmatrix", "list", function(a, b
-   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw")
-   , weight=c(d=1,i=1,s=1,t=1),  q=1, p=0
-   , useNames=c('none','names')
-   , nthread = getOption("sd_num_thread")
-){
-  useNames <- match.arg(useNames)
-  method <- match.arg(method)
-  nthread <- as.integer(nthread)
-  if (method == 'jw') weight <- weight[c(2,1,3)]
-  stopifnot(all_int(a))
-
-  # if b is missing, generate a 'dist' object.  
-  if (missing(b)){ 
-    return( lower_tri(a
-        , method=method
-        , weight=weight
-        , useNames=useNames
-        , nthread=nthread)
-    )
-  }
-  stopifnot(is.list(b),all_int(b))
-  if (length(a) == 0 || length(b) == 0){ 
-    return(matrix(numeric(0)))
-  }
-  
-  if (useNames == "names"){
-    rowns <- names(a)
-    colns <- names(b)
-  }
-  
-  
-  x <- vapply(b, do_dist, USE.NAMES=FALSE, FUN.VALUE=numeric(length(a))
-        , b=a, method=method, weight=weight, q=q, p=p, nthread)
-  
-  if (useNames == "names" ){  
-    structure(matrix(x,nrow=length(a),ncol=length(b), dimnames=list(rowns,colns)))
-  } else {
-    matrix(x,nrow=length(a),ncol=length(b)) 
-  }
-  
-})
-
-#' @rdname stringdist
-setMethod("stringdistmatrix", "ANY", function(a, b
+stringdistmatrix <- function(a, b
   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex")
   , useBytes = FALSE
   , weight=c(d=1,i=1,s=1,t=1),  maxDist=Inf, q=1, p=0
@@ -377,7 +273,7 @@ setMethod("stringdistmatrix", "ANY", function(a, b
   } else {
     matrix(x,nrow=length(a),ncol=length(b)) 
   }
-})
+}
 
 
 char2int <- function(x){

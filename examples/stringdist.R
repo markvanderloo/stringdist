@@ -9,18 +9,6 @@ d <- stringdistmatrix(c('foo','bar','boo','baz'))
 # The following gives a matrix
 stringdistmatrix(c("foo","bar","boo"),c("baz","buz"))
 
-# Distances between lists of integer vectors. Note the postfix 'L' to force
-# integer storage.
-a <- list(c(102L, 107L))     # fu
-b <- list(c(102L,111L,111L)) # foo
-stringdist(a,b)
-
-# also works for stringdistmatrix
-a <- lapply(c("foo","bar","baz"),utf8ToInt)
-stringdistmatrix(a)
-
-
-
 # An example using Damerau-Levenshtein distance (multiple editing of substrings allowed)
 stringdist("ca","abc",method="dl")
 
