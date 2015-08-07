@@ -28,15 +28,15 @@
  * - Extended with custom weights and maxDistance
  */
 double lv_dist(
-  unsigned int *a, int na, 
-  unsigned int *b, int nb, 
+  unsigned int *a, int na, // target
+  unsigned int *b, int nb, // source
   double *weight, 
   double *scores){
   if (!na){
-    return (double) nb;
+    return (double) nb * weight[1]; // del score
   }
   if (!nb){
-    return (double) na;
+    return (double) na * weight[0]; // ins score
   }
 
   int i, j;
@@ -44,7 +44,7 @@ double lv_dist(
   double sub;
 
   for ( i = 0; i < I; ++i ){
-    scores[i] = i * weight[0];
+    scores[i] = i * weight[1];
   }
   for ( j = 1; j < J; ++j, L += I ){
    scores[L] = j * weight[0];

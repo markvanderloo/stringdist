@@ -30,10 +30,10 @@
 double osa_dist(unsigned int *a, int na, unsigned int *b, int nb, double *weight, double *scores){
 
   if (!na){
-    return (double) nb;
+    return (double) nb * weight[1]; // ins weight
   }
   if (!nb){
-    return (double) na;
+    return (double) na * weight[0]; // del weight
   }
 
   int i, j;
@@ -41,7 +41,7 @@ double osa_dist(unsigned int *a, int na, unsigned int *b, int nb, double *weight
   double sub, tran;
 
    for ( i = 0; i < I; ++i ){
-      scores[i] = i * weight[0];
+      scores[i] = i * weight[1];
    }
    for ( j = 1; j < J; ++j, L += I ){
       scores[L] = j * weight[0];

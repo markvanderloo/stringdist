@@ -111,10 +111,10 @@ double dl_dist(
     ){
 
   if (!x){
-    return (double) y;
+    return (double) y * weight[1]; // ins weight
   }
   if (!y){
-    return (double) x;
+    return (double) x * weight[0]; // del weight
   }
 
   unsigned int swapCount, targetCharCount,i,j;
