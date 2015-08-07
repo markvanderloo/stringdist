@@ -347,7 +347,22 @@ SEXP R_all_int(SEXP X){
 
 }
 
+// helper function determining the lengths of all elements of a list.
 
+SEXP R_lengths(SEXP X){
+  PROTECT(X);
+  int n = length(X);
+  SEXP out;
+  out = PROTECT(allocVector(INTSXP, n));
+  
+  int *outp = INTEGER(out);  
+
+  for ( int i=0; i<n; i++, outp++ ) {
+    (*outp) = length(VECTOR_ELT(X,i));
+  }
+  UNPROTECT(2);
+  return out;
+}
 
 
 

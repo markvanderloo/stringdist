@@ -44,6 +44,14 @@ test_that("Stringsim gets correct values with or without useBytes",{
   expect_equal(stringsim(x,y,method="jw", useBytes=TRUE ), (1/2 + 1/3 +1)/3)
 })  
 
+context("seqsim")
+
+test_that("elementary seqsim test",{
+  expect_equal(
+    seqsim(list(1:3,2:4),list(1:3))
+     , stringsim(c("abc","bcd"),"abc") 
+  )
+})
 
 
 
