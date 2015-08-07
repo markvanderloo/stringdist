@@ -77,7 +77,12 @@ setnames <- function(x){
 #' @param .list Will be concatenated with the \code{...} argument(s). Useful for adding integer vectors named 'q'.
 #' @param q The size of q-gramming.
 #' 
-#' @example ../example/seq_qgrams
+#' @return 
+#' A \code{matrix} containing q-gram profiles. Columns 1 to \code{q} contain the encountered q-grams. 
+#' The ensuing (named) columns contain the q-gram counts per vector. Run the example for a simple overview. 
+#' 
+#' 
+#' @example ../examples/seq_qgrams.R
 #' 
 #' @export 
 #' 
