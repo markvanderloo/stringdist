@@ -39,7 +39,7 @@
 #' any matched integer vector will result in \code{NA}. Missing values in the sequences
 #' themselves are treated as a number and not treated specially (Also see the examples).
 #'   
-#' @seealso \code{\link{stringdist}}
+#' @seealso \code{\link{seq_sim}}, \code{\link{seq_amatch}}, \code{\link{seq_qgrams}} 
 #'  
 #' @example ../examples/seq_dist.R
 #' @export

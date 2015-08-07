@@ -9,7 +9,7 @@ a <- lapply(c("foo","bar","baz"),utf8ToInt)
 seq_distmatrix(a)
 
 # Note how missing values are treated. NA's as part of the sequence are treated 
-# as an integer (the representation of \code{NA_integer_}).
+# as an integer (the representation of NA_integer_).
 a <- list(NA_integer_,c(102L, 107L))
 b <- list(c(102L,111L,111L),c(102L,111L,NA_integer_))  
 seq_dist(a,b)

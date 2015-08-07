@@ -78,11 +78,15 @@ setnames <- function(x){
 #' @param q The size of q-gramming.
 #' 
 #' @return 
-#' A \code{matrix} containing q-gram profiles. Columns 1 to \code{q} contain the encountered q-grams. 
-#' The ensuing (named) columns contain the q-gram counts per vector. Run the example for a simple overview. 
+#' A \code{matrix} containing q-gram profiles. Columns 1 to \code{q} contain the
+#' encountered q-grams. The ensuing (named) columns contain the q-gram counts
+#' per vector. Run the example for a simple overview.
 #' 
+#' Missing values in integer sequences are treated as any other number.  
 #' 
 #' @example ../examples/seq_qgrams.R
+#' 
+#' @seealso \code{\link{seq_dist}}, \code{\link{seq_amatch}}
 #' 
 #' @export 
 #' 

@@ -6,6 +6,10 @@ table <- list(
 )
 seq_amatch(x,table,maxDist=2)
 
+# behaviour with missings
+seq_amatch(list(c(1L,NA_integer_,3L),NA_integer_), list(1:3),maxDist=1)
+
+
 \dontrun{
 # Match sentences based on word order. Note: words must match exactly or they
 # are treated as completely different.

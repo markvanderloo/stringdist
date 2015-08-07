@@ -51,7 +51,13 @@ stringsim <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
 #' @param q  Size of the \eqn{q}-gram; must be nonnegative. Only applies to
 #'   \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
 #' @param ... additional arguments are passed on to \code{\link{seq_dist}}.
-#' 
+#'
+#' @return 
+#' A \code{numeric} vector of length \code{max(length(a),length(b))}. If one of the
+#' entries in \code{a} or \code{b} is \code{NA_integer_}, all comparisons with that
+#' element result in \code{NA}. Missings occurring within the sequences are treated
+#' as an ordinary number (the representation of \code{NA_integer_}).
+#'   
 #' @example ../examples/seq_sim.R
 #' @seealso \code{\link{seq_dist}}, \code{\link{seq_amatch}}
 #' @export

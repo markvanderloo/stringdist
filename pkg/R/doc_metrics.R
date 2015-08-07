@@ -2,27 +2,31 @@
 #' String metrics in \pkg{stringdist}
 #' 
 #' @description
-#' This page gives an overview of the string dissimilarity measures offered by stringdist.
+#' This page gives an overview of the string dissimilarity measures offered by
+#' \pkg{stringdist}.
 #' 
 #' @section String Metrics:
-#' String metrics are ways of quantifying the dissimilarity between two (text) strings.
-#' Over the years, many such measures have been developed. Some based on a mathematical
-#' understanding of the set of all strings that can be composed from a finite alphabet,
-#' others are based on more heuristic principles, such as how a text string sounds when 
-#' pronounced by a native English speaker.
+#' String metrics are ways of quantifying the dissimilarity between two finite
+#' sequences, usually text strings. Over the years, many such measures have been
+#' developed. Some are based on a mathematical understanding of the set of all 
+#' strings that can be composed from a finite alphabet, others are based on more
+#' heuristic principles, such as how a text string sounds when pronounced by a 
+#' native English speaker.
 #'
-#' The terms 'string metrics' and 'string distance' are used more or less interchangibly
-#' in literature. From a mathematical point of view, string metrics often do not obey
-#' the demands that are usually required from a distance function. For example,
-#' it is not true for all string metrics that a distance of 0 means that two strings
-#' are the same (e.g. in the \eqn{q}-gram distance). Nevertheless, string metrics are
-#' very useful in practice and have many applications.
+#' The terms 'string metrics' and 'string distance' are used more or less
+#' interchangibly in literature. From a mathematical point of view, string
+#' metrics often do not obey the demands that are usually required from a
+#' distance function. For example, it is not true for all string metrics that a
+#' distance of 0 means that two strings are the same (e.g. in the \eqn{q}-gram
+#' distance). Nevertheless, string metrics are very useful in practice and have
+#' many applications.
 #'
-#' The metric you need to choose for an application strongly depends on both the nature
-#' of the string (what does the string represent?) and the cause of dissimilarities between the
-#' strings you are measuring. For example, if you are comparing human-typed names that may
-#' contain typo's, the Jaro-Winkler distance may be of use. If you are comparing names
-#' that were written down after hearing them, a phonetic distance may be a better choice.
+#' The metric you need to choose for an application strongly depends on both the
+#' nature of the string (what does the string represent?) and the cause of
+#' dissimilarities between the strings you are measuring. For example, if you
+#' are comparing human-typed names that may contain typo's, the Jaro-Winkler
+#' distance may be of use. If you are comparing names that were written down
+#' after hearing them, a phonetic distance may be a better choice.
 #'
 #' Currently, the following distance metrics are supported by \pkg{stringdist}.
 #' \tabular{ll}{
@@ -132,7 +136,10 @@
 #' }
 #' @seealso
 #' \itemize{ 
-#'  \item{Functions using string metrics: \code{\link{stringdist}}, \code{\link{stringdistmatrix}}, \code{\link{amatch}}}
+#'  \item{Functions applying string metrics to text: \code{\link{stringdist}},
+#'    \code{\link{stringdistmatrix}}, \code{\link{amatch}}}
+#'  \item{Functions applying string metrics to integer sequences:
+#'    \code{\link{seq_dist}}, \code{\link{seq_distmatrix}}, \code{\link{seq_amatch}} }
 #'  \item{Encoding issues: \code{\link{stringdist-encoding}}  }
 #' }
 #' 

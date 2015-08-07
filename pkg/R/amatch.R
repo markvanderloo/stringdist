@@ -50,7 +50,7 @@
 #'   characters from \code{b} and the transposition weight, in that order. 
 #'   Weights must be positive and not exceed 1. \code{weight} is ignored
 #'   completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'},
-#'   \code{'Jaccard'}, \code{'lcs'}, or \code{soundex}.
+#'   \code{'Jaccard'}, \code{'lcs'}, or \code{'soundex'}.
 #' @param maxDist Elements in \code{x} will not be matched with elements of 
 #'   \code{table} if their distance is larger than \code{maxDist}. Note that the
 #'   maximum distance between strings depends on the method: it should always be
@@ -172,7 +172,7 @@ ain <- function(x,table,...){
 #'   \code{logical} vector of length \code{length(x)} indicating wether an
 #'   element of \code{x} approximately matches an element in \code{table}.
 #' 
-#' @seealso \code{seqdist}
+#' @seealso \code{\link{seq_dist}}, \code{\link{seq_sim}}, \code{\link{seq_qgrams}}
 #'
 #' @example ../examples/seq_amatch.R
 #' @export

@@ -4,8 +4,13 @@
 #'
 #' The \pkg{stringdist} package offers fast and platform-independent string
 #' metrics. Its main purpose is to compute various string distances and to do 
-#' approximate text matching between character vectors. A typical use is to 
-#' match strings that are not precisely the same. For example
+#' approximate text matching between character vectors. As of version 0.9.3,
+#' it is also possible to compute distances between sequences represented by
+#' integer vectors.
+#' 
+#' 
+#' A typical use is to match strings that are not precisely the same. For
+#' example
 #'
 #' \code{  amatch(c("hello","g'day"),c("hi","hallo","ola"),maxDist=2)}
 #'
@@ -31,7 +36,7 @@
 #' A fourth use is to compute string distances between general sequences,
 #' represented as integer vectors (which must be stored in a \code{list}):
 #'
-#' \code{stringdist( list(c(1L,1L,2L)), list(c(1L,2L,1L),c(2L,3L,1L,2L)) )}
+#' \code{seq_dist( list(c(1L,1L,2L)), list(c(1L,2L,1L),c(2L,3L,1L,2L)) )}
 #'
 #' The above code yields the vector \code{c(1,2)} (the first shorter first
 #' argument is recycled over the longer second argument)
@@ -49,7 +54,7 @@
 #'   \item{The code for the full Damerau-Levenshtein distance was adapted from Nick Logan's
 #'   \href{https://github.com/ugexe/Text--Levenshtein--Damerau--XS/blob/master/damerau-int.c}{public github repository}.}
 #'   \item{C code for converting UTF-8 to integer was copied from the R core for performance reasons.}
-#'   \item{The code for soundex conversion was kindly contributed by Jan van der Laan.}
+#'   \item{The code for soundex conversion and string similarity was kindly contributed by Jan van der Laan.}
 #' }
 #' @section Citation:
 #' If you would like to cite this package, please cite the \href{http://journal.r-project.org/archive/2014-1/loo.pdf}{R Journal Paper}: 
@@ -106,7 +111,7 @@
 #' @param nthread Maximum number of threads to use. By default, a sensible
 #'   number of threads is chosen, see \code{\link{stringdist-parallelization}}.
 #'  
-#' @seealso \code{\link{stringsim}}, \code{\link{qgrams}}, \code{\link{seq_dist}}
+#' @seealso \code{\link{stringsim}}, \code{\link{qgrams}}, \code{\link{amatch}}
 #'
 #' @return For \code{stringdist},  a vector with string distances of size
 #'   \code{max(length(a),length(b))}.
