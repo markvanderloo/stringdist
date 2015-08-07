@@ -174,6 +174,30 @@ test_that("bytewise matching differs from character wise matching",{
 
 })
 
+context("seq_amatch")
+
+test_that("Input checks for seq_amatch",{
+  expect_error(seq_amatch(1:10,list(x=1:10)))
+  expect_error(seq_amatch(list(x=1:10),1:10))
+  expect_error(seq_amatch(list(0.1*1:3),list(1:3)))
+  expect_error(seq_amatch(list(1:3),list(0.1*1:3)))
+})
+
+test_that("Some elementary tests for seq_amatch and seq_ain",{
+  
+  x <- list(c(1L,3L,2L))
+  table <- list(
+    c(2L,3L,4L)
+    ,c(1L,2L,3L)
+  )
+  expect_equal(seq_amatch(x,table,maxDist=3), 2)
+  expect_equal(seq_amatch(list(NA_integer_),table,maxDist=3),NA_integer_ )
+  expect_true(seq_ain(x,table,maxDist=3))
+  expect_false(seq_ain(x,table))
+})
+
+
+
 
 
 

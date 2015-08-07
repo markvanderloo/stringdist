@@ -141,8 +141,8 @@ ain <- function(x,table,...){
 #'   coerced to integer.
 #' @param matchNA Should \code{NA}'s be matched? Default behaviour mimics the 
 #'   behaviour of base \code{\link[base]{match}}, meaning that \code{NA} matches
-#'   \code{NA}. With \code{NA}, we mean a missing entry in the \code{list}. If
-#'   one of the integer sequences stored in the list has an \code{NA} entry,
+#'   \code{NA}. With \code{NA}, we mean a missing entry in the \code{list}, represented as \code{NA_integer_}. 
+#'   If one of the integer sequences stored in the list has an \code{NA} entry,
 #'   this is just treated as another integer (the representation of
 #'   \code{NA_integer_}).
 #' @param method Matching algorithm to use. See \code{\link{stringdist-metrics}}.
@@ -174,6 +174,7 @@ ain <- function(x,table,...){
 #' 
 #' @seealso \code{seqdist}
 #'
+#' @example ../examples/seq_amatch.R
 #' @export
 seq_amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw") 
@@ -193,7 +194,6 @@ seq_amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
       , p <= 0.25
       , p >= 0
       , matchNA %in% c(TRUE,FALSE)
-      , is.logical(useBytes)
       , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
       , nthread > 0
