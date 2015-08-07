@@ -28,8 +28,8 @@
  * - Extended with custom weights and maxDistance
  */
 double lv_dist(
-  unsigned int *a, int na, // target
-  unsigned int *b, int nb, // source
+  unsigned int *a, int na, // source
+  unsigned int *b, int nb, // target
   double *weight, 
   double *scores){
   if (!na){
