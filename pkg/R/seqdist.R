@@ -35,9 +35,11 @@
 #' length(a)} distance matrix is returned. If \code{b} is specified, the
 #' \code{length(a) X length(b)} distance matrix is returned.
 #'    
-#' 
+#' If any element of \code{a} or \code{b} is \code{NA_integer_}, the distance with
+#' any matched integer vector will result in \code{NA}. Missing values in the sequences
+#' themselves are treated as a number and not treated specially (Also see the examples).
 #'   
-#'     
+#' @seealso \code{\link{stringdist}}
 #'  
 #' @example ../examples/seqdist.R
 #' @export

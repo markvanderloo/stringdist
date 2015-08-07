@@ -166,9 +166,9 @@ ain <- function(x,table,...){
 #' @param p Winklers penalty parameter for Jaro-Winkler distance, with
 #'   \eqn{0\leq p\leq0.25}. Only when method is \code{'jw'}
 #'
-#' @return \code{amatch} returns the position of the closest match of \code{x}
-#'   in \code{table}. When multiple matches with the same smallest distance
-#'   metric exist, the first one is returned. \code{seqain} returns a
+#' @return \code{seq_amatch} returns the position of the closest match of \code{x}
+#'   in \code{table}. When multiple matches with the same minimal distance
+#'   metric exist, the first one is returned. \code{seq_ain} returns a
 #'   \code{logical} vector of length \code{length(x)} indicating wether an
 #'   element of \code{x} approximately matches an element in \code{table}.
 #' 

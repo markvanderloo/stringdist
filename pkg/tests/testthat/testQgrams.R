@@ -16,3 +16,14 @@ test_that("qgrams",{
   expect_equivalent(qgrams("a",q=1),array(1,dim=c(1,1)))
   expect_equivalent(qgrams("a",q=1,useBytes=TRUE),array(1,dim=c(1,1)))
 })
+
+test_that("seq_qgrams",{
+  expect_equivalent(
+    seq_qgrams(1:3,2:4,q=2)
+    ,matrix(c(
+       1,2,1,0
+      ,2,3,1,1
+      ,3,4,0,1
+    ),nrow=3,byrow=TRUE)
+  )
+})

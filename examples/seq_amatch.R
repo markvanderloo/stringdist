@@ -16,7 +16,6 @@ x.words <- strsplit(x,"[[:blank:]]+")
 x.int <- hashr::hash(x.words)
 table <- c("a little lamb had Mary",
            "had Mary a little lamb")
-table.int <- hashr::hash(strsplit(table,"[[:blank:]]"))
+table.int <- hashr::hash(strsplit(table,"[[:blank:]]+"))
 seq_amatch(x.int,table.int,maxDist=3)
-
 }
