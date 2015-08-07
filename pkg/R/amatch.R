@@ -71,10 +71,7 @@
 #'
 #' @example ../examples/amatch.R
 #' @export
-setGeneric("amatch", function(x,table,...) standardGeneric("amatch"))
-
-#' @rdname amatch
-setMethod("amatch",c("ANY","ANY"), function(x, table, nomatch=NA_integer_, matchNA=TRUE
+amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw", "soundex") 
   , useBytes = FALSE
   , weight=c(d=1,i=1,s=1,t=1)
@@ -117,16 +114,72 @@ setMethod("amatch",c("ANY","ANY"), function(x, table, nomatch=NA_integer_, match
     , as.integer(nthread)
   )
 
-})
+}
 
+#' @param ... parameters to pass to \code{amatch} (except \code{nomatch})
+#'
+#'
 #' @rdname amatch
-setMethod("amatch",c("list","list"), function(x, table, nomatch=NA_integer_, matchNA=TRUE
-  , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw", "soundex") 
-  , useBytes = FALSE
+#' @export 
+ain <- function(x,table,...){
+  amatch(x, table, nomatch=0, ...) > 0
+}
+
+#' Approximate matching for integer sequences.
+#'
+#'
+#' For a \code{list} of integer vectors \code{x}, find the closest matches in a
+#' \code{list} of integer vectors in \code{table.}
+#'
+#'
+#' @param x \code{list} of integer vectors to be approximately matched. 
+#' @param table \code{list} of \code{integer} vectors serving as lookup table for matching.
+#' @param nomatch The value to be returned when no match is found. This is
+#'   coerced to integer.
+#' @param matchNA Should \code{NA}'s be matched? Default behaviour mimics the 
+#'   behaviour of base \code{\link[base]{match}}, meaning that \code{NA} matches
+#'   \code{NA}. With \code{NA}, we mean a missing entry in the \code{list}. If
+#'   one of the integer sequences stored in the list has an \code{NA} entry,
+#'   this is just treated as another integer (the representation of
+#'   \code{NA_integer_}).
+#' @param method Matching algorithm to use. See \code{\link{stringdist-metrics}}.
+#' @param useBytes Perform byte-wise comparison. See \code{\link{stringdist-encoding}}.
+#' @param weight For \code{method='osa'} or \code{'dl'}, the penalty for
+#'   deletion, insertion, substitution and transposition, in that order. When
+#'   \code{method='lv'}, the penalty for transposition is ignored. When
+#'   \code{method='jw'}, the weights associated with characters of \code{a},
+#'   characters from \code{b} and the transposition weight, in that order. 
+#'   Weights must be positive and not exceed 1. \code{weight} is ignored
+#'   completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'},
+#'   \code{'Jaccard'}, \code{'lcs'}, or \code{soundex}.
+#' @param maxDist Elements in \code{x} will not be matched with elements of 
+#'   \code{table} if their distance is larger than \code{maxDist}. Note that the
+#'   maximum distance between strings depends on the method: it should always be
+#'   specified.
+#' @param nthread Number of threads used by the underlying C-code. A sensible
+#'   default is chosen, see \code{\link{stringdist-parallelization}}.
+#'   
+#' @param q q-gram size, only when method is \code{'qgram'}, \code{'jaccard'},
+#'   or \code{'cosine'}.
+#' @param p Winklers penalty parameter for Jaro-Winkler distance, with
+#'   \eqn{0\leq p\leq0.25}. Only when method is \code{'jw'}
+#'
+#' @return \code{amatch} returns the position of the closest match of \code{x}
+#'   in \code{table}. When multiple matches with the same smallest distance
+#'   metric exist, the first one is returned. \code{seqain} returns a
+#'   \code{logical} vector of length \code{length(x)} indicating wether an
+#'   element of \code{x} approximately matches an element in \code{table}.
+#' 
+#' @seealso \code{seqdist}
+#'
+#' @export
+seq_amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
+  , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw") 
   , weight=c(d=1,i=1,s=1,t=1)
   , maxDist=0.1, q=1, p=0
   , nthread = getOption("sd_num_thread")){
 
+  stopifnot(is.list(x),is.list(table))
   stopifnot(all_int(x),all_int(table))
   
   method <- match.arg(method)
@@ -138,7 +191,6 @@ setMethod("amatch",c("list","list"), function(x, table, nomatch=NA_integer_, mat
       , p <= 0.25
       , p >= 0
       , matchNA %in% c(TRUE,FALSE)
-      , maxDist > 0
       , is.logical(useBytes)
       , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
@@ -156,17 +208,16 @@ setMethod("amatch",c("list","list"), function(x, table, nomatch=NA_integer_, mat
     , as.double(maxDist), as.integer(useBytes)
     , as.integer(nthread)
   )
+}
 
-})
-
-
-
-#' @param ... parameters to pass to \code{amatch} (except \code{nomatch})
+#' @param ... parameters to pass to \code{seq_amatch} (except \code{nomatch})
 #'
 #'
 #' @rdname amatch
 #' @export 
-ain <- function(x,table,...){
-  amatch(x, table, nomatch=0, ...) > 0
+seq_ain <- function(x,table,...){
+  seq_amatch(x, table, nomatch=0, ...) > 0
 }
+
+
 
