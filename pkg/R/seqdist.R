@@ -1,13 +1,13 @@
 #' Compute distance metrics between integer sequences
 #'
-#' \code{seqdist} computes pairwise string distances between elements of 
+#' \code{seq_dist} computes pairwise string distances between elements of 
 #' \code{a} and \code{b}, where the argument with less elements is recycled. 
-#' \code{seqdistmatrix} computes the distance matrix with rows according to
+#' \code{seq_distmatrix} computes the distance matrix with rows according to
 #' \code{a} and columns according to \code{b}.
 #'
 #'
 #' @param a \code{list} of \code{integer} vectors (target)
-#' @param b \code{list} of \code{integer} vectors (source). Optional for \code{seqdistmatrix}.
+#' @param b \code{list} of \code{integer} vectors (source). Optional for \code{seq_distmatrix}.
 #' @param method Distance metric. See \code{\link{stringdist-metrics}}
 #' @param weight For \code{method='osa'} or \code{'dl'}, the penalty for
 #'   deletion, insertion, substitution and transposition, in that order. When
@@ -27,10 +27,10 @@
 #'
 #' @return 
 #' 
-#' \code{seqdist} returns a numeric vector with pairwise distances between \code{a}
+#' \code{seq_dist} returns a numeric vector with pairwise distances between \code{a}
 #' and \code{b} of length \code{max(length(a),length(b)}.
 #' 
-#' For \code{seqdistmatrix} there are two options. If \code{b} is missing, the 
+#' For \code{seq_distmatrix} there are two options. If \code{b} is missing, the 
 #' \code{\link[stats]{dist}} object corresponding to the \code{length(a) X
 #' length(a)} distance matrix is returned. If \code{b} is specified, the
 #' \code{length(a) X length(b)} distance matrix is returned.
@@ -41,9 +41,9 @@
 #'   
 #' @seealso \code{\link{stringdist}}
 #'  
-#' @example ../examples/seqdist.R
+#' @example ../examples/seq_dist.R
 #' @export
-seqdist <- function(a, b
+seq_dist <- function(a, b
   , method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw")
   , weight=c(d=1,i=1,s=1,t=1) 
   , q=1, p=0
@@ -84,9 +84,9 @@ seqdist <- function(a, b
 }
 
 #' @param useNames label the output matrix with \code{names(a)} and \code{names(b)}?
-#' @rdname seqdist
+#' @rdname seq_dist
 #' @export 
-seqdistmatrix <- function(a, b
+seq_distmatrix <- function(a, b
    , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw")
    , weight=c(d=1,i=1,s=1,t=1),  q=1, p=0
    , useNames=c("names","none")

@@ -106,7 +106,7 @@
 #' @param nthread Maximum number of threads to use. By default, a sensible
 #'   number of threads is chosen, see \code{\link{stringdist-parallelization}}.
 #'  
-#' @seealso \code{\link{stringsim}}, \code{\link{qgrams}}, \code{\link{seqdist}}
+#' @seealso \code{\link{stringsim}}, \code{\link{qgrams}}, \code{\link{seq_dist}}
 #'
 #' @return For \code{stringdist},  a vector with string distances of size
 #'   \code{max(length(a),length(b))}.

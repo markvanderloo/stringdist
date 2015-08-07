@@ -45,21 +45,21 @@ stringsim <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
 #' 
 #' @param a \code{list} of \code{integer} vectors (target)
 #' @param b \code{list} of \code{integer} vectors (source). Optional for
-#'   \code{seqdistmatrix}.
+#'   \code{seq_distmatrix}.
 #' @param method Method for distance calculation. The default is \code{"osa"}, 
 #'   see \code{\link{stringdist-metrics}}.
 #' @param q  Size of the \eqn{q}-gram; must be nonnegative. Only applies to
 #'   \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
-#' @param ... additional arguments are passed on to \code{\link{seqdist}}.
+#' @param ... additional arguments are passed on to \code{\link{seq_dist}}.
 #' 
-#' @example ../examples/seqsim.R
-#' @seealso \code{\link{seqdist}}, \code{\link{seq_amatch}}
+#' @example ../examples/seq_sim.R
+#' @seealso \code{\link{seq_dist}}, \code{\link{seq_amatch}}
 #' @export
-seqsim <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
+seq_sim <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
    "qgram", "cosine", "jaccard", "jw"),  q = 1, ...) {
     
   method <- match.arg(method)
-  dist <- stringdist::seqdist(a, b, method=method, q=q, ...)
+  dist <- stringdist::seq_dist(a, b, method=method, q=q, ...)
   normalize_dist(dist,a,b,method=method,q=q)
 }
 
