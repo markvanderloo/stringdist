@@ -49,12 +49,11 @@ seq_dist <- function(a, b
   , q=1, p=0
   , nthread = getOption("sd_num_thread")
 ){
+  stopifnot(is.list(a),is.list(b))
   stopifnot(all_int(a), all_int(b))
   
   stopifnot(
-    is.list(a)
-    , is.list(b)
-    , all(is.finite(weight))
+     all(is.finite(weight))
     , all(weight > 0)
     , all(weight <=1)
     , q >= 0
@@ -96,6 +95,7 @@ seq_distmatrix <- function(a, b
   method <- match.arg(method)
   nthread <- as.integer(nthread)
   if (method == 'jw') weight <- weight[c(2,1,3)]
+  stopifnot(is.list(a))
   stopifnot(all_int(a))
 
   # if b is missing, generate a 'dist' object.  
@@ -107,7 +107,8 @@ seq_distmatrix <- function(a, b
         , nthread=nthread)
     )
   }
-  stopifnot(is.list(b),all_int(b))
+  stopifnot(is.list(b))
+  stopifnot(all_int(b))
   if (length(a) == 0 || length(b) == 0){ 
     return(matrix(numeric(0)))
   }
@@ -118,8 +119,13 @@ seq_distmatrix <- function(a, b
   }
   
   
-  x <- vapply(b, do_dist, USE.NAMES=FALSE, FUN.VALUE=numeric(length(a))
-        , b=a, method=method, weight=weight, q=q, p=p, nthread)
+  #x <- vapply(b, do_dist, USE.NAMES=FALSE, FUN.VALUE=numeric(length(a))
+  #      , b=a, method=method, weight=weight, q=q, p=p, nthread=nthread)
+  
+  x <- vapply(b
+      , function(src) do_dist(list(src), b=a, method=method, weight=weight, q=q, p=p, nthread=nthread)
+      , USE.NAMES=FALSE, FUN.VALUE=numeric(length(a))
+    )
   
   if (useNames == "names" ){  
     structure(matrix(x,nrow=length(a),ncol=length(b), dimnames=list(rowns,colns)))

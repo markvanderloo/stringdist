@@ -39,12 +39,19 @@ test_that("Some edge cases",{
 })
 
 test_that("Elementary tests on seq_distmatrix",{
+  expect_error(seq_distmatrix(1:10))
+  expect_error(seq_distmatrix(1:10,list(1:10)))
+  expect_error(seq_distmatrix(list(1:10),1:10))
   expect_equivalent(
     as.matrix(seq_distmatrix(list(1:3,2:4)) )
     , matrix(c(0,2,2,0),nrow=2)
   )
-  expect_equivalent(
+  expect_equal(
     as.matrix(seq_distmatrix(list(x=1:3,y=2:4),useNames="names") )
+    , matrix(c(0,2,2,0),nrow=2,dimnames=list(c('x','y'),c('x','y')))
+  )
+  expect_equal(
+    seq_distmatrix(list(x=1:3,y=2:4),list(x=1:3,y=2:4),useNames="names")
     , matrix(c(0,2,2,0),nrow=2,dimnames=list(c('x','y'),c('x','y')))
   )
   expect_equal(class(seq_distmatrix(list(1:3,2:4))),"dist")
