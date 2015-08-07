@@ -131,6 +131,9 @@ ain <- function(x,table,...){
 #' For a \code{list} of integer vectors \code{x}, find the closest matches in a
 #' \code{list} of integer vectors in \code{table.}
 #'
+#' \code{seq_ain} is currently defined as 
+#' 
+#' \code{seq_ain(x,table,...) <- function(x,table,...) amatch(x, table, nomatch=0,...) > 0}
 #'
 #' @param x \code{list} of integer vectors to be approximately matched. 
 #' @param table \code{list} of \code{integer} vectors serving as lookup table for matching.
@@ -143,15 +146,14 @@ ain <- function(x,table,...){
 #'   this is just treated as another integer (the representation of
 #'   \code{NA_integer_}).
 #' @param method Matching algorithm to use. See \code{\link{stringdist-metrics}}.
-#' @param useBytes Perform byte-wise comparison. See \code{\link{stringdist-encoding}}.
 #' @param weight For \code{method='osa'} or \code{'dl'}, the penalty for
 #'   deletion, insertion, substitution and transposition, in that order. When
 #'   \code{method='lv'}, the penalty for transposition is ignored. When
-#'   \code{method='jw'}, the weights associated with characters of \code{a},
-#'   characters from \code{b} and the transposition weight, in that order. 
+#'   \code{method='jw'}, the weights associated with integers in elements of \code{a},
+#'   integers in elements of \code{b} and the transposition weight, in that order. 
 #'   Weights must be positive and not exceed 1. \code{weight} is ignored
 #'   completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'},
-#'   \code{'Jaccard'}, \code{'lcs'}, or \code{soundex}.
+#'   \code{'Jaccard'}, or \code{'lcs'}.
 #' @param maxDist Elements in \code{x} will not be matched with elements of 
 #'   \code{table} if their distance is larger than \code{maxDist}. Note that the
 #'   maximum distance between strings depends on the method: it should always be
@@ -205,7 +207,7 @@ seq_amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   .Call("R_amatch", x, table, method
     , as.integer(nomatch), as.integer(matchNA)
     , as.double(weight), as.double(p), as.integer(q)
-    , as.double(maxDist), as.integer(useBytes)
+    , as.double(maxDist), 0L
     , as.integer(nthread)
   )
 }
@@ -213,7 +215,7 @@ seq_amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
 #' @param ... parameters to pass to \code{seq_amatch} (except \code{nomatch})
 #'
 #'
-#' @rdname amatch
+#' @rdname seq_amatch
 #' @export 
 seq_ain <- function(x,table,...){
   seq_amatch(x, table, nomatch=0, ...) > 0
