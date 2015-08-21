@@ -6,8 +6,9 @@
 #' \code{a} and columns according to \code{b}.
 #'
 #'
-#' @param a \code{list} of \code{integer} vectors (target)
-#' @param b \code{list} of \code{integer} vectors (source). Optional for \code{seq_distmatrix}.
+#' @param a (\code{list} of) \code{integer} or \code{numeric} vector(s). Will be converted with \code{as.integer}  (target)
+#' @param b (\code{list} of) \code{integer} or \code{numeric} vector(s). Will be converted with \code{as.integer} (source). 
+#'    Optional for \code{seq_distmatrix}.
 #' @param method Distance metric. See \code{\link{stringdist-metrics}}
 #' @param weight For \code{method='osa'} or \code{'dl'}, the penalty for
 #'   deletion, insertion, substitution and transposition, in that order. When
@@ -49,8 +50,8 @@ seq_dist <- function(a, b
   , q=1, p=0
   , nthread = getOption("sd_num_thread")
 ){
-  stopifnot(is.list(a),is.list(b))
-  stopifnot(all_int(a), all_int(b))
+  a <- ensure_int_list(a)
+  b <- ensure_int_list(b)
   
   stopifnot(
      all(is.finite(weight))
@@ -95,9 +96,9 @@ seq_distmatrix <- function(a, b
   method <- match.arg(method)
   nthread <- as.integer(nthread)
   if (method == 'jw') weight <- weight[c(2,1,3)]
-  stopifnot(is.list(a))
-  stopifnot(all_int(a))
-
+  
+  a <- ensure_int_list(a)
+  
   # if b is missing, generate a 'dist' object.  
   if (missing(b)){ 
     return( lower_tri(a
@@ -107,8 +108,8 @@ seq_distmatrix <- function(a, b
         , nthread=nthread)
     )
   }
-  stopifnot(is.list(b))
-  stopifnot(all_int(b))
+ 
+  b <- ensure_int_list(b)
   if (length(a) == 0 || length(b) == 0){ 
     return(matrix(numeric(0)))
   }

@@ -33,15 +33,23 @@ test_that("Methods are selected and computed correctly", {
   )
 })  
 
+test_that("Conversion for non-integer-list arguments",{
+  expect_equal(seq_dist(list(1:3),list(2:4)),seq_dist(as.numeric(1:3),as.numeric(2:4)))
+  expect_equal(seq_dist(list(1:3),list(2:4)),seq_dist(1:3, 2:4))
+  expect_equal(seq_distmatrix(list(1:3),list(2:4)), seq_distmatrix(as.numeric(1:3),as.numeric(2:4)))  
+  expect_equal(seq_distmatrix(list(1:3),list(2:4)), seq_distmatrix(1:3,2:4))  
+  expect_equal(seq_distmatrix(list(1:3)),seq_distmatrix(1:3))
+  expect_equal(seq_distmatrix(list(1:3)),seq_distmatrix(as.numeric(1:3)))
+})
+
 test_that("Some edge cases",{
   expect_equal(length(seq_dist(list(),list(c(1L)))),0)
   expect_equal(length(seq_dist(list(),list())),0)
 })
 
 test_that("Elementary tests on seq_distmatrix",{
-  expect_error(seq_distmatrix(1:10))
-  expect_error(seq_distmatrix(1:10,list(1:10)))
-  expect_error(seq_distmatrix(list(1:10),1:10))
+  expect_equivalent(seq_distmatrix(1:10),dist(0))
+  expect_equivalent(seq_distmatrix(1:10,list(1:10)),matrix(0))
   expect_equivalent(
     as.matrix(seq_distmatrix(list(1:3,2:4)) )
     , matrix(c(0,2,2,0),nrow=2)
