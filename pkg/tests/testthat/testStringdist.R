@@ -10,6 +10,10 @@ test_that("Argument parsing",{
    expect_error(stringdist("a","b",weight=c(1,0,1,1)))
    expect_error(stringdist("a","b",weight=c(1,1,1,4)))
    expect_warning(stringdist(letters[1:3],letters[1:2]))
+   expect_warning(stringdist(list('a'),'a'))
+   expect_warning(stringdist('a',list('a')))
+   expect_warning(stringdistmatrix(list('a')))
+   expect_warning(stringdistmatrix(list('a'),list('b')))
 }) 
 
 

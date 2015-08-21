@@ -73,7 +73,15 @@
 #' 
 {}
 
-  
+listwarning <- function(x,y){
+sprintf("
+You are passing one or more arguments of type 'list' to
+'%s'. These arguments will be converted with 'as.character'
+which is likeley not to give what you want (did you mean to use '%s'?).
+This warning can be avoided by explicitly converting the argument(s).
+",x,y)
+}
+
 #' Compute distance metrics between strings
 #'
 #' 
@@ -137,7 +145,9 @@ stringdist <- function(a, b
 ){
   if (maxDist < Inf)
     warning("Argument 'maxDist' is deprecated for function 'stringdist'. This argument will be removed in the future.")   
-
+  if (is.list(a)|is.list(b))
+    warning(listwarning("stringdist","seqdist"))
+            
   stopifnot(
     all(is.finite(weight))
     , all(weight > 0)
@@ -205,6 +215,9 @@ stringdistmatrix <- function(a, b
   }
   if ( !is.null(cluster) ){
     message("Argument 'cluster' is deprecaterd as stringdust now uses multithreading by default. The argument is currently ignored and will be removed in the future")
+  }
+  if (is.list(a)|| (!missing(b) && is.list(b)) ){
+   warning(listwarning("stringdistmatrix","seqdistmatrix"))
   }
 
   # for backward compatability with stringdist <= 0.9.0
