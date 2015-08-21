@@ -348,14 +348,7 @@ double qgram_dist(
   // q equals zero. In the R journal paper we used Inf for cases where 
   // q=0 and |s| or |t| > 0
   if ( q == 0 ) return 0.0;
-  /*{
-    if ( x + y > 0 ){ // distance undefined
-      return -1.0;
-    } else { // x == y == 0.
-      return 0.0;
-    } 
-  }
-*/
+  
   double dist[3] = {0,0,0};
   Q = push_string(s, x, q, Q, 0, 2);
   if (Q == NULL) return -2.0;
