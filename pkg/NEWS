@@ -2,6 +2,7 @@ version 0.9.3
 - new function for tokenizing integer sequences: seq_qgrams
 - new function for matching integer sequences: seq_amatch
 - new functions computing distances between integer sequences: seq_dist, seq_distmatrix
+- q-gram based distances are now always 0 when q=0 (used to be Inf if at least one of the arguments was not the empty string)
 - stringdist, stringdistmatrix now emit warning when presented with 'list' argument
 - small c-side code optimizations
 - bugfix in dl, lv, osa distance: weights were not taken into account properly (thanks to Zach Price)

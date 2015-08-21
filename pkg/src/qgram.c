@@ -344,15 +344,18 @@ double qgram_dist(
   ){
   // return -1 when q is larger than the length of the shortest string.
   if ( q > (x <= y ? x : y) ) return -1.0;
-  // rare edge cases.
-  if ( q == 0 ){
+  // rare edge case: q==0. Note that we return 0 for all cases where
+  // q equals zero. In the R journal paper we used Inf for cases where 
+  // q=0 and |s| or |t| > 0
+  if ( q == 0 ) return 0.0;
+  /*{
     if ( x + y > 0 ){ // distance undefined
       return -1.0;
     } else { // x == y == 0.
       return 0.0;
     } 
   }
-
+*/
   double dist[3] = {0,0,0};
   Q = push_string(s, x, q, Q, 0, 2);
   if (Q == NULL) return -2.0;

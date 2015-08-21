@@ -68,8 +68,6 @@ test_that("Elementary tests on seq_distmatrix",{
     , matrix(c(0,2,2,0),nrow=2)
   )
   
-  
-  
 })
 
 
