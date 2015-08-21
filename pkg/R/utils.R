@@ -34,6 +34,10 @@ ensure_int_list <- function(x){
   }
 }
 
+setNames <- function(object, nm){
+  names(object) <- nm
+  object
+}
 
 #' Detect the presence of non-printable or non-ascii characters
 #' 

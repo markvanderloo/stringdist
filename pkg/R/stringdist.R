@@ -67,7 +67,7 @@
 #' @name stringdist-package
 #' @docType package
 #' @useDynLib stringdist
-#' @import parallel methods
+#' @importFrom parallel detectCores 
 #'
 #'
 #' 

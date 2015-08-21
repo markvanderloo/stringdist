@@ -16,7 +16,7 @@ Description: Implements an approximate string matching version of R's native
      integer vectors representing generic sequences.
 Version: 0.9.3
 Depends: R (>= 2.15.3)
-Imports: parallel, methods
+Imports: parallel
 URL: https://github.com/markvanderloo/stringdist
 BugReports: https://github.com/markvanderloo/stringdist/issues
 Date: 2015-06-23
