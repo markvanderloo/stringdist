@@ -17,6 +17,7 @@ The package offers the following main functions:
 * `stringsim` computes a string similarity between 0 and 1, based on `stringdist`
 * `amatch` is a fuzzy matching equivalent of R's native `match` function
 * `ain` is a fuzzy matching equivalent of R's native `%in%` operator
+* `seq_dist`, `seq_distmatrix`, `seq_amatch` and `seq_ain` for distances between, and matching of integer sequences. (see also the [hashr](https://github.com/markvanderloo/hashr) package).
 
 These functions are built upon `C`-code that re-implements some common (weighted) string
 distance functions. Distance functions include:
@@ -35,6 +36,7 @@ distance functions. Distance functions include:
 Also, there are some utility functions:
 
 * `qgrams()` tabulates the qgrams in one or more `character` vectors.
+* `seq_qrams()` tabulates the qgrams (somtimes called ngrams) in one or more `integer` vectors.
 * `phonetic()` computes phonetic codes of strings (currently only soundex)
 * `printable_ascii()` is a utility function that detects non-printable ascii or non-ascii characters.
 
