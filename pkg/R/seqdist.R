@@ -6,6 +6,10 @@
 #' \code{a} and columns according to \code{b}.
 #'
 #'
+#' @section Notes:
+#' Input vectors are converted with \code{as.integer}. This causes truncation for numeric
+#' vectors (e.g. \code{pi} will be treated as \code{3L}).
+#'
 #' @param a (\code{list} of) \code{integer} or \code{numeric} vector(s). Will be converted with \code{as.integer}  (target)
 #' @param b (\code{list} of) \code{integer} or \code{numeric} vector(s). Will be converted with \code{as.integer} (source). 
 #'    Optional for \code{seq_distmatrix}.

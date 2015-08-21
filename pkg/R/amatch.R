@@ -129,14 +129,22 @@ ain <- function(x,table,...){
 #'
 #'
 #' For a \code{list} of integer vectors \code{x}, find the closest matches in a
-#' \code{list} of integer vectors in \code{table.}
+#' \code{list} of integer or numeric vectors in \code{table.}
 #'
+#' @section Notes:
 #' \code{seq_ain} is currently defined as 
 #' 
 #' \code{seq_ain(x,table,...) <- function(x,table,...) amatch(x, table, nomatch=0,...) > 0}
 #'
-#' @param x \code{list} of integer vectors to be approximately matched. 
-#' @param table \code{list} of \code{integer} vectors serving as lookup table for matching.
+#' All input vectors are converted with \code{as.integer}. This causes truncation for numeric
+#' vectors (e.g. \code{pi} will be treated as \code{3L}).
+#'
+#'
+#' @param x (\code{list} of) \code{integer} or \code{numeric} vector(s) to be
+#'   approximately matched. Will be converted with \code{as.integer}.
+#' @param table (\code{list} of) \code{integer} or \code{numeric} vector(s)
+#'   serving as lookup table for matching. Will be converted with
+#'   \code{as.integer}.
 #' @param nomatch The value to be returned when no match is found. This is
 #'   coerced to integer.
 #' @param matchNA Should \code{NA}'s be matched? Default behaviour mimics the 
@@ -182,8 +190,8 @@ seq_amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   , maxDist=0.1, q=1, p=0
   , nthread = getOption("sd_num_thread")){
 
-  stopifnot(is.list(x),is.list(table))
-  stopifnot(all_int(x),all_int(table))
+  x <- ensure_int_list(x)
+  table <- ensure_int_list(table)
   
   method <- match.arg(method)
   stopifnot(

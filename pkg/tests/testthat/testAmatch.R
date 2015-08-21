@@ -177,10 +177,8 @@ test_that("bytewise matching differs from character wise matching",{
 context("seq_amatch")
 
 test_that("Input checks for seq_amatch",{
-  expect_error(seq_amatch(1:10,list(x=1:10)))
-  expect_error(seq_amatch(list(x=1:10),1:10))
-  expect_error(seq_amatch(list(0.1*1:3),list(1:3)))
-  expect_error(seq_amatch(list(1:3),list(0.1*1:3)))
+  expect_equal(seq_amatch(list(1:10),list(1:10)),seq_amatch(1:10,1:10))
+  expect_equal(seq_amatch(list(1:10),list(1:10)),seq_amatch(as.numeric(1:10),as.numeric(1:10)))
 })
 
 test_that("Some elementary tests for seq_amatch and seq_ain",{
