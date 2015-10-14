@@ -122,7 +122,8 @@ double jaro_winkler_dist(
   if ( m < 1 ){
     d = 1.0;
   } else {
-    d = 1.0 - (1.0/3.0)*(w[0]*m/((double) x) + w[1]*m/((double) y) + w[2]*(m-t)/m);
+    double tot_weight = w[0] + w[1] + w[2];
+    d = 1.0 - (1.0/tot_weight)*(w[0]*m/((double) x) + w[1]*m/((double) y) + w[2]*(m-t)/m);
   }
 
   // Winkler's penalty factor
