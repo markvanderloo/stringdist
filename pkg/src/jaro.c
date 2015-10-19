@@ -60,11 +60,12 @@ double jaro_winkler_dist(
   // edge case
   if ( x == 0 && y == 0 ) return 0;
 
-  //unsigned int *work = (unsigned int *) malloc((x + y)*sizeof(unsigned int));
   for (int k=0; k < x + y; k++) work[k] = 0;
-  // 
-  double *matcha = work
-       , *matchb = work + x;  
+
+  // we need space for integers (or do a lot of conversions)
+  unsigned int *wrk = (unsigned int*) work;
+  unsigned int *matcha = wrk
+             , *matchb = wrk + x;  
   unsigned int left, right;
 
   // number of matches
@@ -72,12 +73,12 @@ double jaro_winkler_dist(
   // max transposition distance
   int M = MAX(MAX(x,y)/2 - 1,0);
 
-
+  // store the match indices. Indices are stored as i+1 because 0 is used as 'no match'
   for ( int i = 0; i < x; ++i){
     left = MAX(0,i-M);
     right = MIN(y,i+M);
     for ( int j = left; j <= right; j++){
-      if (a[i] == b[j] & matchb[j]==0){
+      if ((a[i] == b[j]) && (matchb[j]==0)){
          matcha[i] = i+1;
          matchb[j] = j+1;
          m += 1;
@@ -86,23 +87,26 @@ double jaro_winkler_dist(
     }
   }
 
-  double t = 0.0;
+  // copy matches so they're easy to compare for transposition counting
   int j = 0;
   for (int i=0; i < x; ++i){
     if (matcha[i]){ 
-      matcha[j] = (double) a[(int) (matcha[i]-1)];
+      matcha[j] = a[matcha[i]-1];
       ++j;
     }
   }
   j = 0;
   for (int i=0; i < y; ++i){
     if (matchb[i]){ 
-      matchb[j] = (double) b[(int) (matchb[i]-1)];
+      matchb[j] = b[matchb[i]-1];
       ++j;
     }
   }
+
+  // count 'transpositions', the Jaro way.
+  double t = 0.0;
   for ( int k=0; k<m; ++k){
-    t += (matcha[k] == matchb[k]) ? 0 : 0.5;
+    if (matcha[k] != matchb[k]) t += 0.5;
   }
 
   double d;
@@ -121,27 +125,6 @@ double jaro_winkler_dist(
   return d;
 }
 
-/*
-SEXP jwdist(SEXP a, SEXP x, SEXP b, SEXP y, SEXP p, SEXP w){
-
-  double *work = (double *) malloc((INTEGER(x)[0]+INTEGER(y)[0])*sizeof(double *));
-  SEXP out;
-  out = PROTECT(allocVector(REALSXP, 1));
-  REAL(out)[0] = jaro_winkler_dist(
-   (unsigned int *) INTEGER(a)
-   ,INTEGER(x)[0]
-   ,(unsigned int *) INTEGER(b)
-   ,INTEGER(y)[0]
-   ,REAL(p)[0]
-   ,REAL(w)
-   , work
- );
-
- free(work);
- UNPROTECT(1); 
-return out ;
-}
-*/
 
 
 
