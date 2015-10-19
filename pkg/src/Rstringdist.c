@@ -233,7 +233,9 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
 static int get_j(int k, int n){
   double nd = (double) n;
   double kd = (double) k;
-  return (int) ceil( (2.*nd - 3.)/2. - sqrt(pow(nd-.5,2.) - 2.*(kd + 1.)) );
+  double u = ceil( (2.*nd - 3.)/2. - sqrt(pow(nd-.5,2.) - 2.*(kd + 1.)) );
+
+  return (int) u;
 }
 
 
@@ -254,9 +256,13 @@ SEXP R_lower_tri(SEXP a, SEXP method
     , ml = max_length(a)
     , N = n*(n - 1)/2
     , intdist = TYPEOF(a) == VECSXP ? 1 : 0; // expect list of integer vectors? 
+
+
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(REALSXP, N));
+  // nothing to do if n=1 
+  if (n == 1L) goto end ;
   double *y = REAL(yy);
 
 
@@ -320,6 +326,7 @@ SEXP R_lower_tri(SEXP a, SEXP method
     close_stringdist(sd);
   } // end of parallel region
 
+  end:
   UNPROTECT(8);
   if (n < 0 ) error("Unable to allocate enough memory");
   return(yy);
