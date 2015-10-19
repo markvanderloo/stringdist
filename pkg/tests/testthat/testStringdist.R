@@ -300,6 +300,10 @@ test_that("basic examples and edge cases work",{
   # following test added after a bug report of Carol Gan:
   expect_equal(stringdist("tire","tree",method="jw"),stringdist("tree","tire",method="jw"));
   expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="jw"))),1)
+  # following test added after issue #42 by github user gtumuluri
+  # thanks to Jan for providing this simple example.
+  expect_equal(stringdist("DHCXXXXX","HCDXXXXX",method="jw"),stringdist("HCDXXXXX","DHCXXXXX",method="jw"))
+ 
 })
 
 test_that("Extended examples work",{

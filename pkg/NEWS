@@ -1,3 +1,6 @@
+version 0.9.4
+- bugfix in jw distance: not symmetric for certain cases (thanks to github user gtumuluri)
+
 version 0.9.3
 - new function for tokenizing integer sequences: seq_qgrams
 - new function for matching integer sequences: seq_amatch
