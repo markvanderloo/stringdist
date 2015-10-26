@@ -1,3 +1,6 @@
+version 0.9.5
+- bugfix in osa/dl/lv distances w/unequal edit weights (thanks to Nathalia Potocka)
+
 version 0.9.4
 - bugfix: edge case for zero-size for lower tridiagonal dist matrices (caused UBSAN to fire, but gave correct results).
 - bugfix in jw distance: not symmetric for certain cases (thanks to github user gtumuluri)
