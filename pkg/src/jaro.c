@@ -24,28 +24,6 @@
 #endif
 
 
-
-/* First match of a in b[] 
- * Returns -1 if no match is found
- * Parameter 'guard; indicates which elements of b have been matched before to avoid
- * matching two instances of the same character to the same position in b (which we treat read-only).
- */
-static int match_int(unsigned int a, unsigned int *b, double *guard, int width, int m){
-  int i = 0;
-  while ( 
-      ( i < width ) && 
-      ( b[i] != a || (b[i] == a && guard[i] > 0)) 
-  ){
-    ++i;
-  }
-  // ugly edge case workaround
-  if ( !(m && i==width) && b[i] == a ){
-    guard[i] = 1.0;
-    return i;
-  } 
-  return -1;
-}
-
 // Winkler's l-factor (nr of matching characters at beginning of the string).
 static double get_l(unsigned int *a, unsigned int *b, int n){
   int i=0;
@@ -65,59 +43,72 @@ static double get_l(unsigned int *a, unsigned int *b, int n){
  * x    : length of a (in uints)
  * y    : length of b (in uints)
  * p    : Winkler's p-factor in (0,0.25)
- * work : workspace, minimally of length max(x,y)
+ * work : workspace, minimally of length x + y
  *
  */
 double jaro_winkler_dist(
-             unsigned int *a, 
-             int x,
-             unsigned int *b,
-             int y,
-             double p,
-             double *w,
-             double *work
-        ){
+     unsigned int *a 
+     , int x
+     , unsigned int *b
+     , int y
+     , double p
+     , double *w
+     , double *work
+  ){
+
 
   // edge case
   if ( x == 0 && y == 0 ) return 0;
-  // swap arguments if necessary, so we always loop over the shortest string
-  if ( x > y ){
-    unsigned int *c = b;
-    unsigned int z = y;
-    b = a;
-    a = c;
-    y = x;
-    x = z;
-  }
 
-  for (int k=0; k<MAX(x,y); k++) work[k] = 0.0;
+  for (int k=0; k < x + y; k++) work[k] = 0;
 
+  // we need space for integers (or do a lot of conversions)
+  unsigned int *wrk = (unsigned int*) work;
+  unsigned int *matcha = wrk
+             , *matchb = wrk + x;  
+  unsigned int left, right;
+
+  // number of matches
+  int m = 0;
   // max transposition distance
   int M = MAX(MAX(x,y)/2 - 1,0);
-  // transposition counter
-  double t = 0.0;
-  // number of matches 
-  double m = 0.0;
-  int max_reached; 
-  int left, right, J, jmax=0;
-  
-  for ( int i=0; i < x; ++i ){
-    left  = MAX(0, i-M);
-    if ( left >= y ){
-      J = -1;
-    } else {
-      right = MIN(y, i+M);
-      // ugly workaround: I should rewrite match_int.
-      max_reached = (right == y) ? 1 : 0;
-      J =  match_int(a[i], b + left, work + left, right - left, max_reached);
-    }
 
-    if ( J >= 0 ){
-      ++m;
-      t += (J + left < jmax ) ? 1 : 0; 
-      jmax = MAX(jmax, J + left);
+  // store the match indices. Indices are stored as i+1 because 0 is used as 'no match'
+  for ( int i = 0; i < x; ++i){
+    left = MAX(0,i-M);
+    right = MIN(y,i+M);
+    for ( int j = left; j <= right; j++){
+      if ((a[i] == b[j]) && (matchb[j]==0)){
+         matcha[i] = i+1;
+         matchb[j] = j+1;
+         m += 1;
+         break;
+      }
     }
   }
+
+  // copy matches so they're easy to compare for transposition counting
+  int j = 0;
+  for (int i=0; i < x; ++i){
+    if (matcha[i]){ 
+      matcha[j] = a[matcha[i]-1];
+      ++j;
+    }
+  }
+  j = 0;
+  for (int i=0; i < y; ++i){
+    if (matchb[i]){ 
+      matchb[j] = b[matchb[i]-1];
+      ++j;
+    }
+  }
+
+  // count 'transpositions', the Jaro way.
+  double t = 0.0;
+  for ( int k=0; k<m; ++k){
+    if (matcha[k] != matchb[k]) t += 0.5;
+  }
+
   double d;
   if ( m < 1 ){
     d = 1.0;
@@ -130,8 +121,11 @@ double jaro_winkler_dist(
     int n = MIN(MIN(x,y),4);
     d =  d - get_l(a,b,n)*p*d; 
   }
+
   return d;
 }
+
+
 
 
 

@@ -75,7 +75,9 @@ Stringdist *open_stringdist(Distance d, int str_len_a, int str_len_b, ...){
       S->tree = new_qtree(S->q, 2L); 
       break;
     case jw :
-      S->work = (double *) malloc( sizeof(double) * MAX(str_len_a,str_len_b));
+//      S->work = (double *) malloc( sizeof(double) * MAX(str_len_a,str_len_b));
+      S->work = (double *) malloc( sizeof(double) * (str_len_a+str_len_b));
+
       S->weight = (double *) malloc(3L*sizeof(double));
       memcpy(S->weight, va_arg(args, double *), 3*sizeof(double));
       S->p = va_arg(args, double);
