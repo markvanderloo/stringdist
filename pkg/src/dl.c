@@ -119,12 +119,12 @@ double dl_dist(
 
   unsigned int swapCount, targetCharCount,i,j;
   double delScore, insScore, subScore, swapScore;
-  unsigned int score_ceil = x + y;
+  double score_ceil =  x + y;
   
   /* intialize matrix start values */
   scores[0] = score_ceil;  
-  scores[1 * (y + 2) + 0] = score_ceil;
-  scores[0 * (y + 2) + 1] = score_ceil;
+  scores[1 * (y + 2) + 0] = weight[0]; //score_ceil;
+  scores[0 * (y + 2) + 1] = weight[1]; //score_ceil;
   scores[1 * (y + 2) + 1] = 0;
 
   uniquePush(dict,src[0]);
@@ -142,7 +142,7 @@ double dl_dist(
     for(j=1;j<=y;j++){
       if(i == 1) {
         uniquePush(dict,tgt[j]);
-        scores[1 * (y + 2) + (j + 1)] = j * weight[0];
+        scores[1 * (y + 2) + (j + 1)] = j * weight[1];
         scores[0 * (y + 2) + (j + 1)] = score_ceil;
       }
       targetCharCount = dict->value[which(dict, tgt[j-1])];
