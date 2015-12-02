@@ -22,11 +22,15 @@
 #'
 #' @details
 #' The similarity is calculated by first calculating the distance using
-#' \code{\link{stringdist}} and then dividing the distance by the maximum
-#' possible distance. This results in a score between 0 and 1, with 1
-#' corresponding to perfect similarity and 0 to complete dissimilarity.
-#' For distances where weights can be specified, the maximum distance is currently computed by
-#' assuming that all weights are equal to 1.
+#' \code{\link{stringdist}}, dividing the distance by the maximum
+#' possible distance, and substracting the result from 1. 
+#' This results in a score between 0 and 1, with 1
+#' corresponding to complete similarity and 0 to complete dissimilarity.
+#' Note that complete similarity only means equality for distances satisfying
+#' the identity property. This is not the case e.g. for q-gram based distances
+#' (for example if q=1, anagrams are completely similar).
+#' For distances where weights can be specified, the maximum distance 
+#' is currently computed by assuming that all weights are equal to 1.
 #'
 #' @example ../examples/stringsim.R
 #' @export
