@@ -44,7 +44,11 @@ typedef struct {
 } Stringset;
 
 
-
+/* size of longest object in a SEXP
+ *
+ *
+ *
+ */
 unsigned int max_length(SEXP);
 
 /* Get element from SEXP list and determine some parameters.
