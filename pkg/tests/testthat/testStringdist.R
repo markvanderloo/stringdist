@@ -410,6 +410,11 @@ test_that("dimensions work out",{
     expect_equivalent( # bug #28
       dim(stringdistmatrix('foo',letters[1:3])), c(1,3)
     )
+   # Error when input vector yields a vector too big for a long vector.
+   out <- tryCatch(stringdistmatrix(character(100663296+1),method="hamming")
+      , error = function(e) e$message )
+   expect_equal(class(out),"character")
+   expect_match(out, "exceeds maximum allowed")
 })
 
 test_that('stringdistmatrix yields correct distances',{

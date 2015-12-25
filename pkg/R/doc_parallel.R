@@ -1,8 +1,8 @@
 #' @title
 #' Multithreading and parallelization in \pkg{stringdist}
 #'
-#' @details
-#' This page describes how \pkg{stringdist} uses parallel processing.
+#' 
+#' @description This page describes how \pkg{stringdist} uses parallel processing.
 #'
 #' @section Multithreading and parallelization in \pkg{stringdist}: The core 
 #'   functions of \pkg{stringdist} are implemented in C. On systems where 

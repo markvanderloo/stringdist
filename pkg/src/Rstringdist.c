@@ -19,6 +19,7 @@
 
 #define USE_RINTERNALS
 #include <stdlib.h>
+#include <stdint.h>
 #include <R.h>
 #include <Rdefines.h>
 #include <math.h>
@@ -230,7 +231,7 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
 
 // Lower tridiagonal distance matrix for a single vector argument.
 
-static int get_j(int k, int n){
+static int get_j(R_xlen_t k, int n){
   double nd = (double) n;
   double kd = (double) k;
   double u = ceil( (2.*nd - 3.)/2. - sqrt(pow(nd-.5,2.) - 2.*(kd + 1.)) );
@@ -238,6 +239,14 @@ static int get_j(int k, int n){
   return (int) u;
 }
 
+/* max n for objects of length n(n-1).
+ * 
+*/
+#ifdef LONG_VECTOR_SUPPORT
+#define MAXN ( (R_xlen_t) (0.5 + 1.5 * sqrt((double) R_XLEN_T_MAX)) )
+#else
+#define MAXN ( (R_xlen_t) (0.5 + 1.5 * sqrt((double) R_LEN_T_MAX)) )
+#endif
 
 SEXP R_lower_tri(SEXP a, SEXP method
   , SEXP weight, SEXP p, SEXP q
@@ -251,13 +260,19 @@ SEXP R_lower_tri(SEXP a, SEXP method
   PROTECT(useBytes);
   PROTECT(nthrd);
 
-  int n = length(a)
-    , bytes = INTEGER(useBytes)[0]
+  int bytes = INTEGER(useBytes)[0]
     , ml = max_length(a)
-    , N = n*(n - 1)/2
     , intdist = TYPEOF(a) == VECSXP ? 1 : 0; // expect list of integer vectors? 
 
+  // Long vectors on platforms where LONG_VECTOR_SUPPORT is defined.
+  R_xlen_t n = xlength(a)
+    , N = n*(n-1)/2;
 
+  if ( n > MAXN ){
+    error("Length of input vector (%d) exceeds maximum allowed for this platform (%d)",n,MAXN);
+  }  
+ 
+ 
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(REALSXP, N));
@@ -288,10 +303,12 @@ SEXP R_lower_tri(SEXP a, SEXP method
     t = s + ml + 1L;
       
     int len_s, len_t, isna_s, isna_t
-      , i = 0, j = 0, p = 0
+      , i = 0, j = 0
       , thread_id = 0
       , n_threads = 1
-      , col_max = n-1
+      , col_max = n-1;
+
+    R_xlen_t p = 0
       , k_start = 0
       , k_end = N;
 
@@ -305,7 +322,7 @@ SEXP R_lower_tri(SEXP a, SEXP method
       k_end   = (thread_id < n_threads - 1 ) ? k_start + p : N;
       j = get_j(k_start,n);
       i = k_start + j * (j - 2*n + 3)/2;
-    for ( int k=k_start; k < k_end; k++ ){
+    for ( R_xlen_t k=k_start; k < k_end; k++ ){
       i++;
       get_elem(a, i, bytes, intdist, &len_s, &isna_s, s);
       get_elem(a, j, bytes, intdist, &len_t, &isna_t, t);
