@@ -1,4 +1,7 @@
-version 0.9.5
+version 0.9.4.1
+- stringdistmatrix(a) now outputs long vectors (issue #45, thanks to Wouter Touw). 
+  For stringdistmatrix(a,b) this was already the case, but the length of rows and columns remains
+  restricted to 2^31-1 since long input vectors are not supported (yet).
 - bugfix in osa/dl/lv distances w/unequal edit weights (thanks to Nathalia Potocka)
 
 version 0.9.4
