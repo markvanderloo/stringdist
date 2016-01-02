@@ -9,12 +9,12 @@ Authors@R: c( person("Mark", "van der Loo", role=c("aut","cre"),email="mark.vand
             , person("Jan", "van der Laan", role="ctb"),person("R Core Team","",role=c("ctb")),person("Nick","Logan",role="ctb"))
 Description: Implements an approximate string matching version of R's native
      'match' function. Can calculate various string distances based on edits
-     (damerau-levenshtein, hamming, levenshtein, optimal sting alignment), qgrams
-     (q-gram, cosine, jaccard distance) or heuristic metrics (jaro, jaro-winkler).
+     (Damerau-Levenshtein, Hamming, Levenshtein, optimal sting alignment), qgrams
+     (q-gram, cosine, jaccard distance) or heuristic metrics (Jaro, Jaro-Winkler).
      An implementation of soundex is provided as well. Distances can be computed
      between character vectors while taking proper care of encoding or between
      integer vectors representing generic sequences.
-Version: 0.9.4.1
+Version: 0.9.4.2
 Depends: R (>= 2.15.3)
 Imports: parallel
 URL: https://github.com/markvanderloo/stringdist
