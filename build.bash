@@ -16,11 +16,10 @@ done
 echo "######## Removing building information..."
 rm -rf output
 
-echo "######## Copying DESCRIPTION and NAMESPACE to pkg directory..."
-cp build/DESCRIPTION pkg
 
 echo "######## Generate documentation..."
-$R -q -f roxygen.R
+$R -q -e "devtools::document('pkg')"
+
 
 echo "######## Building package in output..."
 mkdir output

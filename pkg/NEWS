@@ -1,21 +1,31 @@
+version 0.9.4.2
+- bugfix in stringdistmatrix(a): value of p, for jw-distance was ignored
+  (thanks to Max Fritsche)
+- bugfix in stringdistmatrix(a): Would segfault on q-gram w/input > ~7k strings
+  and q>1 (thanks to Connor McKay)
+
 version 0.9.4.1
-- stringdistmatrix(a) now outputs long vectors (issue #45, thanks to Wouter Touw). 
-  For stringdistmatrix(a,b) this was already the case, but the length of rows and columns remains
-  restricted to 2^31-1 since long input vectors are not supported (yet).
+- stringdistmatrix(a) now outputs long vectors (issue #45, thanks to Wouter
+  Touw).  For stringdistmatrix(a,b) this was already the case, but the length
+  of rows and columns remains restricted to 2^31-1 since long input vectors are
+  not supported (yet).
 - bugfix in osa/dl/lv distances w/unequal edit weights (thanks to Nathalia Potocka)
 
 version 0.9.4
-- bugfix: edge case for zero-size for lower tridiagonal dist matrices (caused UBSAN to fire, but gave correct results).
+- bugfix: edge case for zero-size for lower tridiagonal dist matrices (caused
+  UBSAN to fire, but gave correct results).
 - bugfix in jw distance: not symmetric for certain cases (thanks to github user gtumuluri)
 
 version 0.9.3
 - new function for tokenizing integer sequences: seq_qgrams
 - new function for matching integer sequences: seq_amatch
 - new functions computing distances between integer sequences: seq_dist, seq_distmatrix
-- q-gram based distances are now always 0 when q=0 (used to be Inf if at least one of the arguments was not the empty string)
+- q-gram based distances are now always 0 when q=0 (used to be Inf if at least
+  one of the arguments was not the empty string)
 - stringdist, stringdistmatrix now emit warning when presented with 'list' argument
 - small c-side code optimizations
-- bugfix in dl, lv, osa distance: weights were not taken into account properly (thanks to Zach Price)
+- bugfix in dl, lv, osa distance: weights were not taken into account properly
+  (thanks to Zach Price)
 
 version 0.9.2
 - Update  fixing some errors (missing documentation, tests) in the 0.9.1 release.
@@ -34,34 +44,48 @@ version 0.9.1
 version 0.9.0
 - C-code underlying stringdist and amatch now automatically use multithreading based on openMP. 
   The default number of threads is governed by options('sd_num_thread'). 
-- stringdist, stringdistmatrix, amatch and ain gain nthread argument which can overwrite the default maximum number of threads.
-- Argument 'maxDist' is phased out for 'stringdist' and 'stringdistmatrix'. Specifying it causes a message.
-- Argument 'ncores' is phased out for 'stringdistmatrix'. It is now ignored and specifying it causes a message.
+- stringdist, stringdistmatrix, amatch and ain gain nthread argument which can
+  overwrite the default maximum number of threads.
+- Argument 'maxDist' is phased out for 'stringdist' and 'stringdistmatrix'.
+  Specifying it causes a message.
+- Argument 'ncores' is phased out for 'stringdistmatrix'. It is now ignored and
+  specifying it causes a message.
 - bugfix in amatch/dl. In certain cases, the best match went undetected.
-- Documentation improved and rearranged with string metrics, encoding, and parallelization now documented as separate topics.
+- Documentation improved and rearranged with string metrics, encoding, and
+  parallelization now documented as separate topics.
 
 version 0.8.2
-- Fixed a few warnings issued by the CLANG compiler (thanks to Brian Ripley). This fixes a bug in amatch/jaccard
-- Fixed a bug in stringdist/osa, dl: NA incorectly returned (thanks to Lauri Koobas).
+- Fixed a few warnings issued by the CLANG compiler (thanks to Brian Ripley).
+  This fixes a bug in amatch/jaccard
+- Fixed a bug in stringdist/osa, dl: NA incorectly returned (thanks to Lauri
+  Koobas).
 
 version 0.8.1
-- stringdistmatrix returns dimensionless matrix when both arguments have length zero (thanks to Richie Cotton)
+- stringdistmatrix returns dimensionless matrix when both arguments have length
+  zero (thanks to Richie Cotton)
 - stringdistmatrix gains argument 'useNames' (thanks to Richie Cotton)
 - Package now 'Imports' parallel rather than 'Depends' on it.
-- bugfix in optimal string alignment distance: the nr of transpositions was sometimes overcounted (thanks to Frank Binder)
+- bugfix in optimal string alignment distance: the nr of transpositions was
+  sometimes overcounted (thanks to Frank Binder)
 - rearranged the documentation.
 
 version 0.8.0
 - Added soundex-based string distance (thanks to Jan van der Laan)
-- New function 'phonetic' translates strings to phonetic codes using soundex (thanks to Jan van der Laan)
-- New function 'printable_ascii' detects non-printable ascii or non-ascii characters.
-- Precision issue: cosine distance between equal strings would be O(1e-16) in stead of 0.0 (thanks to Ben Haller).
-- Code cleaning: somewhat better performance when maxDist is unspecified in stringdist. It remains deprecated.
-- Row names in the output array of 'qgrams' are now in system native encoding (used to be utf8 for all systems).
+- New function 'phonetic' translates strings to phonetic codes using soundex
+  (thanks to Jan van der Laan)
+- New function 'printable_ascii' detects non-printable ascii or non-ascii
+  characters.
+- Precision issue: cosine distance between equal strings would be O(1e-16) in
+  stead of 0.0 (thanks to Ben Haller).
+- Code cleaning: somewhat better performance when maxDist is unspecified in
+  stringdist. It remains deprecated.
+- Row names in the output array of 'qgrams' are now in system native encoding
+  (used to be utf8 for all systems).
 - updated CITATION with page number info as the R Journal is now out.
 
 version 0.7.3
-- bugfix in jw-distance: out-of-range access in C-code caused R to crash in some cases (thanks to Carol Gan)
+- bugfix in jw-distance: out-of-range access in C-code caused R to crash in
+  some cases (thanks to Carol Gan)
 - bugfix in dl distance: in some cases, distances could be one unit too high.
 - Updated CITATION file: paper to appear in The R Journal vol 6 (2014).
 - Some updates in documentation.
@@ -69,20 +93,25 @@ version 0.7.3
 version 0.7.2
 - function 'qgrams' gains .list argument
 - bugfix in multicore option of stringdistmatrix
-- bugfix in substitution weight of DL-distance (undercounted when w4 != 1 in some cases)
+- bugfix in substitution weight of DL-distance (undercounted when w4 != 1 in
+  some cases)
 - bugfix in dl.c: C-function read outside of array. 
 
 version 0.7.0
-- added useBytes option: up to ~3-fold speed gain at the cost of possible encoding-dependent results.
-- new memory allocation method for q-grams increases speed between ~5% and ~30% depending on q and input string.
+- added useBytes option: up to ~3-fold speed gain at the cost of possible
+  encoding-dependent results.
+- new memory allocation method for q-grams increases speed between ~5% and ~30%
+  depending on q and input string.
 - function 'qgrams' gains useNames option.
 - jaro-winkler distance gains weight argument.
-- C-code optimization in edit-based distances:  10~20% speed increase depending on input.
+- C-code optimization in edit-based distances:  10~20% speed increase depending
+  on input.
 - bugfix in amatch: sometimes NA was erroneously returned.
 - bugfix in amatch/lcs: hamming distance method was called erroneously.
 
 version 0.6.1
-- bugfix in parallel version of stringdistmatrix: parameter p was not passed (thanks to Ricardo Saporta)
+- bugfix in parallel version of stringdistmatrix: parameter p was not passed
+  (thanks to Ricardo Saporta)
 - bugfix in lv/osa/dl: maxDist ignored in certain cases
 
 version 0.6.0
@@ -94,16 +123,20 @@ version 0.6.0
 - added Jaro and Jaro-Winkler distances
 - small performance tweeks in underlying C code
 - Edge case in stringdistmatrix: output is now always of class matrix
-- Default maxDist is now Inf (this is only to make it more intuitive and does not break previous code)
+- Default maxDist is now Inf (this is only to make it more intuitive and does
+  not break previous code)
 - BREAKING CHANGE: output -1 is replaced by Inf for all distance methods
 
 
 version 0.5.0
 - added qgram counting function 'qgrams'
 - faster edge case handling in osa method.
-- edge case in lv/osa/dl methods: distance returned length(b) in stead of -1 when length(a) == 0, maxDist < length(b).
-- bugfix in lv/osa/dl method: maxDist returned when length(a) > maxDist > 0 (thanks to Daniel Reckhard).
-- Hamming distance (method='h') now returns -1 for strings of unequal lengts (used to emit error).
+- edge case in lv/osa/dl methods: distance returned length(b) in stead of -1
+  when length(a) == 0, maxDist < length(b).
+- bugfix in lv/osa/dl method: maxDist returned when length(a) > maxDist > 0
+  (thanks to Daniel Reckhard).
+- Hamming distance (method='h') now returns -1 for strings of unequal lengts
+  (used to emit error).
 - added longest common substring distance (method='lcs').
 - added qgram distance method.
 - stringdistmatrix gains cluster argument.
