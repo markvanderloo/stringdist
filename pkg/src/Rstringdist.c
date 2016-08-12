@@ -308,7 +308,7 @@ SEXP R_lower_tri(SEXP a, SEXP method
       , n_threads = 1
       , col_max = n-1;
 
-    R_xlen_t p = 0
+    R_xlen_t pp = 0
       , k_start = 0
       , k_end = N;
 
@@ -317,9 +317,9 @@ SEXP R_lower_tri(SEXP a, SEXP method
       n_threads = omp_get_num_threads();
     #endif
       // some administration to parallelize the loop.
-      p = N / n_threads;
-      k_start = thread_id * p;
-      k_end   = (thread_id < n_threads - 1 ) ? k_start + p : N;
+      pp = N / n_threads;
+      k_start = thread_id * pp;
+      k_end   = (thread_id < n_threads - 1 ) ? k_start + pp : N;
       j = get_j(k_start,n);
       i = k_start + j * (j - 2*n + 3)/2;
     for ( R_xlen_t k=k_start; k < k_end; k++ ){

@@ -486,6 +486,12 @@ test_that("stringdistmatrix with single argument",{
     , c("k1","k2")
   )
   
+  # bug reported by Max Fritsche; issue #47
+  x <- c("aap","apen")
+  expect_equivalent(
+    as.matrix(stringdistmatrix(x,method="jw",p=0.1))
+    , stringdistmatrix(x,x,method="jw",p=0.1)
+  )
   
 })
 

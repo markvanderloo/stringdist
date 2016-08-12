@@ -149,6 +149,7 @@ typedef enum { uInt, Double, Qtree } type;
 static void *alloc(type t){
   Shelf *shelf = &wall[get_shelf_num()];
 
+
   if ( 
     shelf->nboxes == 0L &&
     !add_box(MIN_BOX_SIZE)

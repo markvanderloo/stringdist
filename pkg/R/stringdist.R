@@ -254,6 +254,8 @@ stringdistmatrix <- function(a, b
         , method=method
         , useBytes=useBytes
         , weight=weight
+        , q=q
+        , p=p
         , useNames=useNames
         , nthread=nthread)
     )
@@ -341,11 +343,13 @@ do_dist <- function(a, b, method, weight, maxDist=Inf, q, p, useBytes=FALSE, nth
 
 # more efficient function that returns a square distance matrix as a 'stats::dist' object.
 lower_tri <- function(a
-   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex")
-   , useBytes = FALSE
-   , weight=c(d=1,i=1,s=1,t=1), q=1, p=0
-   , useNames=FALSE
-   , nthread = getOption("sd_num_thread")
+  , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex")
+  , useBytes = FALSE
+  , weight=c(d=1,i=1,s=1,t=1)
+  , q=1
+  , p=0
+  , useNames=FALSE
+  , nthread = getOption("sd_num_thread")
 ){
   methnr <- METHODS[method]
   if (is.na(method)){
