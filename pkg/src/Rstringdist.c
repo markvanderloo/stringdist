@@ -205,9 +205,13 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
         len_T = T->str_len[j];
         if (len_X != NA_INTEGER && len_T != NA_INTEGER ){        // both are char (usual case)
           d = stringdist(sd, str, len_X, *tab, len_T);
+//Rprintf("d = %8.4f ",d);
           if ( d <= maxDist && d < d1){ 
             index = j + 1;
-            if ( ABS(d) < 1e-14 ) break; // exact match
+            if ( fabs(d) < 1e-14 ){ 
+ //               Rprintf(" helleu!\n");
+                  break; // exact match
+            }
             d1 = d;
           }
         } else if ( len_X == NA_INTEGER && len_T == NA_INTEGER ) {  // both are NA

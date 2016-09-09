@@ -124,12 +124,11 @@ double stringdist(Stringdist *S, unsigned int *str_a, int len_a, unsigned int *s
     case lcs :
       return lcs_dist(str_a, len_a, str_b, len_b, S->work); 
     case qgram :
-      return qgram_dist(str_a, len_a, str_b, len_b, S->q, &(S->tree), 0L);
+      return qgram_dist(str_a, len_a, str_b, len_b, S->q, &S->tree, 0L);
     case cosine :
       return qgram_dist(str_a, len_a, str_b, len_b, S->q, &S->tree, 1L);
     case jaccard :
-      d = qgram_dist(str_a, len_a, str_b, len_b, S->q, &S->tree, 2L);
-      break;
+      return qgram_dist(str_a, len_a, str_b, len_b, S->q, &S->tree, 2L);
     case jw :
       return jaro_winkler_dist(str_a, len_a, str_b, len_b, S->p, S->weight, S->work);
     case soundex :

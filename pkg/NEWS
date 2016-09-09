@@ -3,6 +3,8 @@ version 0.9.4.2
   (thanks to Max Fritsche)
 - bugfix in stringdistmatrix(a): Would segfault on q-gram w/input > ~7k strings
   and q>1 (thanks to Connor McKay)
+- bugfix in jaccard distance: distance not always correct when passing multiple
+  strings (thanks to Robert Carlson)
 
 version 0.9.4.1
 - stringdistmatrix(a) now outputs long vectors (issue #45, thanks to Wouter

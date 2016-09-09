@@ -305,7 +305,9 @@ static void getjaccard(qtree *Q, double *d){
     ++d[0];
   } 
   // denominator: |x V y|
-  ++d[1];
+  if ( Q->n[0] > 0 || Q->n[1] > 0){
+    ++d[1];
+  }
   // clean up and continue
   Q->n[0] = 0;
   Q->n[1] = 0;
@@ -313,7 +315,18 @@ static void getjaccard(qtree *Q, double *d){
   getjaccard(Q->right,d);
 }
 
-
+/* for testing purposes only
+static void print_qtree(qtree *Q, int q){
+  if (Q==NULL) return;
+  Rprintf("q=%d ",q);
+  Rprintf("qgram = {");
+  for(int i = 0; i < q; i++)
+    Rprintf("%03d ",Q->qgram[i]);
+  Rprintf("}");
+  Rprintf("n = [%2.0f %2.0f]\n", Q->n[0], Q->n[1]);
+  print_qtree(Q->left,q);
+  print_qtree(Q->right,q);
+}*/
 
 /*Get qgram distances 
  * Input
@@ -356,7 +369,8 @@ double qgram_dist(
   *Qp = push_string(t, y, q, *Qp, 1, 2);
   if (*Qp == NULL) return -2.0;
 
- qtree *Q = *Qp;
+
+  qtree *Q = *Qp;
   switch ( distance ){
     case 0:
       getdist(Q,dist);
@@ -373,7 +387,7 @@ double qgram_dist(
       }
       break;
     case 2:
-      getjaccard(Q,dist);
+      getjaccard(*Qp,dist);
       dist[0] = 1.0 - dist[0]/dist[1];
       break;
     default:
