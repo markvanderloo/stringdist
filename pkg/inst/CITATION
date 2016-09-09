@@ -5,6 +5,6 @@ bibentry(bibtype = "article",
  , journal = {"The {R} {J}ournal"}
  , volume = 6
  , issue  = 1
- , url = "http://CRAN.R-project.org/package=stringdist"
+ , url = "https://CRAN.R-project.org/package=stringdist"
  , pages = {"111-122"}
 )

@@ -32,7 +32,7 @@
 #' controls the maximum number of threads to use. If you need to do large
 #' calculations, it is probably a good idea to benchmark the performance on your
 #' machine(s) as a function of \code{'nthread'}, for example using the 
-#' \href{http://cran.r-project.org/package=microbenchmark}{microbenchmark}
+#' \href{https://cran.r-project.org/package=microbenchmark}{microbenchmark}
 #' package of Mersmann.
 #'
 #'
