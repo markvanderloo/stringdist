@@ -340,7 +340,7 @@ double qgram_dist(
     unsigned int *t, 
     int y,
     unsigned int q, 
-    qtree *Q,
+    qtree **Qp,
     int distance
   ){
   // return -1 when q is larger than the length of the shortest string.
@@ -349,13 +349,14 @@ double qgram_dist(
   // q equals zero. In the R journal paper we used Inf for cases where 
   // q=0 and |s| or |t| > 0
   if ( q == 0 ) return 0.0;
-  
-  double dist[3] = {0,0,0};
-  Q = push_string(s, x, q, Q, 0, 2);
-  if (Q == NULL) return -2.0;
-  Q = push_string(t, y, q, Q, 1, 2);
-  if (Q == NULL) return -2.0;
 
+  double dist[3] = {0,0,0};
+  *Qp = push_string(s, x, q, *Qp, 0, 2);
+  if (*Qp == NULL) return -2.0;
+  *Qp = push_string(t, y, q, *Qp, 1, 2);
+  if (*Qp == NULL) return -2.0;
+
+ qtree *Q = *Qp;
   switch ( distance ){
     case 0:
       getdist(Q,dist);
@@ -378,6 +379,7 @@ double qgram_dist(
     default:
       break;
   }
+
   return dist[0];
 }
 
