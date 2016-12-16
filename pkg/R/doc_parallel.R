@@ -17,10 +17,13 @@
 #' By default, the number of threads to use is taken from \code{options('sd_num_thread')}.
 #' When the package is loaded, the value for this option is determined as follows:
 #' \itemize{
-#'   \item{The number of available cores is determined with \code{parallel::detectCores()}}
-#'   \item{If available, the environment variable \code{OMP_THREAD_LIMIT} is determined}
-#'   \item{The number of threads is set to the lesser of \code{OMP_THREAD_LIMIT} and the number of detected cores.}
-#'   \item{If the number of threads larger then or equal to \eqn{4}, and \code{OMP_THREAD_LIMIT} is not set, it is set to \code{'sd_num_thread'-1}}.
+#'   \item{If the environment variable \code{OMP_NUM_THREADS} is set, this value is taken.}
+#'   \item{Otherwise, the number of available cores is determined with \code{parallel::detectCores()}
+#'   If this fails, the number of threads is set to 1 (with a message). If the nr of detected
+#'   cores exceeds three, the number of used cores is set to \eqn{n-1}.}
+#'   \item{If available, the environment variable \code{OMP_THREAD_LIMIT} is
+#'   determined and The number of threads is set to the lesser of
+#'   \code{OMP_THREAD_LIMIT} and the number of detected cores.}
 #' }
 #'
 #' The latter step makes sure that on machines with \eqn{n>3} cores, \eqn{n-1} 

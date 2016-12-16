@@ -57,7 +57,7 @@
 #'   \item{The code for soundex conversion and string similarity was kindly contributed by Jan van der Laan.}
 #' }
 #' @section Citation:
-#' If you would like to cite this package, please cite the \href{http://journal.r-project.org/archive/2014-1/loo.pdf}{R Journal Paper}: 
+#' If you would like to cite this package, please cite the \href{https://journal.r-project.org/archive/2014-1/loo.pdf}{R Journal Paper}: 
 #' \itemize{
 #' \item{M.P.J. van der Loo (2014). The \code{stringdist} package for approximate string matching. 
 #'  R Journal 6(1) pp 111-122}

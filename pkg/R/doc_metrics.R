@@ -46,7 +46,7 @@
 #'
 #' @section A short description of string metrics supported by \pkg{stringdist}:
 #'
-#' See \href{http://journal.r-project.org/archive/2014-1/loo.pdf}{Van der Loo
+#' See \href{https://journal.r-project.org/archive/2014-1/loo.pdf}{Van der Loo
 #' (2014)} for an extensive description and references. The review papers of
 #' Navarro (2001) and Boytsov (2011) provide excellent technical overviews of
 #' respectively online and offline string matching algorithms.
