@@ -1,3 +1,6 @@
+version 0.9.4.5
+- registered native routines as now recommended by CRAN
+
 version 0.9.4.4
 - updated default nr of threads to comply to CRAN policy (thanks to Kurt Hornik).
   The default nr of cores now equals OMP_NUM_THREADS if set. See 

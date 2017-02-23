@@ -66,7 +66,7 @@
 #'
 #' @name stringdist-package
 #' @docType package
-#' @useDynLib stringdist
+#' @useDynLib stringdist, .registration=TRUE
 #' @importFrom parallel detectCores 
 #'
 #'

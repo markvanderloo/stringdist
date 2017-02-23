@@ -14,14 +14,14 @@ Description: Implements an approximate string matching version of R's native
     implementation of soundex is provided as well. Distances can be computed between
     character vectors while taking proper care of encoding or between integer
     vectors representing generic sequences.
-Version: 0.9.4.4
+Version: 0.9.4.5
 Depends:
     R (>= 2.15.3)
 Imports:
     parallel
 URL: https://github.com/markvanderloo/stringdist
 BugReports: https://github.com/markvanderloo/stringdist/issues
-Date: 2016-12-16
+Date: 2017-02-23
 Suggests:
     testthat
 RoxygenNote: 5.0.1
