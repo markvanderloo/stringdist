@@ -108,6 +108,8 @@ seq_distmatrix <- function(a, b
     return( lower_tri(a
         , method=method
         , weight=weight
+        , q=q
+        , p=p
         , useNames=useNames
         , nthread=nthread)
     )
