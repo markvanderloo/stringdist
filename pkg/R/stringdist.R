@@ -117,7 +117,7 @@ This warning can be avoided by explicitly converting the argument(s).
 #'   \code{p} is \code{0 <= p <= 0.25}. If \code{p=0} (default), the
 #'   Jaro-distance is returned. Applies only to \code{method='jw'}.
 #' @param bt Winkler's boost threshold. Winkler's penalty factor is
-#"   only applied when the Jaro distance is larger than \code{bt}.
+#'   only applied when the Jaro distance is larger than \code{bt}.
 #'   Applies only to \code{method='jw'} and \code{p>0}.
 #' @param nthread Maximum number of threads to use. By default, a sensible
 #'   number of threads is chosen, see \code{\link{stringdist-parallelization}}.

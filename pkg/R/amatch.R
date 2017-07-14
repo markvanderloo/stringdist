@@ -63,7 +63,7 @@
 #' @param p Winklers penalty parameter for Jaro-Winkler distance, with
 #'   \eqn{0\leq p\leq0.25}. Only when method is \code{'jw'}
 #' @param bt Winkler's boost threshold. Winkler's penalty factor is
-#"   only applied when the Jaro distance is larger than \code{bt}.
+#'   only applied when the Jaro distance is larger than \code{bt}.
 #'   Applies only to \code{method='jw'} and \code{p>0}.
 #'
 #' @return \code{amatch} returns the position of the closest match of \code{x}
@@ -177,7 +177,7 @@ ain <- function(x,table,...){
 #' @param p Winklers penalty parameter for Jaro-Winkler distance, with
 #'   \eqn{0\leq p\leq0.25}. Only when method is \code{'jw'}
 #' @param bt Winkler's boost threshold. Winkler's penalty factor is
-#"   only applied when the Jaro distance is larger than \code{bt}.
+#'   only applied when the Jaro distance is larger than \code{bt}.
 #'   Applies only to \code{method='jw'} and \code{p>0}.
 #' @return \code{seq_amatch} returns the position of the closest match of \code{x}
 #'   in \code{table}. When multiple matches with the same minimal distance
