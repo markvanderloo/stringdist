@@ -41,6 +41,8 @@ typedef struct {
   unsigned int q;
   // Winkler's penalty factor
   double p;
+  // Winkler's boost threshold
+  double bt;
   // fail indicator
   unsigned int ifail;
 } Stringdist;

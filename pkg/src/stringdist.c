@@ -39,7 +39,7 @@ Stringdist *open_stringdist(Distance d, int str_len_a, int str_len_b, ...){
   va_start(args, str_len_b);
 
   Stringdist *S = (Stringdist *) malloc(sizeof(Stringdist)); 
-  (*S) = (Stringdist) {d, NULL, NULL, NULL, NULL, 0L, 0.0, 0L};
+  (*S) = (Stringdist) {d, NULL, NULL, NULL, NULL, 0L, 0.0, 0.0, 0L};
   switch (d){
     case osa :
       S->work = (double *) malloc( (str_len_a + 1) * (str_len_b + 1) * sizeof(double)); 
@@ -75,12 +75,12 @@ Stringdist *open_stringdist(Distance d, int str_len_a, int str_len_b, ...){
       S->tree = new_qtree(S->q, 2L); 
       break;
     case jw :
-//      S->work = (double *) malloc( sizeof(double) * MAX(str_len_a,str_len_b));
       S->work = (double *) malloc( sizeof(double) * (str_len_a+str_len_b));
 
       S->weight = (double *) malloc(3L*sizeof(double));
       memcpy(S->weight, va_arg(args, double *), 3*sizeof(double));
       S->p = va_arg(args, double);
+      S->bt = va_arg(args, double);
       break;
     case soundex :
       break;
@@ -130,7 +130,7 @@ double stringdist(Stringdist *S, unsigned int *str_a, int len_a, unsigned int *s
     case jaccard :
       return qgram_dist(str_a, len_a, str_b, len_b, S->q, &S->tree, 2L);
     case jw :
-      return jaro_winkler_dist(str_a, len_a, str_b, len_b, S->p, S->weight, S->work);
+      return jaro_winkler_dist(str_a, len_a, str_b, len_b, S->p, S->bt, S->weight, S->work);
     case soundex :
       return soundex_dist(str_a, len_a, str_b, len_b, &(S->ifail));
     default :

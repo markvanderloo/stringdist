@@ -43,6 +43,7 @@ static double get_l(unsigned int *a, unsigned int *b, int n){
  * x    : length of a (in uints)
  * y    : length of b (in uints)
  * p    : Winkler's p-factor in (0,0.25)
+ * bt   : Winkler's (undocumented?) boost threshold
  * work : workspace, minimally of length x + y
  *
  */
@@ -52,6 +53,7 @@ double jaro_winkler_dist(
      , unsigned int *b
      , int y
      , double p
+     , double bt
      , double *w
      , double *work
   ){
@@ -115,9 +117,8 @@ double jaro_winkler_dist(
   } else {
     d = 1.0 - (1.0/3.0)*(w[0]*m/((double) x) + w[1]*m/((double) y) + w[2]*(m-t)/m);
   }
-
   // Winkler's penalty factor
-  if ( p > 0 && d > 0 ){
+  if ( p > 0 && d > bt ){
     int n = MIN(MIN(x,y),4);
     d =  d - get_l(a,b,n)*p*d; 
   }

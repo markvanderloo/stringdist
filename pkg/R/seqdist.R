@@ -27,6 +27,9 @@
 #' @param p Penalty factor for Jaro-Winkler distance. The valid range for 
 #'   \code{p} is \code{0 <= p <= 0.25}. If \code{p=0} (default), the
 #'   Jaro-distance is returned. Applies only to \code{method='jw'}.
+#' @param bt Winkler's boost threshold. Winkler's penalty factor is
+#"   only applied when the Jaro distance is larger than \code{bt}.
+#'   Applies only to \code{method='jw'} and \code{p>0}.
 #' @param nthread Maximum number of threads to use. By default, a sensible
 #'   number of threads is chosen, see \code{\link{stringdist-parallelization}}.
 #'
@@ -51,7 +54,7 @@
 seq_dist <- function(a, b
   , method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw")
   , weight=c(d=1,i=1,s=1,t=1) 
-  , q=1, p=0
+  , q=1, p=0, bt=0
   , nthread = getOption("sd_num_thread")
 ){
   a <- ensure_int_list(a)
@@ -84,6 +87,7 @@ seq_dist <- function(a, b
     , weight=weight
     , q=q
     , p=p
+    , bt=bt
     , nthread=nthread)
 }
 
@@ -92,7 +96,7 @@ seq_dist <- function(a, b
 #' @export 
 seq_distmatrix <- function(a, b
    , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw")
-   , weight=c(d=1,i=1,s=1,t=1),  q=1, p=0
+   , weight=c(d=1,i=1,s=1,t=1),  q=1, p=0, bt=0
    , useNames=c("names","none")
    , nthread = getOption("sd_num_thread")
 ){
@@ -110,6 +114,7 @@ seq_distmatrix <- function(a, b
         , weight=weight
         , q=q
         , p=p
+        , bt=bt
         , useNames=useNames
         , nthread=nthread)
     )
@@ -126,11 +131,8 @@ seq_distmatrix <- function(a, b
   }
   
   
-  #x <- vapply(b, do_dist, USE.NAMES=FALSE, FUN.VALUE=numeric(length(a))
-  #      , b=a, method=method, weight=weight, q=q, p=p, nthread=nthread)
-  
   x <- vapply(b
-      , function(src) do_dist(list(src), b=a, method=method, weight=weight, q=q, p=p, nthread=nthread)
+      , function(src) do_dist(list(src), b=a, method=method, weight=weight, q=q, p=p,bt=bt, nthread=nthread)
       , USE.NAMES=FALSE, FUN.VALUE=numeric(length(a))
     )
   

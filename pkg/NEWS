@@ -1,6 +1,8 @@
 version 0.9.4.5
+- New argument 'bt' implementing Winkler's boost threshold for the Jaro-Winkler distance
 - stringdist(a,b,method="qgram") returns correct value when q>nchar(a) (or b). 
-  (Thanks to Giora Simchoni)
+  (Thanks to Giora Simchoni). Also affects stringdistmatrix, amatch, seq_dist,
+  and seq_distmatrix.
 - registered native routines as now recommended by CRAN
 
 version 0.9.4.4

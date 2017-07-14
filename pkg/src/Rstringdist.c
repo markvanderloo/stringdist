@@ -33,7 +33,7 @@
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 
 // TODO: catch error and report.
-static Stringdist *R_open_stringdist(Distance d, int max_len_a, int max_len_b, SEXP weight, SEXP p, SEXP q){
+static Stringdist *R_open_stringdist(Distance d, int max_len_a, int max_len_b, SEXP weight, SEXP p, SEXP bt, SEXP q){
 
   Stringdist *sd = NULL;
   if (d == osa || d == lv || d == dl || d == hamming || d == lcs){
@@ -41,7 +41,7 @@ static Stringdist *R_open_stringdist(Distance d, int max_len_a, int max_len_b, S
   } else if ( d == qgram || d == cosine || d == jaccard ){
     sd = open_stringdist(d, max_len_a, max_len_b, (unsigned int) INTEGER(q)[0]);
   } else if ( d == jw ){
-    sd = open_stringdist(d, max_len_a, max_len_b, REAL(weight), REAL(p)[0]);
+    sd = open_stringdist(d, max_len_a, max_len_b, REAL(weight), REAL(p)[0], REAL(bt)[0]);
   } else if (d == soundex) {
     sd = open_stringdist(d, max_len_a, max_len_b);
   }
@@ -52,16 +52,8 @@ static Stringdist *R_open_stringdist(Distance d, int max_len_a, int max_len_b, S
 
 
 SEXP R_stringdist(SEXP a, SEXP b, SEXP method
-  , SEXP weight, SEXP p, SEXP q
+  , SEXP weight, SEXP p, SEXP bt, SEXP q
   , SEXP useBytes, SEXP nthrd){
-  PROTECT(a);
-  PROTECT(b);
-  PROTECT(method);
-  PROTECT(weight);
-  PROTECT(p);
-  PROTECT(q);
-  PROTECT(useBytes);
-  PROTECT(nthrd);
 
   int na = length(a)
     , nb = length(b)
@@ -76,11 +68,10 @@ SEXP R_stringdist(SEXP a, SEXP b, SEXP method
   PROTECT(yy = allocVector(REALSXP, nt));
   double *y = REAL(yy);
 
-
   #ifdef _OPENMP 
   int  nthreads = MIN(INTEGER(nthrd)[0],MAX(na,nb));
   #pragma omp parallel num_threads(nthreads) default(none) \
-      shared(y,na,nb, R_PosInf, NA_REAL, bytes, intdist, method, weight, p, q, ml_a, ml_b, nt, a, b)
+      shared(y,na,nb, R_PosInf, NA_REAL, bytes, intdist, method, weight, p, bt, q, ml_a, ml_b, nt, a, b)
   #endif
   {
 
@@ -88,6 +79,7 @@ SEXP R_stringdist(SEXP a, SEXP b, SEXP method
         , ml_a, ml_b
         , weight
         , p
+        , bt
         , q
     );
 
@@ -125,7 +117,7 @@ SEXP R_stringdist(SEXP a, SEXP b, SEXP method
     free(s);
   } // end of parallel region
 
-  UNPROTECT(9);
+  UNPROTECT(1);
   if (nt < 0 ) error("Unable to allocate enough memory");
   return(yy);
 }
@@ -135,21 +127,10 @@ SEXP R_stringdist(SEXP a, SEXP b, SEXP method
  */
 SEXP R_amatch(SEXP x, SEXP table, SEXP method 
   , SEXP nomatch, SEXP matchNA
-  , SEXP weight, SEXP p, SEXP q
+  , SEXP weight, SEXP p, SEXP bt, SEXP q
   , SEXP maxDistance, SEXP useBytes
   , SEXP nthrd){
 
-  PROTECT(x);
-  PROTECT(table);
-  PROTECT(method);
-  PROTECT(nomatch);
-  PROTECT(matchNA);
-  PROTECT(weight);
-  PROTECT(p);
-  PROTECT(q);
-  PROTECT(maxDistance);
-  PROTECT(useBytes);
-  PROTECT(nthrd);
 
   int nx = length(x)
     , ntable = length(table)
@@ -175,7 +156,7 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
   #ifdef _OPENMP
   int nthreads = MAX(MIN(INTEGER(nthrd)[0],nx),0);
   #pragma omp parallel num_threads(nthreads) default(none) \
-    shared(X, T, y, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, ml_x, ml_t, method, weight, p, q, maxDist)
+    shared(X, T, y, R_PosInf, NA_INTEGER, nx, ntable, no_match, match_na, ml_x, ml_t, method, weight, p, bt, q, maxDist)
   #endif
   {
     /* claim space for workhorse */
@@ -184,6 +165,7 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
         , ml_x, ml_t
         , weight
         , p
+        , bt
         , q
     );
 
@@ -205,12 +187,10 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
         len_T = T->str_len[j];
         if (len_X != NA_INTEGER && len_T != NA_INTEGER ){        // both are char (usual case)
           d = stringdist(sd, str, len_X, *tab, len_T);
-//Rprintf("d = %8.4f ",d);
           if ( d <= maxDist && d < d1){ 
             index = j + 1;
             if ( fabs(d) < 1e-14 ){ 
- //               Rprintf(" helleu!\n");
-                  break; // exact match
+              break; // exact match
             }
             d1 = d;
           }
@@ -227,7 +207,7 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
   } // end of parallel region
   free_stringset(X);
   free_stringset(T);
-  UNPROTECT(12);
+  UNPROTECT(1);
 
   return(yy);
 } // end R_amatch
@@ -253,16 +233,8 @@ static int get_j(R_xlen_t k, int n){
 #endif
 
 SEXP R_lower_tri(SEXP a, SEXP method
-  , SEXP weight, SEXP p, SEXP q
+  , SEXP weight, SEXP p, SEXP q, SEXP bt
   , SEXP useBytes, SEXP nthrd){
-
-  PROTECT(a);
-  PROTECT(method);
-  PROTECT(weight);
-  PROTECT(p);
-  PROTECT(q);
-  PROTECT(useBytes);
-  PROTECT(nthrd);
 
   int bytes = INTEGER(useBytes)[0]
     , ml = max_length(a)
@@ -289,7 +261,7 @@ SEXP R_lower_tri(SEXP a, SEXP method
   int  nthreads = MIN(INTEGER(nthrd)[0],N);
   nthreads = MIN(nthreads, n);
   #pragma omp parallel num_threads(nthreads) default(none) \
-      shared(y,n,N, R_PosInf, NA_REAL, bytes, intdist, method, weight, p, q, ml, a)
+      shared(y,n,N, R_PosInf, NA_REAL, bytes, intdist, method, weight, p, bt, q, ml, a)
   #endif
   {
 
@@ -297,6 +269,7 @@ SEXP R_lower_tri(SEXP a, SEXP method
         , ml, ml
         , weight
         , p
+        , bt
         , q
     );
 
@@ -348,7 +321,7 @@ SEXP R_lower_tri(SEXP a, SEXP method
   } // end of parallel region
 
   end:
-  UNPROTECT(8);
+  UNPROTECT(1);
   if (n < 0 ) error("Unable to allocate enough memory");
   return(yy);
 }

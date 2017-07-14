@@ -62,6 +62,9 @@
 #'   or \code{'cosine'}.
 #' @param p Winklers penalty parameter for Jaro-Winkler distance, with
 #'   \eqn{0\leq p\leq0.25}. Only when method is \code{'jw'}
+#' @param bt Winkler's boost threshold. Winkler's penalty factor is
+#"   only applied when the Jaro distance is larger than \code{bt}.
+#'   Applies only to \code{method='jw'} and \code{p>0}.
 #'
 #' @return \code{amatch} returns the position of the closest match of \code{x}
 #'   in \code{table}. When multiple matches with the same smallest distance
@@ -75,7 +78,7 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw", "soundex") 
   , useBytes = FALSE
   , weight=c(d=1,i=1,s=1,t=1)
-  , maxDist=0.1, q=1, p=0
+  , maxDist=0.1, q=1, p=0, bt=0
   , nthread = getOption("sd_num_thread")){
 
   x <- as.character(x)
@@ -109,8 +112,8 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
 
   .Call("R_amatch", x, table, method
     , as.integer(nomatch), as.integer(matchNA)
-    , as.double(weight), as.double(p), as.integer(q)
-    , as.double(maxDist), as.integer(useBytes)
+    , as.double(weight), as.double(p), as.double(bt)
+    , as.integer(q) , as.double(maxDist), as.integer(useBytes)
     , as.integer(nthread)
   )
 
@@ -173,7 +176,9 @@ ain <- function(x,table,...){
 #'   or \code{'cosine'}.
 #' @param p Winklers penalty parameter for Jaro-Winkler distance, with
 #'   \eqn{0\leq p\leq0.25}. Only when method is \code{'jw'}
-#'
+#' @param bt Winkler's boost threshold. Winkler's penalty factor is
+#"   only applied when the Jaro distance is larger than \code{bt}.
+#'   Applies only to \code{method='jw'} and \code{p>0}.
 #' @return \code{seq_amatch} returns the position of the closest match of \code{x}
 #'   in \code{table}. When multiple matches with the same minimal distance
 #'   metric exist, the first one is returned. \code{seq_ain} returns a
@@ -187,7 +192,7 @@ ain <- function(x,table,...){
 seq_amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard", "jw") 
   , weight=c(d=1,i=1,s=1,t=1)
-  , maxDist=0.1, q=1, p=0
+  , maxDist=0.1, q=1, p=0, bt=0
   , nthread = getOption("sd_num_thread")){
 
   x <- ensure_int_list(x)
@@ -214,8 +219,8 @@ seq_amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
 
   .Call("R_amatch", x, table, method
     , as.integer(nomatch), as.integer(matchNA)
-    , as.double(weight), as.double(p), as.integer(q)
-    , as.double(maxDist), 0L
+    , as.double(weight), as.double(p), as.double(bt)
+    , as.integer(q) , as.double(maxDist), 0L
     , as.integer(nthread)
   )
 }

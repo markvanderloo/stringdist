@@ -396,6 +396,17 @@ test_that("wikipedia examples",{
   )
 })
 
+test_that("Winkler's boost parameter",{
+  expect_equal(
+    stringdist("john doe","jane doe",method="jw",p=0.1, bt=0)
+    , stringdist("john doe","jane doe",method="jw",p=0.1, bt=0.1))
+  
+  expect_lt(
+    stringdist("john doe","jane doe",method="jw",p=0.1, bt=0.1)
+    , stringdist("john doe","jane doe",method="jw",p=0.1, bt=0.8))
+})
+
+
 
 context("stringdistmatrix")
 test_that("dimensions work out",{

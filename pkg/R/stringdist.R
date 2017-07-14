@@ -116,6 +116,9 @@ This warning can be avoided by explicitly converting the argument(s).
 #' @param p Penalty factor for Jaro-Winkler distance. The valid range for 
 #'   \code{p} is \code{0 <= p <= 0.25}. If \code{p=0} (default), the
 #'   Jaro-distance is returned. Applies only to \code{method='jw'}.
+#' @param bt Winkler's boost threshold. Winkler's penalty factor is
+#"   only applied when the Jaro distance is larger than \code{bt}.
+#'   Applies only to \code{method='jw'} and \code{p>0}.
 #' @param nthread Maximum number of threads to use. By default, a sensible
 #'   number of threads is chosen, see \code{\link{stringdist-parallelization}}.
 #'  
@@ -140,7 +143,7 @@ stringdist <- function(a, b
   , method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw","soundex")
   , useBytes = FALSE
   , weight=c(d=1,i=1,s=1,t=1) 
-  , maxDist=Inf, q=1, p=0
+  , maxDist=Inf, q=1, p=0, bt=0
   , nthread = getOption("sd_num_thread")
 ){
   if (maxDist < Inf)
@@ -185,6 +188,7 @@ stringdist <- function(a, b
     , maxDist=maxDist
     , q=q
     , p=p
+    , bt=bt
     , useBytes=useBytes
     , nthread=nthread)
 }
@@ -203,7 +207,7 @@ stringdist <- function(a, b
 stringdistmatrix <- function(a, b
   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex")
   , useBytes = FALSE
-  , weight=c(d=1,i=1,s=1,t=1),  maxDist=Inf, q=1, p=0
+  , weight=c(d=1,i=1,s=1,t=1),  maxDist=Inf, q=1, p=0, bt=0
   , useNames=c('none','strings','names'), ncores=1, cluster=NULL
   , nthread = getOption("sd_num_thread")
 ){
@@ -256,6 +260,7 @@ stringdistmatrix <- function(a, b
         , weight=weight
         , q=q
         , p=p
+        , bt=bt
         , useNames=useNames
         , nthread=nthread)
     )
@@ -286,7 +291,7 @@ stringdistmatrix <- function(a, b
   }
 
   x <- vapply(b, do_dist, USE.NAMES=FALSE, FUN.VALUE=numeric(length(a))
-          , a, method,weight,maxDist, q, p,useBytes, nthread)
+          , a, method,weight,maxDist, q, p, bt, useBytes, nthread)
 
   if (useNames %in% c("strings","names") ){  
     structure(matrix(x,nrow=length(a),ncol=length(b), dimnames=list(rowns,colns)))
@@ -320,7 +325,7 @@ METHODS <- c(
 )
 
 
-do_dist <- function(a, b, method, weight, maxDist=Inf, q, p, useBytes=FALSE, nthread=1L){
+do_dist <- function(a, b, method, weight, maxDist=Inf, q, p, bt, useBytes=FALSE, nthread=1L){
   
   if (method=='soundex' && !all(printable_ascii(a) & printable_ascii(b)) ){
     warning("Non-printable ascii or non-ascii characters in soundex. Results may be unreliable. See ?printable_ascii.")
@@ -331,7 +336,7 @@ do_dist <- function(a, b, method, weight, maxDist=Inf, q, p, useBytes=FALSE, nth
   }
 
   d <- .Call("R_stringdist", a, b, method
-    , as.double(weight), as.double(p), as.integer(q)
+    , as.double(weight), as.double(p), as.double(bt), as.integer(q)
     , as.integer(useBytes), as.integer(nthread)
   )
 
@@ -348,6 +353,7 @@ lower_tri <- function(a
   , weight=c(d=1,i=1,s=1,t=1)
   , q=1
   , p=0
+  , bt=0
   , useNames=FALSE
   , nthread = getOption("sd_num_thread")
 ){
@@ -357,8 +363,8 @@ lower_tri <- function(a
   }
   
   x <- .Call("R_lower_tri", a, methnr
-             , as.double(weight), as.double(p), as.integer(q)
-             , as.integer(useBytes), as.integer(nthread))
+         , as.double(weight), as.double(p), as.double(bt)
+         , as.integer(q), as.integer(useBytes), as.integer(nthread))
   
   attributes(x) <- list(class='dist'
     , Size     = length(a)
