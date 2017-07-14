@@ -24,4 +24,4 @@ BugReports: https://github.com/markvanderloo/stringdist/issues
 Date: 2017-02-23
 Suggests:
     testthat
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

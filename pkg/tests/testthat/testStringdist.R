@@ -236,9 +236,9 @@ context("Q-gram distance")
 
 test_that("Edge cases in qgram method",{
    expect_equal(stringdist( "", "",method='qgram',q=0), 0)
-   expect_equal(stringdist( "", "",method='qgram',q=1),Inf)
-   expect_equal(stringdist( "","a",method='qgram',q=1),Inf)
-   expect_equal(stringdist("a", "",method='qgram',q=1),Inf)
+   expect_equal(stringdist( "", "",method='qgram',q=1),0)
+   expect_equal(stringdist( "","a",method='qgram',q=1),1)
+   expect_equal(stringdist("a", "",method='qgram',q=1),1)
    expect_equal(stringdist("a","a",method='qgram',q=1), 0)
    expect_error(stringdist("aa","bb",method='qgram',q=-2))
    expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="qgram"))),1)

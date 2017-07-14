@@ -252,7 +252,7 @@ static qtree *push(qtree *Q, unsigned int *qgram, unsigned int q, int iLoc, int 
 /* push qgrams of a string into binary tree */
 static qtree *push_string(unsigned int *str, int strlen, unsigned int q, qtree *Q, int iLoc, int nLoc){
   qtree *P;
-  for ( int i=0; i < strlen - q + 1; ++i ){
+  for ( int i=0; i < (int) (strlen - q + 1); i++ ){
     P = push(Q, str + i, q, iLoc, nLoc);
     if ( P == NULL ){ 
       free_qtree();
@@ -356,8 +356,7 @@ double qgram_dist(
     qtree **Qp,
     int distance
   ){
-  // return -1 when q is larger than the length of the shortest string.
-  if ( q > (x <= y ? x : y) ) return -1.0;
+
   // rare edge case: q==0. Note that we return 0 for all cases where
   // q equals zero. In the R journal paper we used Inf for cases where 
   // q=0 and |s| or |t| > 0
@@ -365,10 +364,10 @@ double qgram_dist(
 
   double dist[3] = {0,0,0};
   *Qp = push_string(s, x, q, *Qp, 0, 2);
-  if (*Qp == NULL) return -2.0;
-  *Qp = push_string(t, y, q, *Qp, 1, 2);
-  if (*Qp == NULL) return -2.0;
 
+  *Qp = push_string(t, y, q, *Qp, 1, 2);
+  if (*Qp == NULL) return 0;
+  
 
   qtree *Q = *Qp;
   switch ( distance ){
