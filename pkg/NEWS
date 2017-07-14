@@ -1,4 +1,6 @@
 version 0.9.4.5
+- stringdist(a,b,method="qgram") returns correct value when q>nchar(a) (or b). 
+  (Thanks to Giora Simchoni)
 - registered native routines as now recommended by CRAN
 
 version 0.9.4.4
