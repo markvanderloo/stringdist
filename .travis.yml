@@ -13,7 +13,6 @@ addons:
 
 r:
  - release
- - oldrel
  - devel
 
 before_install:
