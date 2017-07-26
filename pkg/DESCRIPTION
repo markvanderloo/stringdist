@@ -21,7 +21,7 @@ Imports:
     parallel
 URL: https://github.com/markvanderloo/stringdist
 BugReports: https://github.com/markvanderloo/stringdist/issues
-Date: 2017-02-23
+Date: 2017-07-26
 Suggests:
     testthat
 RoxygenNote: 6.0.1
