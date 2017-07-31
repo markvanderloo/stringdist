@@ -1,3 +1,6 @@
+version 0.9.4.6
+- Fixed argument passing error in lower_tri (thanks to Kurt Hornik)
+
 version 0.9.4.5
 - New argument 'bt' implementing Winkler's boost threshold for the Jaro-Winkler distance
 - stringdist(a,b,method="qgram") returns correct value when q>nchar(a) (or b). 

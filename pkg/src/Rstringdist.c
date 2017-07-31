@@ -233,7 +233,7 @@ static int get_j(R_xlen_t k, int n){
 #endif
 
 SEXP R_lower_tri(SEXP a, SEXP method
-  , SEXP weight, SEXP p, SEXP q, SEXP bt
+  , SEXP weight, SEXP p,  SEXP bt, SEXP q
   , SEXP useBytes, SEXP nthrd){
 
   int bytes = INTEGER(useBytes)[0]
