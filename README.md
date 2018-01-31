@@ -32,7 +32,7 @@ distance functions. Distance functions include:
 * Q-gram distance
 * cosine distance for q-gram count vectors (= 1-cosine similarity)
 * Jaccard distance for q-gram count vectors (= 1-Jaccard similarity)
-* Jaro, and Jaro-Winker distance
+* Jaro, and Jaro-Winkler distance
 * Soundex-based string distance.
 
 Also, there are some utility functions:
