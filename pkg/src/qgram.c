@@ -381,8 +381,9 @@ double qgram_dist(
         dist[0] =  0.0;
       } else {
         // there are several ways to express the rhs (including ones that give 0L 
-        // at equal strings) but this has least chance of overflow.
-        dist[0] = 1.0 - dist[0]/(sqrt(dist[1]) * sqrt(dist[2]));
+        // at equal strings) but this has least chance of overflow
+        // fabs is taken to avoid numerical -0.
+        dist[0] = fabs(1.0 - dist[0]/(sqrt(dist[1]) * sqrt(dist[2])));
       }
       break;
     case 2:

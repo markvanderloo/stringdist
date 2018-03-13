@@ -1,3 +1,7 @@
+version 0.9.4.7
+- Fixed edge case where cosine distance with q=1, between strings of repeating characters
+  yielded Inf (Thanks to Markus Dumke)
+
 version 0.9.4.6
 - Fixed argument passing error in lower_tri (thanks to Kurt Hornik)
 
