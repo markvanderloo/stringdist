@@ -149,7 +149,7 @@ stringdist <- function(a, b
   if (maxDist < Inf)
     warning("Argument 'maxDist' is deprecated for function 'stringdist'. This argument will be removed in the future.")   
   if (is.list(a)|is.list(b))
-    warning(listwarning("stringdist","seqdist"))
+    warning(listwarning("stringdist","seq_dist"))
             
   stopifnot(
     all(is.finite(weight))
@@ -221,7 +221,7 @@ stringdistmatrix <- function(a, b
     message("Argument 'cluster' is deprecaterd as stringdust now uses multithreading by default. The argument is currently ignored and will be removed in the future")
   }
   if (is.list(a)|| (!missing(b) && is.list(b)) ){
-   warning(listwarning("stringdistmatrix","seqdistmatrix"))
+   warning(listwarning("stringdistmatrix","seq_distmatrix"))
   }
 
   # for backward compatability with stringdist <= 0.9.0
