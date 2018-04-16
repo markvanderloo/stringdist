@@ -1,3 +1,4 @@
+#include "stringdist.h"
 #include <R.h>
 #include <Rinternals.h>
 #include <stdlib.h> // for NULL
@@ -30,5 +31,14 @@ static const R_CallMethodDef CallEntries[] = {
 void R_init_stringdist(DllInfo *dll)
 {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
-    R_useDynamicSymbols(dll, FALSE);
+    R_useDynamicSymbols(dll, TRUE);
+    
+    /* used by external packages linking to internal xts code from C */
+    R_RegisterCCallable("stringdist","R_all_int",(DL_FUNC) &R_all_int);
+    R_RegisterCCallable("stringdist","R_amatch",(DL_FUNC) &R_amatch);
+    R_RegisterCCallable("stringdist","R_get_qgrams",(DL_FUNC) &R_get_qgrams);
+    R_RegisterCCallable("stringdist","R_lengths",(DL_FUNC) &R_lengths);
+    R_RegisterCCallable("stringdist","R_lower_tri",(DL_FUNC) &R_lower_tri);
+    R_RegisterCCallable("stringdist","R_soundex",(DL_FUNC) &R_soundex);
+    R_RegisterCCallable("stringdist","R_stringdist",(DL_FUNC) &R_stringdist);
 }
