@@ -24,7 +24,7 @@
 #include <Rdefines.h>
 #include <math.h>
 #include "utils.h"
-#include "stringdist.h"
+#include "stringdist_pkg.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif

@@ -22,7 +22,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include "dist.h"
-#include "stringdist.h"
+#include "stringdist_pkg.h"
 
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 
