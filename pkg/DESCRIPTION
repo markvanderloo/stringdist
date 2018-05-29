@@ -6,14 +6,17 @@ LazyData: no
 Type: Package
 LazyLoad: yes
 Authors@R: c( person("Mark", "van der Loo", role=c("aut","cre"),email="mark.vanderloo@gmail.com")
-            , person("Jan", "van der Laan", role="ctb"),person("R Core Team","",role=c("ctb")),person("Nick","Logan",role="ctb"))
+            , person("Jan", "van der Laan", role="ctb")
+            , person("R Core Team",""     , role="ctb")
+            , person("Nick","Logan"       , role="ctb")
+            , person("Chris","Muir"       , role="ctb"))
 Description: Implements an approximate string matching version of R's native
     'match' function. Can calculate various string distances based on edits
     (Damerau-Levenshtein, Hamming, Levenshtein, optimal sting alignment), qgrams (q-
     gram, cosine, jaccard distance) or heuristic metrics (Jaro, Jaro-Winkler). An
     implementation of soundex is provided as well. Distances can be computed between
     character vectors while taking proper care of encoding or between integer
-    vectors representing generic sequences.
+    vectors representing generic sequences. An API for C or C++ is exposed as well.
 Version: 0.9.5.0
 Depends:
     R (>= 2.15.3)
