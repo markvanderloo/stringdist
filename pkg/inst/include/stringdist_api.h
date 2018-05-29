@@ -40,6 +40,12 @@ extern "C" {
  * @file stringdist_api.h
  * @brief Functions exported from the stringdist package.
  * 
+ *
+ * @section sec Character encoding
+ * All `character` vector input is expected to be in `UTF-8` (this also allows `ASCII`).
+ * Distance computations are based on UTF code points unless `useBytes` is `TRUE`, in which
+ * case distances are computed over byte sequences. Using non-UTF-8 encoded strings is
+ * untested and is highly likely to result in errors.
  */
 
 
@@ -51,6 +57,54 @@ SEXP attribute_hidden sd_all_int(SEXP X)
   return fun(X);
 }
 
+/**
+ * @brief Find the location of values in `x` in `table` by approximate matching.
+ * 
+ * @param x `[character]` vector.
+ * @param table `[character]` vector (lookup table)
+ * @param method `[integer]` scalar, indicating the distance method as follows
+ *   @parblock
+ *    - 0: Optimal String Alignment (`"osa"`)
+ *    - 1: Levenshtein (`"lv"`)
+ *    - 2: Damerau-Levenshtein (`"dl"`)
+ *    - 3: Hamming (`"hamming"`)
+ *    - 4: Longest Common Substring (`"lcs"`)
+ *    - 5: q-gram (`"qgram"`)
+ *    - 6: cosine (`"cosine"`)
+ *    - 7: Jaccard (`"jaccard"`)
+ *    - 8: Jaro-Winkler (`"jw"`)
+ *    - 9: Soundex (`"soundex"`)
+ *   @endparblock
+ * @param nomatch `[integer]` The value to be returned when no match is found. 
+ * @param matchNA Should `NA`s be matched? Default behaviour mimics the 
+ *  behaviour of base `match`, meaning that `NA` matches
+ *  `NA` (see also the note on `NA` handling below).
+ * @param weight `[numeric]` vector. Edit penalty
+ *   @parblock
+ *     For `method='osa'` or`'dl'`, the penalty for
+ *     deletion, insertion, substitution and transposition, in that order. When
+ *     `method='lv'`, the penalty for transposition is ignored. When
+ *     `method='jw'`, the weights associated with characters of `a`,
+ *     characters from `b` and the transposition weight, in that order. 
+ *     Weights must be positive and not exceed 1. `weight` is ignored
+ *     completely for other methods
+ *   @endparblock
+ * @param q  `[integer]` scalar. Size of the q-gram; must be nonnegative. Only applies to
+ *   `method='qgram'`, `'jaccard'` or `'cosine'`.
+ * @param maxDistance `[numeric]` scalar. The maximum distance allowed for matching.
+ * @param p `[numeric]` scalar. Penalty factor for Jaro-Winkler distance. The valid range for 
+ *   `p` is `0 <= p <= 0.25`. If `p=0` (default), the
+ *   Jaro-distance is returned. Applies only to `method='jw'`.
+ * @param bt `[numeric]` vector. Winkler's boost threshold. Winkler's penalty factor is
+ *   only applied when the Jaro distance is larger than `bt`.
+ *   Applies only to `method='jw'` and `p>0`.
+ * @param useBytes Perform byte-wise comparison (i.e. do not translate UTF-8 to integer prior to distance calculation)
+ * @param nthread `[integer]` scalar. Maximum number of threads to use. 
+ *
+ *
+ * @return
+ * `[integer]` vector of `length(x)` with indices in `table`.
+ */
 SEXP attribute_hidden sd_amatch(SEXP x, SEXP table, SEXP method 
                                   , SEXP nomatch, SEXP matchNA
                                   , SEXP weight, SEXP p, SEXP bt, SEXP q
@@ -62,6 +116,18 @@ SEXP attribute_hidden sd_amatch(SEXP x, SEXP table, SEXP method
   return fun(x, table, method, nomatch, matchNA, weight, p, bt, q, maxDistance, useBytes, nthrd);
 }
 
+/**
+ * @brief Compute q-gram counts
+ * 
+ * @param a `[character]` vector 
+ * @param qq `[integer`] scalar. 
+ * 
+ * @return
+ * A `[numeric]` vector of `length(a)*n_qgrams`, where `n_qrams` is the number of different `qgrams` observed
+ * in the elements of `a`. The output vector has an attribute called `qgrams`, which is an integer vector
+ * of size `q*n_qgrams` containing integer (UTF-32) labels for the q-grams sequentially.
+ * 
+ */
 SEXP attribute_hidden sd_get_qgrams(SEXP a, SEXP qq)
 {
   static SEXP(*fun)(SEXP, SEXP) = NULL;
@@ -78,7 +144,7 @@ SEXP attribute_hidden sd_lengths(SEXP X)
 
 
 /**
- * Lower tridiagonal elements of distance matrix.
+ * @brief Lower tridiagonal elements of distance matrix.
  *
  * @param a `[character]` vector
  * @param method `[integer]` scalar, indicating the distance method as follows
