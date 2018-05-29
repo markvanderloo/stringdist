@@ -42,6 +42,21 @@ Also, there are some utility functions:
 * `phonetic()` computes phonetic codes of strings (currently only soundex)
 * `printable_ascii()` is a utility function that detects non-printable ascii or non-ascii characters.
 
+#### C api
+
+As of version `0.9.5.0`  you can call a number of `stringdist` functions directly
+from the `C` code of your R package. The description of the API can be found 
+
+- By typing `?stringdist_api` in the R console
+- By browsing the package's help index to `User guides, package vignettes and other documentation` and clicking on `doc/stringdist_api.pdf`.
+- Or you can find the file's location as follows
+
+```
+system.file("doc/stringdist_api.pdf", package="stringdist")
+```
+
+
+
 
 
 #### Installation
@@ -50,14 +65,6 @@ To install the latest release from CRAN, open an R terminal and type
 
 `install.packages('stringdist')`
 
-Beta versions are released through my [drat](http://www.r-pkg.org/pkg/drat) repository. These versions build and pass all current tests correctly on Linux
-but builds have not been tested on all architectures that [CRAN](http://cran.r-projecet.org) supports. Windows users will also need to
-have [rtools](http://cran.r-project.org/bin/windows/Rtools/) installed.
-
-```
-drat::addRepo("markvanderloo")
-install.packages("stringdist")
-```
 
 To obtain the package from the very latest source code open a `bash` terminal (or `git bash` if you work under Windows
 with `msysgit`) and type

@@ -36,9 +36,8 @@
 extern "C" {
 #endif
 
-/** 
- * @file stringdist_api.h
- * @brief Functions exported from the stringdist package.
+/**
+ * @mainpage Stringdist C API
  *
  * @author Mark van der Loo, Jan van der Laan, R Core Team, Paul Hsieh, Chris Muir
  * @version `R package stringdist` version `0.9.5.0` and higher.
@@ -62,6 +61,16 @@ extern "C" {
  * Distance computations are based on UTF [code points](https://en.wikipedia.org/wiki/Code_point) unless `useBytes` is `TRUE`, in which
  * case distances are computed over byte sequences. Using non-UTF-8 encoded strings is
  * untested and is highly likely to result in errors.
+ *
+ *
+ *
+ */
+
+
+/** 
+ * @file stringdist_api.h
+ * @brief Functions exported from the stringdist package.
+ *
  */
 
 
