@@ -49,13 +49,14 @@ extern "C" {
  */
 
 
-
+/*
 SEXP attribute_hidden sd_all_int(SEXP X)
 {
   static SEXP(*fun)(SEXP) = NULL;
   if (fun == NULL) fun = (SEXP(*)(SEXP)) R_GetCCallable("stringdist","R_all_int");
   return fun(X);
 }
+*/
 
 /**
  * @brief Find the location of values in `x` in `table` by approximate matching.
@@ -135,13 +136,14 @@ SEXP attribute_hidden sd_get_qgrams(SEXP a, SEXP qq)
   return fun(a, qq);
 }
 
+/*
 SEXP attribute_hidden sd_lengths(SEXP X)
 {
   static SEXP(*fun)(SEXP) = NULL;
   if (fun == NULL) fun = (SEXP(*)(SEXP)) R_GetCCallable("stringdist","R_lengths");
   return fun(X);
 }
-
+*/
 
 /**
  * @brief Lower tridiagonal elements of distance matrix.
