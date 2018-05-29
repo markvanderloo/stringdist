@@ -39,11 +39,27 @@ extern "C" {
 /** 
  * @file stringdist_api.h
  * @brief Functions exported from the stringdist package.
- * 
  *
- * @section sec Character encoding
+ * @author Mark van der Loo, Jan van der Laan, R Core Team, Paul Hsieh, Chris Muir
+ * @version `R package stringdist` version `0.9.5.0` and higher.
+ *
+ * @section using Using the stringdist C API
+ * To call the functions described here from your package you need to:
+ * 
+ * 1. Make sure that `stringdist` is installed.
+ * 2. Add `stringdist` to `Imports` (or `Depends`) and `LinkingTo` in the `DESCRIPTION` file.
+ * 3. In your source file under the package's `/src` directory, add the line 
+ * ```
+ * #include <stringdist_api.h>
+ * ```
+ * 
+ * 
+ * An example of a package using this API is [refinr](https://CRAN.R-project.org/package=refinr).
+ *
+ *
+ * @section encoding Character encoding
  * All `character` vector input is expected to be in `UTF-8` (this also allows `ASCII`).
- * Distance computations are based on UTF code points unless `useBytes` is `TRUE`, in which
+ * Distance computations are based on UTF [code points](https://en.wikipedia.org/wiki/Code_point) unless `useBytes` is `TRUE`, in which
  * case distances are computed over byte sequences. Using non-UTF-8 encoded strings is
  * untested and is highly likely to result in errors.
  */
