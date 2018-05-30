@@ -202,7 +202,7 @@ stringdistmatrix <- function(a, b
   , q  = 1
   , p  = 0
   , bt = 0
-  , useNames=c('none','strings','names'), ncores=1, cluster=NULL
+  , useNames=c('none','strings','names') 
   , nthread = getOption("sd_num_thread")
 ){
   if (is.list(a)|| (!missing(b) && is.list(b)) ){
@@ -226,7 +226,6 @@ stringdistmatrix <- function(a, b
     , is.logical(useBytes)
     , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
     , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
-    , ncores > 0
     , nthread > 0
   )
   
