@@ -16,7 +16,8 @@ Description: Implements an approximate string matching version of R's native
     gram, cosine, jaccard distance) or heuristic metrics (Jaro, Jaro-Winkler). An
     implementation of soundex is provided as well. Distances can be computed between
     character vectors while taking proper care of encoding or between integer
-    vectors representing generic sequences. An API for C or C++ is exposed as well.
+    vectors representing generic sequences. Stringdist is built for speed and
+    paralellizes computation using 'openMP'. An API for C or C++ is exposed as well.
 Version: 0.9.5.0
 Depends:
     R (>= 2.15.3)

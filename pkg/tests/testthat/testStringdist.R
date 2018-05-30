@@ -32,9 +32,6 @@ test_that("Edge cases in OSA method",{
 
 })
 
-test_that("max distance yields warning",{
-  expect_warning(stringdist("abc","abc",method='osa',maxDist=1))
-})
 
 test_that("transpositions are found",{
   expect_equal(stringdist("ab","ba",method='osa'),1)

@@ -107,10 +107,6 @@ This warning can be avoided by explicitly converting the argument(s).
 #'   Weights must be positive and not exceed 1. \code{weight} is ignored
 #'   completely when \code{method='hamming'}, \code{'qgram'}, \code{'cosine'},
 #'   \code{'Jaccard'}, \code{'lcs'}, or \code{soundex}.
-#' @param maxDist  [DEPRECATED AND WILL BE REMOVED|2016] Currently kept for
-#'   backward compatibility. It does not offer any speed gain. (In fact, it
-#'   currently slows things down when set to anything different from
-#'   \code{Inf}).
 #' @param q  Size of the \eqn{q}-gram; must be nonnegative. Only applies to
 #'   \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
 #' @param p Penalty factor for Jaro-Winkler distance. The valid range for 
@@ -143,11 +139,11 @@ stringdist <- function(a, b
   , method=c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw","soundex")
   , useBytes = FALSE
   , weight=c(d=1,i=1,s=1,t=1) 
-  , maxDist=Inf, q=1, p=0, bt=0
+  , q  = 1
+  , p  = 0
+  , bt = 0
   , nthread = getOption("sd_num_thread")
 ){
-  if (maxDist < Inf)
-    warning("Argument 'maxDist' is deprecated for function 'stringdist'. This argument will be removed in the future.")   
   if (is.list(a)|is.list(b))
     warning(listwarning("stringdist","seq_dist"))
             
@@ -185,7 +181,6 @@ stringdist <- function(a, b
   do_dist(a=b, b=a
     , method=method
     , weight=weight
-    , maxDist=maxDist
     , q=q
     , p=p
     , bt=bt
@@ -195,10 +190,6 @@ stringdist <- function(a, b
 
 
 #' @param useNames Use input vectors as row and column names?
-#' @param ncores [DEPRECATED AND WILL BE REMOVED|2016]. Use \code{nthread} in
-#'   stead. This argument is ignored.
-#' @param cluster [DEPRECATED AND WILL BE REMOVED|2016].  A custom cluster,
-#'   created with \code{\link[parallel]{makeCluster}}.
 #'
 #'
 #' @rdname stringdist
@@ -207,19 +198,13 @@ stringdist <- function(a, b
 stringdistmatrix <- function(a, b
   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex")
   , useBytes = FALSE
-  , weight=c(d=1,i=1,s=1,t=1),  maxDist=Inf, q=1, p=0, bt=0
+  , weight=c(d=1,i=1,s=1,t=1)  
+  , q  = 1
+  , p  = 0
+  , bt = 0
   , useNames=c('none','strings','names'), ncores=1, cluster=NULL
   , nthread = getOption("sd_num_thread")
 ){
-  if (maxDist < Inf)
-    warning("Argument 'maxDist' is deprecated for function 'stringdistmatrix'. This argument will be removed in the future.") 
-  if (ncores > 1 ){
-    warning("Argument 'ncores' is deprecated as stringdist now uses multithreading by default. This argument is currently ignored and will be removed in the future.")
-    ncores <- 1
-  }
-  if ( !is.null(cluster) ){
-    message("Argument 'cluster' is deprecaterd as stringdust now uses multithreading by default. The argument is currently ignored and will be removed in the future")
-  }
   if (is.list(a)|| (!missing(b) && is.list(b)) ){
    warning(listwarning("stringdistmatrix","seq_distmatrix"))
   }
@@ -291,7 +276,7 @@ stringdistmatrix <- function(a, b
   }
 
   x <- vapply(b, do_dist, USE.NAMES=FALSE, FUN.VALUE=numeric(length(a))
-          , a, method,weight,maxDist, q, p, bt, useBytes, nthread)
+          , a, method,weight, q, p, bt, useBytes, nthread)
 
   if (useNames %in% c("strings","names") ){  
     structure(matrix(x,nrow=length(a),ncol=length(b), dimnames=list(rowns,colns)))
@@ -325,7 +310,7 @@ METHODS <- c(
 )
 
 
-do_dist <- function(a, b, method, weight, maxDist=Inf, q, p, bt, useBytes=FALSE, nthread=1L){
+do_dist <- function(a, b, method, weight, q, p, bt, useBytes=FALSE, nthread=1L){
   
   if (method=='soundex' && !all(printable_ascii(a) & printable_ascii(b)) ){
     warning("Non-printable ascii or non-ascii characters in soundex. Results may be unreliable. See ?printable_ascii.")
@@ -340,9 +325,6 @@ do_dist <- function(a, b, method, weight, maxDist=Inf, q, p, bt, useBytes=FALSE,
     , as.integer(useBytes), as.integer(nthread)
   )
 
-  if (maxDist < Inf ){
-    d[!is.na(d) & d > maxDist] <- Inf
-  }
   d
 }
 
