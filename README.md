@@ -11,6 +11,7 @@
 
 * Approximate matching and string distance calculations for R. 
 * All distance and matching operations are system- and encoding-independent.
+* Built for speed, using [openMP](https://www.openmp.org/) for parallel computing.
 
 The package offers the following main functions:
 
@@ -42,7 +43,7 @@ Also, there are some utility functions:
 * `phonetic()` computes phonetic codes of strings (currently only soundex)
 * `printable_ascii()` is a utility function that detects non-printable ascii or non-ascii characters.
 
-#### C api
+#### C API
 
 As of version `0.9.5.0`  you can call a number of `stringdist` functions directly
 from the `C` code of your R package. The description of the API can be found 
