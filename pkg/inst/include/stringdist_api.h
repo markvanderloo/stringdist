@@ -21,8 +21,9 @@
 #ifndef _STRINGDIST_API_H
 #define _STRINGDIST_API_H
 
-#include <stringdist.h>		// also includes R.h, Rinternals.h, Rdefines.h
-
+#include <R.h>
+#include <Rinternals.h>
+#include <Rdefines.h>
 #include <Rconfig.h>
 #include <R_ext/Rdynload.h>
 
