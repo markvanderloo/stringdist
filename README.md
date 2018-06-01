@@ -88,6 +88,15 @@ of the code is written in `C`, the development version may crash your `R`-sessio
 * A [paper](http://journal.r-project.org/archive/2014-1/loo.pdf) on stringdist has been published in the R-journal
 * [Slides](http://www.slideshare.net/MarkVanDerLoo/stringdist-use-r2014) of te _useR!2014_ conference.
 
+#### Note to users: deprecated arguments removed as of version 0.9.5.0
+
+The following arguments have been obsolete since 2015 and have been removed in the 0.9.5.0 release (spring 2018)
+
+* Argument `cluster` for function `stringdistmatrix`.
+* Argument `maxDist` for functions `stringdist` and `stringdistmatrix` (not `amatch`).
+* Argument `ncores` for function `stringdistmatrix` 
+
+
 #### Note to users: deprecated arguments as of >= 0.9.0, >= 0.9.2
 
 Parallelization used to be based on R's ```parallel``` package, that works by spawning several R sessions in the background. As of version 0.9.0, ```stringdist``` uses the more efficient ```openMP``` protocol to parallelize everything under the hood. 
