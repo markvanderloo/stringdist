@@ -55,6 +55,8 @@ from the `C` code of your R package. The description of the API can be found
 system.file("doc/stringdist_api.pdf", package="stringdist")
 ```
 
+Examples of packages that link to `stringdist` can be found [here](https://github.com/markvanderloo/linkstringdist) and
+[here](https://github.com/ChrisMuir/refinr).
 
 
 
