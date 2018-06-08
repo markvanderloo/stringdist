@@ -13,7 +13,6 @@ addons:
 
 r:
  - release
- - devel
 
 before_install:
   - R -e "install.packages(c('devtools','roxygen2','testthat'))"
