@@ -1,3 +1,6 @@
+version 0.9.5.1
+- Fixed header file for C API
+
 version 0.9.5.0
 - New contributor: Chris Muir
 - C/C++ API now exposed for packages LinkingTo stringdist. See `?stringdist_api`
