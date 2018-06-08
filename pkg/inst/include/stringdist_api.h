@@ -62,6 +62,11 @@ extern "C" {
  * non-UTF-8 encoded strings is untested and is highly likely to result in
  * errors.
  *
+ * @section threads Thread safety
+ *
+ * It is not safe to call functions from `stringdist` C API from 
+ * multiple concurrent threads.
+ *
  *
  *
  */
