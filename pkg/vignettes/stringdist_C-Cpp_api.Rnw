@@ -1,0 +1,7 @@
+\documentclass{article}
+\usepackage{pdfpages}
+%\VignetteIndexEntry{stringdist C/C++ API}
+
+\begin{document}
+\includepdf[pages=-, fitpaper=true]{stringdist_api.pdf}
+\end{document}

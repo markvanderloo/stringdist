@@ -15,7 +15,7 @@ basedir=`pwd`
 cd pkg/inst/include
 doxygen Doxyfile
 cd $basedir
-cd pkg/inst/doc/latex 
+cd pkg/vignettes/latex 
 make
 cd ..
 mv latex/refman.pdf ./stringdist_api.pdf

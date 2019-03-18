@@ -421,13 +421,10 @@ static void get_counts( qtree *Q, int q, int *qgrams, int nLoc, int *index, doub
  * 
  */
 SEXP R_get_qgrams(SEXP a, SEXP qq){
-  PROTECT(a);
-  PROTECT(qq);
 
   int q = INTEGER(qq)[0];
 
   if ( q < 0 ){
-    UNPROTECT(2);
     error("q must be a nonnegative integer");
   }
 
@@ -454,7 +451,6 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
       }
       Q = push_string(str, nchar, q, Q, iLoc, nLoc);
       if ( Q == NULL ){
-        UNPROTECT(2);
         error("could not allocate enough memory");
       }
     }
@@ -477,7 +473,7 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
   setAttrib(qcount, install("qgrams"), qgrams);
   
   free_qtree();
-  UNPROTECT(4);
+  UNPROTECT(2);
 
   return(qcount);
 }

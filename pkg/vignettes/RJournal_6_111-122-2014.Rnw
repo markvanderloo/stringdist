@@ -1,0 +1,17 @@
+\documentclass{article}
+\usepackage{pdfpages}
+%\VignetteIndexEntry{RJournal 6 111-122 (2014)}
+
+\begin{document}
+\includepdf[pages=-, fitpaper=true]{loo2014stringdist.pdf}
+
+\newpage{}
+\subsection*{Errata}
+A few things have changed after the paper was published. These changes
+are documented here.
+
+\begin{itemize}
+\item[Version 0.9.3:] $q$-gram distances are now always 0 when $q=0$ (used to be \texttt{Inf}).
+\end{itemize}
+
+\end{document}

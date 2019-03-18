@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export _R_CHECK_CRAN_INCOMING_REMOTE_=false
+
 R=R
 CHECKARG=""
 while [ $# -gt 0 ] ; do
