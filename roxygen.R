@@ -1,9 +1,10 @@
 library(roxygen2)
-library(devtools)
+library(pkgload)
 options(error=traceback)
 unlink( 'pkg/man', TRUE)
 
 #setwd('pkg')
+load_all('./pkg')
 document('./pkg')
 #roxygenize( '.'
 #          , roxygen.dir='.'
