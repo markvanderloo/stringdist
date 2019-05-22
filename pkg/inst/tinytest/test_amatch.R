@@ -1,4 +1,4 @@
-
+options(sd_num_thread=2)
 ## amatch: Optimal String Alignment
 
 ## simple test and multiple edge cases

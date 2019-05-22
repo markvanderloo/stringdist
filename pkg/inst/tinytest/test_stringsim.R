@@ -1,4 +1,4 @@
-
+options(sd_num_thread=2)
 ## stringsim
 
 # We expect that two completely different strings have a similarity of

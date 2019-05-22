@@ -1,4 +1,4 @@
-
+options(sd_num_thread=2)
 ## seq_dist
 
 # A simple test to see that everything is passed on to the correct
@@ -48,25 +48,26 @@
 
 
 ## Elementary tests on seq_distmatrix
-#  expect_equivalent(seq_distmatrix(1:10),dist(0))
-#  expect_equivalent(seq_distmatrix(1:10,list(1:10)),matrix(0))
-#  expect_equivalent(
-#    as.matrix(seq_distmatrix(list(1:3,2:4)) )
-#    , matrix(c(0,2,2,0),nrow=2)
-#  )
-#  expect_equal(
-#    as.matrix(seq_distmatrix(list(x=1:3,y=2:4),useNames="names") )
-#    , matrix(c(0,2,2,0),nrow=2,dimnames=list(c('x','y'),c('x','y')))
-#  )
-#  expect_equal(
-#    seq_distmatrix(list(x=1:3,y=2:4),list(x=1:3,y=2:4),useNames="names")
-#    , matrix(c(0,2,2,0),nrow=2,dimnames=list(c('x','y'),c('x','y')))
-#  )
-#  expect_equal(class(seq_distmatrix(list(1:3,2:4))),"dist")
-#  expect_equivalent(
-#    as.matrix(seq_distmatrix(list(1:3,2:4)),seq_distmatrix(list(1:3,2:4),list(1:3,2:4)) )
-#    , matrix(c(0,2,2,0),nrow=2)
-#  )
+
+  expect_equivalent(seq_distmatrix(1:10),dist(0))
+  expect_equivalent(seq_distmatrix(1:10,list(1:10)),matrix(0))
+  expect_equivalent(
+    as.matrix(seq_distmatrix(list(1:3,2:4)) )
+    , matrix(c(0,2,2,0),nrow=2)
+  )
+  expect_equal(
+    as.matrix(seq_distmatrix(list(x=1:3,y=2:4),useNames="names") )
+    , matrix(c(0,2,2,0),nrow=2,dimnames=list(c('x','y'),c('x','y')))
+  )
+  expect_equal(
+    seq_distmatrix(list(x=1:3,y=2:4),list(x=1:3,y=2:4),useNames="names")
+    , matrix(c(0,2,2,0),nrow=2,dimnames=list(c('x','y'),c('x','y')))
+  )
+  expect_equal(class(seq_distmatrix(list(1:3,2:4))),"dist")
+  expect_equivalent(
+    as.matrix(seq_distmatrix(list(1:3,2:4)),seq_distmatrix(list(1:3,2:4),list(1:3,2:4)) )
+    , matrix(c(0,2,2,0),nrow=2)
+  )
   
 
 
