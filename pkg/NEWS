@@ -1,4 +1,5 @@
 version 0.9.5.2
+- switched to tinytest framework
 - RJournal paper and C/C++ api docs are now presented as vignette.
 
 version 0.9.5.1
