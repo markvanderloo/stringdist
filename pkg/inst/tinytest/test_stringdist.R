@@ -1,9 +1,8 @@
 
-library(testthat)
 
 ### -------------------------------------------------------------
-context("General ")
-test_that("Argument parsing",{
+##General
+## Argument parsing
    expect_equal(stringdist(character(0),"a"),numeric(0))
    expect_equal(stringdist("a",character(0)),numeric(0))
    expect_error(stringdist("a","b",weight=c(-1,1,1,1)))
@@ -14,12 +13,12 @@ test_that("Argument parsing",{
    expect_warning(stringdist('a',list('a')))
    expect_warning(stringdistmatrix(list('a')))
    expect_warning(stringdistmatrix(list('a'),list('b')))
-}) 
+
 
 
 ### -------------------------------------------------------------
-context("Optimal String Alignment")
-test_that("Edge cases in OSA method",{
+## Optimal String Alignment
+## Edge cases in OSA method
    expect_equal(stringdist( "", "",method='osa'),0)
    expect_equal(stringdist( "","a",method='osa'),1)
    expect_equal(stringdist("a", "",method='osa'),1)
@@ -30,19 +29,15 @@ test_that("Edge cases in OSA method",{
    expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd")))),1)
 
 
-})
-
-
-test_that("transpositions are found",{
+## transpositions are found
   expect_equal(stringdist("ab","ba",method='osa'),1)
-})
 
-test_that("Shortest argument is recycled",{
+## Shortest argument is recycled
    expect_equal(stringdist(c('a','b'),'a',method='osa'),c(0,1))
    expect_equal(stringdist('a',c('a','b'),method='osa'),c(0,1))
-})
 
-test_that("weights are handled correctly",{
+
+## weights are handled correctly
    # deletion
    expect_equal(stringdist("a","ab", method='osa',weight=c(0.5,1,1,1)),0.5)
    # insertion
@@ -95,32 +90,29 @@ test_that("weights are handled correctly",{
   expect_equal(stringdist("a","b",method="dl",weight=c(i=.1,d=1,s=.3,t=1)),.3)
   expect_equal(stringdist("leia","leela",method="dl",weight=c(i=1,d=.1,s=1,t=1)),2)
 
-})
 
-test_that("NA's are handled correctly",{
+## NA's are handled correctly
    expect_true(is.na(stringdist(NA ,'a',method='osa')))
    expect_true(is.na(stringdist('a',NA ,method='osa')))
    expect_true(is.na(stringdist(NA ,NA ,method='osa')))
 
-})
 
 ### -------------------------------------------------------------
-context("Levenstein")
-test_that("Edge cases in Levenshtein method",{
+## Levenstein
+## Edge cases in Levenshtein method
    expect_equal(stringdist( "", "",method='lv'),0)
    expect_equal(stringdist( "","a",method='lv'),1)
    expect_equal(stringdist("a", "",method='lv'),1)
    expect_equal(stringdist("a","a",method='lv'),0)
    expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="lv"))),1)
-})
 
 
-test_that("Shortest argument is recycled",{
+## Shortest argument is recycled
    expect_equal(stringdist(c('a','b'),'a',method='lv'),c(0,1))
    expect_equal(stringdist('a',c('a','b'),method='lv'),c(0,1))
-})
 
-test_that("weights are handled correctly",{
+
+## weights are handled correctly
    # deletion
    expect_equal(stringdist("a","ab", method='lv',weight=c(0.5,1,1)),0.5)
    # insertion
@@ -132,30 +124,28 @@ test_that("weights are handled correctly",{
       stringdist("abc","ac",method='lv',weight=c(0.5,1,1,1)),
       stringdist("ac","abc",method='lv',weight=c(1,0.5,1,1))
    )
-})
 
-test_that("NA's are handled correctly",{
+## NA's are handled correctly
    expect_true(is.na(stringdist(NA ,'a',method='lv')))
    expect_true(is.na(stringdist('a',NA ,method='lv')))
    expect_true(is.na(stringdist(NA ,NA ,method='lv')))
-})
+
 
 ### -------------------------------------------------------------
-context("Damerau-Levenstein")
-test_that("Edge cases in DL method",{
+## Damerau-Levenstein
+## Edge cases in DL method
    expect_equal(stringdist( "", "",method='dl'),0)
    expect_equal(stringdist( "","a",method='dl'),1)
    expect_equal(stringdist("a", "",method='dl'),1)
    expect_equal(stringdist("a","a",method='dl'),0)
-})
 
 
-test_that("Shortest argument is recycled",{
+## Shortest argument is recycled
    expect_equal(stringdist(c('a','b'),'a',method='dl'),c(0,1))
    expect_equal(stringdist('a',c('a','b'),method='dl'),c(0,1))
-})
 
-test_that("weights are handled correctly",{
+
+## weights are handled correctly
    # deletion
    expect_equal(stringdist("a","ab", method='dl',weight=c(0.5,1,1,1)),0.5)
    # insertion
@@ -169,69 +159,67 @@ test_that("weights are handled correctly",{
       stringdist("abc","ac",method='dl',weight=c(0.5,1,1,1)),
       stringdist("ac","abc",method='dl',weight=c(1,0.5,1,1))
    )
-})
 
-test_that("NA's are handled correctly",{
+## NA's are handled correctly
    expect_true(is.na(stringdist(NA ,'a',method='dl')))
    expect_true(is.na(stringdist('a',NA ,method='dl')))
    expect_true(is.na(stringdist(NA ,NA ,method='dl')))
-})
+
 
 ### -------------------------------------------------------------
-context("Longest Common Substring")
-test_that("Edge cases in LCS method",{
+## Longest Common Substring
+## Edge cases in LCS method
    expect_equal(stringdist( "", "",method='lcs'),0)
    expect_equal(stringdist( "","a",method='lcs'),1)
    expect_equal(stringdist("a", "",method='lcs'),1)
    expect_equal(stringdist("a","a",method='lcs'),0)
    expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="lcs"))),1)
-})
 
 
-test_that("Shortest argument is recycled",{
+
+## Shortest argument is recycled
    expect_equal(stringdist(c('a','b'),'a',method='lcs'),c(0,2))
    expect_equal(stringdist('a',c('a','b'),method='lcs'),c(0,2))
-})
 
 
-test_that("NA's are handled correctly",{
+
+## NA's are handled correctly
    expect_true(is.na(stringdist(NA ,'a',method='lcs')))
    expect_true(is.na(stringdist('a',NA ,method='lcs')))
    expect_true(is.na(stringdist(NA ,NA ,method='lcs')))
-})
+
 
 
 ### -------------------------------------------------------------
-context("Hamming distance")
-test_that("Edge cases in DL method",{
+## Hamming distance
+## Edge cases in DL method
    expect_equal(stringdist( "", "",method='h'),0)
    expect_equal(stringdist("a","a",method='h'),0)
    expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="h"))),1)
-})
 
-test_that("Unequal string lengths",{
+
+## Unequal string lengths
   expect_equal(stringdist("aa","a",method="h"),Inf)
   expect_equal(stringdist("a","aa",method="h"),Inf)
-})
 
 
-test_that("Shortest argument is recycled",{
+## Shortest argument is recycled
    expect_equal(stringdist(c('a','b'),'a',method='h'),c(0,1))
    expect_equal(stringdist('a',c('a','b'),method='h'),c(0,1))
-})
 
-test_that("NA's are handled correctly",{
+
+## NA's are handled correctly
    expect_true(is.na(stringdist(NA ,'a',method='h')))
    expect_true(is.na(stringdist('a',NA ,method='h')))
    expect_true(is.na(stringdist(NA ,NA ,method='h')))
-})
+
 
 
 
 ### -------------------------------------------------------------
-context("Q-gram distance")
+## Q-gram distance
 
-test_that("Edge cases in qgram method",{
+## Edge cases in qgram method
    expect_equal(stringdist( "", "",method='qgram',q=0), 0)
    expect_equal(stringdist( "", "",method='qgram',q=1),0)
    expect_equal(stringdist( "","a",method='qgram',q=1),1)
@@ -239,32 +227,30 @@ test_that("Edge cases in qgram method",{
    expect_equal(stringdist("a","a",method='qgram',q=1), 0)
    expect_error(stringdist("aa","bb",method='qgram',q=-2))
    expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="qgram"))),1)
-})
 
 
-test_that("Shortest argument is recycled",{
+## Shortest argument is recycled
    expect_equal(stringdist(c('a','b'),'a',method='qgram',q=1),c(0,2))
    expect_equal(stringdist('a',c('a','b'),method='qgram',q=1),c(0,2))
-})
 
-test_that("NA's are handled correctly",{
+
+## NA's are handled correctly
    expect_true(is.na(stringdist(NA ,'a',method='qgram')))
    expect_true(is.na(stringdist('a',NA ,method='qgram')))
    expect_true(is.na(stringdist(NA ,NA ,method='qgram')))
-})
 
 
-test_that("binary tree is cleaned up properly in qgram-tree",{
+## binary tree is cleaned up properly in qgram-tree
 # explanation: the binary tree storing unique q-grams and q-gram counts is re-used when looping
 # over string pairs. (this is not the case with the unsorted lookup table in 'qgram')
   d <- stringdist('abcde',c('edcba','edcba'),method='qgram',q=2)
   expect_equal(d[1],d[2])
-})
+
 
 ### -------------------------------------------------------------
-context("cosine distance") 
+## cosine distance
 # basic engine is q-gram so we need limited testing
-test_that("cosine distance computes correctly",{
+## cosine distance computes correctly
   expect_equal(
     round(stringdist("aaa","abc",method="cosine",q=1),8),
     round(1-1/sqrt(3),8)
@@ -279,11 +265,11 @@ test_that("cosine distance computes correctly",{
   # note that 1 - 2/(sqrt(2)*sqrt(2)) != 0, so this used to give ~2.2E-16. 
   expect_equal( stringdist("ab","ab",method="cosine"),0.0,tolerance=0.0 ) 
   expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="cosine"))),1)
-})
 
-context("Jaccard distance")
+
+### Jaccard distance
 # basic engine is q-gram so we need limited testing
-test_that("Jaccard distance computes correctly",{
+## Jaccard distance computes correctly
   expect_equal(
     round(stringdist("aaa","abc",method="jaccard",q=1),8),
     round(1-1/3,8)
@@ -293,12 +279,12 @@ test_that("Jaccard distance computes correctly",{
     1.0
   )
   expect_equal(sum(is.na(stringdist(c("a", NA, "b", "c"), c("aa", "bb", "cc", "dd"),method="jaccard"))),1)
-})
+
 
 
 ### -------------------------------------------------------------
-context("Jaro")
-test_that("basic examples and edge cases work",{
+## Jaro
+## basic examples and edge cases work
   # strings of length 1
   expect_equal(stringdist("a","a",method='jw'),0);
   expect_equal(stringdist("a","b",method='jw'),1);
@@ -314,9 +300,9 @@ test_that("basic examples and edge cases work",{
   expect_equal(
     stringdist("RICK WARREN","WARREN BUFFET",method="jw")
     , 1 - (1/3)*(7/13 + 7/11 + (7-3.5)/7))
-})
 
-test_that("Extended examples work",{
+
+## Extended examples work
   # cases from wikipedia
   expect_equal(
     round(1-stringdist("martha","marhta",method='jw'),3),
@@ -354,9 +340,9 @@ test_that("Extended examples work",{
   expect_equal(stringdist("axiou","aaeeiioouu",method='jw'),1-(4/5+4/10 + 4/4)/3);
   # non-matching characters in both strings
   expect_equal(stringdist("abcdeu","abxde",method='jw'),1-(4/6+4/5+4/4)/3);
-})
 
-test_that("distance is symmetric",{
+
+## distance is symmetric
   expect_equal(
     round(stringdist("martha","marhta",method='jw'),8),
     round(stringdist("marhta","martha",method='jw'),8)
@@ -365,22 +351,21 @@ test_that("distance is symmetric",{
     round(stringdist("dicksonx","dixon",method='jw'),8),
     round(stringdist("dixon","dicksonx",method='jw'),8)
   )
-})
 
-test_that("Shortest argument is recycled",{
+
+## Shortest argument is recycled
    expect_equal(stringdist(c('a','b'),'a',method='jw'),c(0,1))
    expect_equal(stringdist('a',c('a','b'),method='jw'),c(0,1))
-})
 
-test_that("NA's are handled correctly",{
+
+## NA's are handled correctly
    expect_true(is.na(stringdist(NA ,'a',method='jw')))
    expect_true(is.na(stringdist('a',NA ,method='jw')))
    expect_true(is.na(stringdist(NA ,NA ,method='jw')))
-})
 
 ### -------------------------------------------------------------
-context("Jaro-Winkler")
-test_that("wikipedia examples",{
+## Jaro-Winkler
+## wikipedia examples
   expect_equal(
     round(stringdist("martha","marhta",method="jw",p=0.1),3),
     1-0.961
@@ -393,22 +378,20 @@ test_that("wikipedia examples",{
     round(stringdist("dixon","dicksonx",method="jw",p=0.1),3),
     round(1-0.813,3)
   )
-})
 
-test_that("Winkler's boost parameter",{
+
+## Winkler's boost parameter
   expect_equal(
     stringdist("john doe","jane doe",method="jw",p=0.1, bt=0)
     , stringdist("john doe","jane doe",method="jw",p=0.1, bt=0.1))
   
-  expect_lt(
+  expect_true(
     stringdist("john doe","jane doe",method="jw",p=0.1, bt=0.1)
-    , stringdist("john doe","jane doe",method="jw",p=0.1, bt=0.8))
-})
+     < stringdist("john doe","jane doe",method="jw",p=0.1, bt=0.8))
 
 
-
-context("stringdistmatrix")
-test_that("dimensions work out",{
+## stringdistmatrix
+## dimensions work out
     expect_equivalent(
         dim(stringdistmatrix(c("aa","bb","cc"),c("aa","cc"))),
         c(3,2)
@@ -420,19 +403,18 @@ test_that("dimensions work out",{
     expect_equivalent( # bug #28
       dim(stringdistmatrix('foo',letters[1:3])), c(1,3)
     )
-})
 
-test_that("stringdistmatrix-lower-tri can output long vectors",{
+## stringdistmatrix-lower-tri can output long vectors
    # skipped on CRAN because of high memory use.
-   skip_on_cran()
-   # Error when input vector yields a vector too big for a long vector.
-   out <- tryCatch(stringdistmatrix(character(100663296+1),method="hamming")
-      , error = function(e) e$message )
-   expect_equal(class(out),"character")
-   expect_match(out, "exceeds maximum allowed")
-})
+   if (at_home()){
+     # Error when input vector yields a vector too big for a long vector.
+     out <- tryCatch(stringdistmatrix(character(100663296+1),method="hamming")
+        , error = function(e) e$message )
+     expect_equal(class(out),"character")
+     expect_true(grepl("exceeds maximum allowed",out))
+   }
 
-test_that('stringdistmatrix yields correct distances',{
+## stringdistmatrix yields correct distances
   x <- paste0('Mot',intToUtf8(0x00F6),'rhead') # correct spelling
   y <- 'Motorhead' # Pissing off Lemmy.
   v <- c(x,y)
@@ -450,9 +432,9 @@ test_that('stringdistmatrix yields correct distances',{
     stringdistmatrix(v,v,useBytes=TRUE)
     , matrix(c(d11,d12,d12,d22),nrow=2,ncol=2)
   )
-})
 
-test_that("stringdistmatrix gives correct labels",{
+
+## stringdistmatrix gives correct labels
   a <- c(k1="jan",k2="pier",k3="joris")
   b <- c(f1 = "jip", f2="janneke")
   expect_equal(
@@ -468,10 +450,9 @@ test_that("stringdistmatrix gives correct labels",{
     , list(c("k1","k2","k3"),c("f1","f2"))
   )
   
-})
 
 
-test_that("stringdistmatrix with single argument",{
+## stringdistmatrix with single argument
   d <- stringdistmatrix(c("aap","noot","mies","boom","roos","vis"))
   expect_equal(class(d),"dist")
   expect_equal(length(d),15)
@@ -503,18 +484,17 @@ test_that("stringdistmatrix with single argument",{
     , stringdistmatrix(x,x,method="jw",p=0.1)
   )
   
-})
 
 
-context("stringdist: useBytes")
-test_that("useBytes gets NA",{
+## stringdist: useBytes
+## useBytes gets NA
   expect_true(is.na(stringdist('a',NA,method='osa',useBytes=TRUE)))
   expect_true(is.na(stringdist('a',NA,method='lv',useBytes=TRUE)))
   expect_true(is.na(stringdist('a',NA,method='dl',useBytes=TRUE)))
   expect_true(is.na(stringdist('a',NA,method='hamming',useBytes=TRUE)))
-})
 
-test_that("useBytes translates correctly to numeric",{
+
+## useBytes translates correctly to numeric
   # smoketest
   set.seed(1)
   x <- sapply(sample(5:25,10,replace=TRUE),function(x) paste(letters[x],collapse=""))
@@ -541,9 +521,8 @@ test_that("useBytes translates correctly to numeric",{
     stringdist(x,y,method='qgram',q=3,useBytes=TRUE)
   , stringdist(x,y,method='qgram',q=3,useBytes=FALSE))
 
-})
 
-test_that("useBytes really analyses bytes",{
+## useBytes really analyses bytes
   x <- paste0('Mot',intToUtf8(0x00F6),'rhead') # correct spelling
   y <- 'Motorhead' # Pissing off Lemmy.
   expect_equal(stringdist(x,y,method='dl',useBytes=TRUE),  2)
@@ -556,14 +535,12 @@ test_that("useBytes really analyses bytes",{
   )
   expect_equal(stringdist(x,y,method='lcs',useBytes=TRUE),  3)
   expect_equal(stringdist(x,y,method='qgram',q=3,useBytes=TRUE),  7)
-})
-
 
 
 ### -------------------------------------------------------------
-context("Soundex distance")
+## Soundex distance
 
-test_that("",{
+## 
   expect_equal(stringdist("", "0000",method='soundex'),0)
   expect_equal(stringdist("john","jan",method='soundex'),0)
   expect_equal(stringdist("schoen","son",method='soundex'),0)
@@ -586,20 +563,20 @@ test_that("",{
   x <- "Motorhead"
   y <- paste0("Mot",intToUtf8(0x00F6),"rhead") # with o-umlaut
   expect_warning(stringdist(x,y,method='soundex',useBytes=TRUE))  
-})
 
-test_that("Shortest argument is recycled",{
+
+## Shortest argument is recycled
   expect_equal(stringdist(c('a','b'),'a',method='soundex'),c(0,1))
   expect_equal(stringdist('a',c('a','b'),method='soundex'),c(0,1))
-})
 
-test_that("NA's are handled correctly",{
+
+## NA's are handled correctly
   expect_true(is.na(stringdist(NA ,'a',method='soundex')))
   expect_true(is.na(stringdist('a',NA ,method='soundex')))
   expect_true(is.na(stringdist(NA ,NA ,method='soundex')))
-})
 
-test_that("non-printable ascii and non-ascii encoding is detected",{
+
+## non-printable ascii and non-ascii encoding is detected
   ouml <- intToUtf8("0x00F6")
   # non-ascii within string
   x <- paste0("Mot",ouml,"rhead")
@@ -617,7 +594,7 @@ test_that("non-printable ascii and non-ascii encoding is detected",{
   expect_warning(stringdist('Lemmy',x,method='soundex'))
   expect_warning(stringdist('Ozzy',y,method='soundex'))
   expect_warning(stringdist('Ozzy',z,method='soundex'))
-})
+
 
 
 

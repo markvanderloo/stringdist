@@ -21,10 +21,9 @@ Description: Implements an approximate string matching version of R's native
 Version: 0.9.5.2
 Depends:
     R (>= 2.15.3)
-Imports:
-    parallel
 URL: https://github.com/markvanderloo/stringdist
 BugReports: https://github.com/markvanderloo/stringdist/issues
 Suggests:
-    testthat
-RoxygenNote: 6.0.1
+    tinytest
+Imports: parallel
+RoxygenNote: 6.1.1

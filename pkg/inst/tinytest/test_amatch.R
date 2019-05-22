@@ -1,7 +1,7 @@
 
-context("amatch: Optimal String Alignment")
+## amatch: Optimal String Alignment
 
-test_that("simple test and multiple edge cases",{
+## simple test and multiple edge cases
   expect_equal(amatch("aa",c("ba","bb"), method="osa",maxDist=1L), 1L)
   expect_equal(amatch("aa",c("bb","bb"), method="osa",maxDist=1L), NA_integer_)
   expect_equal(amatch("aa",c("bbb"), method="osa",maxDist=2L), NA_integer_)
@@ -16,13 +16,13 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch("aa","bb", method="osa",maxDist=1), NA_integer_)
   expect_equal(amatch("aa","bb", method="osa",maxDist=1), NA_integer_)
   expect_equal(amatch(c("m","fem"),c("male","female"),method="osa",maxDist=Inf), c(1,2))
-})
 
 
 
-context("amatch: Damerau-Levenshtein")
 
-test_that("simple test and multiple edge cases",{
+## amatch: Damerau-Levenshtein
+
+## simple test and multiple edge cases
   expect_equal(amatch("aa", c("ba","bb"), method="dl",maxDist=1L), 1L)
   expect_equal(amatch("aa",c("bb","bb"), method="dl",maxDist=1L), NA_integer_)
   expect_equal(amatch("aa",c("bbb"), method="dl",maxDist=2L), NA_integer_)
@@ -37,11 +37,11 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch("aa","bb", method="dl",maxDist=1), NA_integer_)
   expect_equal(amatch("aa","bb", method="dl",maxDist=1), NA_integer_)
   expect_equal(amatch(c("m","fem"),c("male","female"),method="dl",maxDist=Inf), c(1,2))
-})
 
-context("amatch: Hamming")
 
-test_that("simple test and multiple edge cases",{
+## amatch: Hamming
+
+## simple test and multiple edge cases
   expect_equal(amatch("aa", c("ba","bb"), method="hamming",maxDist=1L), 1L)
   expect_equal(amatch("aa",c("bb","bb"), method="hamming",maxDist=1L), NA_integer_)
   expect_equal(amatch(NA,c(NA,NA),method="hamming"),1L)
@@ -53,12 +53,12 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="hamming",matchNA=FALSE,nomatch=0L), 0L)
   expect_equal(amatch(NA,NA, method="hamming",matchNA=FALSE,nomatch=7L), 7L)
   expect_equal(amatch("aa","bb", method="hamming",maxDist=1), NA_integer_)
-})
 
 
-context("amatch: Jaro and Jaro-Winkler")
 
-test_that("simple test and multiple edge cases",{
+## amatch: Jaro and Jaro-Winkler
+
+## simple test and multiple edge cases
   expect_equal(amatch("aa", c("ba","bb"), method="jw",maxDist=1L), 1L)
   expect_equal(amatch("aa",c("bb","bb"), method="jw",maxDist=0.5), NA_integer_)
   expect_equal(amatch(NA,c(NA,NA),method="jw"),1L)
@@ -70,11 +70,10 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="jw",matchNA=FALSE,nomatch=0L), 0L)
   expect_equal(amatch(NA,NA, method="jw",matchNA=FALSE,nomatch=7L), 7L)
   expect_equal(amatch(c("m","fem"),c("male","female"),method="jw",maxDist=Inf), c(1,2))
-})
 
-context("amatch: Longest Common Substring")
+## amatch: Longest Common Substring
 
-test_that("simple test and multiple edge cases",{
+## simple test and multiple edge cases
   expect_equal(amatch("aa", c("ba","bb"), method="lcs",maxDist=2L), 1L)
   expect_equal(amatch("aa",c("bb","bb"), method="lcs",maxDist=1L), NA_integer_)
   expect_equal(amatch("aa",c("bbb"), method="lcs",maxDist=2L), NA_integer_)
@@ -88,12 +87,10 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="lcs",matchNA=FALSE,nomatch=0L), 0L)
   expect_equal(amatch(NA,NA, method="lcs",matchNA=FALSE,nomatch=7L), 7L)
 
-})
 
+## amatch: Levenshtein
 
-context("amatch: Levenshtein")
-
-test_that("simple test and multiple edge cases",{
+## simple test and multiple edge cases
   expect_equal(amatch("aa", c("ba","bb"), method="lv",maxDist=1L), 1L)
   expect_equal(amatch("aa",c("bb","bb"), method="lv",maxDist=1L), NA_integer_)
   expect_equal(amatch("aa",c("bbb"), method="lv",maxDist=2L), NA_integer_)
@@ -107,11 +104,11 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="lv",matchNA=FALSE,nomatch=0L), 0L)
   expect_equal(amatch(NA,NA, method="lv",matchNA=FALSE,nomatch=7L), 7L)
   expect_equal(amatch(c("m","fem"),c("male","female"),method="lv",maxDist=Inf), c(1,2))
-})
 
-context("amatch: qgrams")
 
-test_that("simple test and multiple edge cases",{
+## amatch: qgrams
+
+## simple test and multiple edge cases
   expect_equal(amatch("aa", c("ba","bb"), method="qgram",maxDist=2), 1L)
   expect_equal(amatch("aa",c("bb","bb"), method="qgram",maxDist=1L), NA_integer_)
   expect_equal(amatch(NA,c(NA,NA),method="qgram"),1L)
@@ -128,12 +125,11 @@ test_that("simple test and multiple edge cases",{
         c("2100 EXAMPLE AVE NJ 8619", "600 EXAMPLE AVE NJ 8629"), method="jaccard")
       , 2L)
 
-})
 
 
-context("amatch: Soundex")
+## amatch: Soundex
 
-test_that("simple test and multiple edge cases",{
+## simple test and multiple edge cases
   expect_equal(amatch("smith", c("smyth","smelt"), method="soundex"), 1L)
   expect_equal(amatch("smith",c("bb","bb"), method="soundex"), NA_integer_)
   expect_equal(amatch("smith",c("whashington"), method="soundex"), NA_integer_)
@@ -146,12 +142,11 @@ test_that("simple test and multiple edge cases",{
   expect_equal(amatch(NA,NA, method="soundex",matchNA=FALSE), NA_integer_)
   expect_equal(amatch(NA,NA, method="soundex",matchNA=FALSE,nomatch=0L), 0L)
   expect_equal(amatch(NA,NA, method="soundex",matchNA=FALSE,nomatch=7L), 7L)
-})
 
 
-context("amatch: useBytes")
+## amatch: useBytes
 
-test_that("bytewise matching differs from character wise matching",{
+## bytewise matching differs from character wise matching
   x <- paste0('Mot',intToUtf8(0x00F6),'rhead') 
   y <- c('bastard','Motorhead') 
   jwdist <- round(1-(1/3)*(8/9 + 8/10 + 1),3)
@@ -172,16 +167,14 @@ test_that("bytewise matching differs from character wise matching",{
   expect_equal(amatch(x, y, method='qgram',maxDist=6, q=3, useBytes=TRUE, nomatch=0L), 0L);
 
 
-})
+## seq_amatch
 
-context("seq_amatch")
-
-test_that("Input checks for seq_amatch",{
+## Input checks for seq_amatch
   expect_equal(seq_amatch(list(1:10),list(1:10)),seq_amatch(1:10,1:10))
   expect_equal(seq_amatch(list(1:10),list(1:10)),seq_amatch(as.numeric(1:10),as.numeric(1:10)))
-})
 
-test_that("Some elementary tests for seq_amatch and seq_ain",{
+
+## Some elementary tests for seq_amatch and seq_ain
   
   x <- list(c(1L,3L,2L))
   table <- list(
@@ -192,9 +185,6 @@ test_that("Some elementary tests for seq_amatch and seq_ain",{
   expect_equal(seq_amatch(list(NA_integer_),table,maxDist=3),NA_integer_ )
   expect_true(seq_ain(x,table,maxDist=3))
   expect_false(seq_ain(x,table))
-})
-
-
 
 
 
