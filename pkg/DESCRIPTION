@@ -26,4 +26,5 @@ BugReports: https://github.com/markvanderloo/stringdist/issues
 Suggests:
     tinytest
 Imports: parallel
+Encoding: UTF-8
 RoxygenNote: 6.1.1

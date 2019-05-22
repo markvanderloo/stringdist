@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # document R code
-R -f roxygen.R
+R -e "pkgload::load_all('pkg'); roxygen2::roxygenize('pkg')"
 R CMD Rd2pdf --force --no-preview -o manual.pdf ./pkg
 
 # document the C API
