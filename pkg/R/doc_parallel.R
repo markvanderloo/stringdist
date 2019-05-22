@@ -4,7 +4,8 @@
 #' 
 #' @description This page describes how \pkg{stringdist} uses parallel processing.
 #'
-#' @section Multithreading and parallelization in \pkg{stringdist}: The core 
+#' @section Multithreading and parallelization in \pkg{stringdist}: 
+#'   The core 
 #'   functions of \pkg{stringdist} are implemented in C. On systems where 
 #'   \code{openMP} is available, \pkg{stringdist} will automatically take 
 #'   advantage of multiple cores. The
@@ -12,7 +13,7 @@
 #'   on OpenMP} of the
 #'   \href{https://cran.r-project.org/doc/manuals/r-release/R-exts.html}{Writing
 #'   R Extensions} manual discusses on what systems OpenMP is available (at the time of writing more or
-#'   less, anywhere except on OSX).
+#'   less anywhere except on OSX).
 #'
 #' By default, the number of threads to use is taken from \code{options('sd_num_thread')}.
 #' When the package is loaded, the value for this option is determined as follows:
