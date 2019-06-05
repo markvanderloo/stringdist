@@ -45,7 +45,9 @@ static Stringdist *R_open_stringdist(Distance d, int max_len_a, int max_len_b, S
   } else if (d == soundex) {
     sd = open_stringdist(d, max_len_a, max_len_b);
   }
-
+  if ( sd == NULL ){
+    error("Could not allocate enough memory");
+  }
   return sd;
 }
 

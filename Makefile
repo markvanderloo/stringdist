@@ -5,6 +5,9 @@ doc:
 pkg: doc
 	R CMD build pkg
 
+install: pkg
+	R CMD INSTALL *.tar.gz
+
 check: doc
 	R CMD build pkg
 	R CMD check *.tar.gz
@@ -20,9 +23,13 @@ manual: doc
 	R CMD Rd2pdf --force -o manual.pdf ./pkg
 
 revdep: pkg
-	rm -rf revcheck
-	mkdir revcheck
-	mv *.tar.gz revcheck
-	R -s -e "out <- tools::check_packages_in_dir('revcheck',reverse=list(which='most'),Ncpus=3); print(summary(out)); saveRDS(out, file='revcheck/output.RDS')"
+	rm -rf revdep
+	mkdir revdep
+	mv *.tar.gz revdep
+	R -s -e "out <- tools::check_packages_in_dir('revdep',reverse=list(which='most'),Ncpus=3); print(summary(out)); saveRDS(out, file='revdep/output.RDS')"
+
+clean:
+	rm -rf stringdist.Rcheck
+	rm -rf revdep
 
 
