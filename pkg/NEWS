@@ -2,7 +2,7 @@ version 0.9.5.2
 - RJournal paper and C/C++ api docs are now presented as vignette.
 - Switched to tinytest framework
 - Fix: stringdist could cause a segfault for edit distances between very long 
-  strings (>32767 characters). (Thanks to GH user gllipatz)
+  strings. (Thanks to GH user gllipatz)
 
 
 version 0.9.5.1
