@@ -32,7 +32,7 @@
 /* 
  *
  *
- * TODO check for memory allocation failure
+ *
  */
 Stringdist *open_stringdist(Distance d, int str_len_a, int str_len_b, ...){
   va_list args;
@@ -85,12 +85,10 @@ Stringdist *open_stringdist(Distance d, int str_len_a, int str_len_b, ...){
       break;
     default :
       break;
-      //TODO: set errno, return NULL
   };
 
   va_end(args);
 
-  // test if we could allocate memory
   if ( (d == osa || d == lv || d == dl || d == lcs || d== jw) &&  S->work == NULL ){ 
       close_stringdist(S);
       return(NULL);
