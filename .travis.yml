@@ -16,7 +16,7 @@ r:
 
 before_install:
   - R -e "install.packages(c('pkgload','roxygen2','tinytest'))"
-  - ./document.sh
+  - R -e "pkgload::load_all('pkg');roxygen2::roxygenize('pkg')"
   - cd ./pkg
 
 r_packages:
