@@ -322,6 +322,7 @@ do_dist <- function(a, b, method, weight, q, p, bt, useBytes=FALSE, nthread=1L){
   d <- .Call("R_stringdist", a, b, method
     , as.double(weight), as.double(p), as.double(bt), as.integer(q)
     , as.integer(useBytes), as.integer(nthread)
+    , PACKAGE="stringdist"
   )
 
   d
@@ -345,7 +346,8 @@ lower_tri <- function(a
   
   x <- .Call("R_lower_tri", a, methnr
          , as.double(weight), as.double(p), as.double(bt)
-         , as.integer(q), as.integer(useBytes), as.integer(nthread))
+         , as.integer(q), as.integer(useBytes), as.integer(nthread)
+         , PACKAGE="stringdist")
   
   attributes(x) <- list(class='dist'
     , Size     = length(a)

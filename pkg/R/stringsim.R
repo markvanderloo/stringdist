@@ -86,7 +86,7 @@ lengths.character <- function(x, type="char",...){
 }
 
 lengths.list <- function(x,...){
-  .Call("R_lengths",x)
+  .Call("R_lengths",x, PACKAGE="stringdist")
 }
 
 normalize_dist <- function(dist, a, b, method, nctype="char",q=1L){

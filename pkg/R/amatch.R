@@ -115,6 +115,7 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
     , as.double(weight), as.double(p), as.double(bt)
     , as.integer(q) , as.double(maxDist), as.integer(useBytes)
     , as.integer(nthread)
+    , PACKAGE="stringdist"
   )
 
 }
@@ -222,6 +223,7 @@ seq_amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
     , as.double(weight), as.double(p), as.double(bt)
     , as.integer(q) , as.double(maxDist), 0L
     , as.integer(nthread)
+    , PACKAGE="stringdist"
   )
 }
 

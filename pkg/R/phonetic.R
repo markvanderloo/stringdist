@@ -43,7 +43,7 @@ phonetic <- function(x, method = c("soundex"), useBytes = FALSE) {
   stopifnot(is.logical(useBytes))
   if (!useBytes) x <- enc2utf8(x)
   if (method == "soundex") {
-    r <- .Call("R_soundex", x, useBytes)
+    r <- .Call("R_soundex", x, useBytes,PACKAGE="stringdist")
     if (!useBytes) int2char(r) else r
   } 
 }

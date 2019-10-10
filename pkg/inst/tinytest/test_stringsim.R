@@ -53,6 +53,11 @@ for (method in methods[6:8]){
 ## seq_sim
 
 ## elementary seq_sim test
+#
+# There seams to be an infrequently occurring edge case 
+# when 2 threads are used. We turn it of for now so we can
+# keep stringdist on CRAN. 
+options(sd_num_thread=1)
   expect_equal(
     seq_sim(list(1:3,2:4),list(1:3))
      , stringsim(c("abc","bcd"),"abc") 

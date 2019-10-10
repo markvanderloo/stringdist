@@ -1,3 +1,6 @@
+versioni 0.9.5.3
+- Update in test suite to stay on CRAN
+
 version 0.9.5.2
 - RJournal paper and C/C++ api docs are now presented as vignette.
 - Switched to tinytest framework

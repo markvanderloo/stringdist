@@ -31,7 +31,7 @@ qgrams <- function(..., .list=NULL,q=1L,useBytes=FALSE, useNames=!useBytes){
   L <- setnames(L)
   L <- lapply(L,char2int)
 
-  v <- .Call("R_get_qgrams",L,as.integer(q))
+  v <- .Call("R_get_qgrams",L,as.integer(q),PACKAGE="stringdist")
   
   nqgrams <- length(v)/length(L)
   qgrams <- NULL
@@ -94,7 +94,7 @@ seq_qgrams <- function(...,.list=NULL,q=1L){
   L <- lapply(c(list(...),.list),function(x) list(as.integer(x)))
   if (length(L) == 0) return(array(dim=c(0,0)))
   L <- setnames(L)
-  v <- .Call("R_get_qgrams",L,as.integer(q))
+  v <- .Call("R_get_qgrams",L,as.integer(q), PACKAGE="stringdist")
   Q <- attr(v,"qgrams")
   nqgrams <- length(v)/length(L)
   Q <- t(array(Q,dim=c(q,nqgrams),dimnames=list(paste0("q",1:q),NULL)))
