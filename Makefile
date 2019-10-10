@@ -31,5 +31,6 @@ revdep: pkg
 clean:
 	rm -rf stringdist.Rcheck
 	rm -rf revdep
+	rm -f *.tar.gz
 
 
