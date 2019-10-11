@@ -38,11 +38,9 @@ Also, there are some utility functions:
 
 #### C API
 
-As of version `0.9.5.0`  you can call a number of `stringdist` functions directly
-from the `C` code of your R package. The description of the API can be found 
-
-- By typing `?stringdist_api` in the R console
-- Or open the vignette directly:
+Some of `stringdist`'s underlying `C` functions can be called directly from
+`C` code in other packages. The description of the API can be found by either
+typing `?stringdist_api` in the R console or open the vignette directly as follows:
 
 ```
 vignette("stringdist_C-Cpp_api", package="stringdist")
