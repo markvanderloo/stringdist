@@ -1,4 +1,10 @@
-versioni 0.9.5.3
+version 0.9.5.4
+- Some tests using seq_dist() would fail when the input was defined with lazily
+  evaluated arguments, e.g. list(1:3, 2:4); but only in the context of NSE by a
+  test suite ('tinytest', 'testthat'). Tests were replaced by literal versions,
+  e.g. list(c(1,2,3), c(2,3,4)).
+
+version 0.9.5.3
 - Update in test suite to stay on CRAN
 
 version 0.9.5.2

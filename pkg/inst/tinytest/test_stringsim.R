@@ -52,15 +52,13 @@ for (method in methods[6:8]){
 
 ## seq_sim
 
-## elementary seq_sim test
-#
-# There seams to be an infrequently occurring edge case 
-# when 2 threads are used. We turn it of for now so we can
-# keep stringdist on CRAN. 
-options(sd_num_thread=1)
+# We used to have list(1:3, 2:4) and list(1:3). This occasionally
+# gave failing tests, and only in the context of expect_equal (both
+# for tinytest and testthat. Therefore this may point to a hard-to-reproduce
+# bug in R's JIT compiler.
   expect_equal(
-    seq_sim(list(1:3,2:4),list(1:3))
-     , stringsim(c("abc","bcd"),"abc") 
+       seq_sim(list(c(1,2,3),c(2,3,4)), list(c(1,2,3)), method="cosine")
+     , stringsim(c("abc","bcd"),"abc", method="cosine") 
   )
 
 

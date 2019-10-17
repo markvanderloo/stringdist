@@ -34,12 +34,12 @@ options(sd_num_thread=2)
 
 
 ## Conversion for non-integer-list arguments
-  expect_equal(seq_dist(list(1:3),list(2:4)),seq_dist(as.numeric(1:3),as.numeric(2:4)))
-  expect_equal(seq_dist(list(1:3),list(2:4)),seq_dist(1:3, 2:4))
-  expect_equal(seq_distmatrix(list(1:3),list(2:4)), seq_distmatrix(as.numeric(1:3),as.numeric(2:4)))  
-  expect_equal(seq_distmatrix(list(1:3),list(2:4)), seq_distmatrix(1:3,2:4))  
-  expect_equal(seq_distmatrix(list(1:3)),seq_distmatrix(1:3))
-  expect_equal(seq_distmatrix(list(1:3)),seq_distmatrix(as.numeric(1:3)))
+  expect_equal(seq_dist(list(c(1,2,3)),list(c(2,3,4))),seq_dist(as.numeric(c(1,2,3)),as.numeric(c(2,3,4))))
+  expect_equal(seq_dist(list(c(1,2,3)),list(c(2,3,4))),seq_dist(c(1,2,3), c(2,3,4)))
+  expect_equal(seq_distmatrix(list(c(1,2,3)),list(c(2,3,4))), seq_distmatrix(as.numeric(c(1,2,3)),as.numeric(c(2,3,4))))  
+  expect_equal(seq_distmatrix(list(c(1,2,3)),list(c(2,3,4))), seq_distmatrix(c(1,2,3),c(2,3,4)))  
+  expect_equal(seq_distmatrix(list(c(1,2,3))),seq_distmatrix(c(1,2,3)))
+  expect_equal(seq_distmatrix(list(c(1,2,3))),seq_distmatrix(as.numeric(c(1,2,3))))
 
 
 ## Some edge cases
@@ -52,20 +52,20 @@ options(sd_num_thread=2)
   expect_equivalent(seq_distmatrix(1:10),dist(0))
   expect_equivalent(seq_distmatrix(1:10,list(1:10)),matrix(0))
   expect_equivalent(
-    as.matrix(seq_distmatrix(list(1:3,2:4)) )
+    as.matrix(seq_distmatrix(list(c(1,2,3),c(2,3,4))) )
     , matrix(c(0,2,2,0),nrow=2)
   )
   expect_equal(
-    as.matrix(seq_distmatrix(list(x=1:3,y=2:4),useNames="names") )
+    as.matrix(seq_distmatrix(list(x=c(1,2,3),y=c(2,3,4)),useNames="names") )
     , matrix(c(0,2,2,0),nrow=2,dimnames=list(c('x','y'),c('x','y')))
   )
   expect_equal(
-    seq_distmatrix(list(x=1:3,y=2:4),list(x=1:3,y=2:4),useNames="names")
+    seq_distmatrix(list(x=c(1,2,3),y=c(2,3,4)),list(x=c(1,2,3),y=c(2,3,4)),useNames="names")
     , matrix(c(0,2,2,0),nrow=2,dimnames=list(c('x','y'),c('x','y')))
   )
-  expect_equal(class(seq_distmatrix(list(1:3,2:4))),"dist")
+  expect_equal(class(seq_distmatrix(list(c(1,2,3),c(2,3,4)))),"dist")
   expect_equivalent(
-    as.matrix(seq_distmatrix(list(1:3,2:4)),seq_distmatrix(list(1:3,2:4),list(1:3,2:4)) )
+    as.matrix(seq_distmatrix(list(c(1,2,3),c(2,3,4))),seq_distmatrix(list(c(1,2,3),c(2,3,4)),list(c(1,2,3),c(2,3,4))) )
     , matrix(c(0,2,2,0),nrow=2)
   )
   

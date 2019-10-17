@@ -67,10 +67,10 @@ stringsim <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
 #' @export
 seq_sim <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
    "qgram", "cosine", "jaccard", "jw"),  q = 1, ...) {
-    
+
   method <- match.arg(method)
   dist <- stringdist::seq_dist(a, b, method=method, q=q, ...)
-  normalize_dist(dist,a,b,method=method,q=q)
+  normalize_dist(dist, a, b, method=method, q=q)
 }
 
 
