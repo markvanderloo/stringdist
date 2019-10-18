@@ -5,7 +5,9 @@ Title: Approximate String Matching and String Distance Functions
 LazyData: no
 Type: Package
 LazyLoad: yes
-Authors@R: c( person("Mark", "van der Loo", role=c("aut","cre"),email="mark.vanderloo@gmail.com")
+Authors@R: c( person("Mark", "van der Loo", role=c("aut","cre")
+             , email="mark.vanderloo@gmail.com"
+             , comment= c(ORCID="0000-0002-9807-4686"))
             , person("Jan", "van der Laan", role="ctb")
             , person("R Core Team",""     , role="ctb")
             , person("Nick","Logan"       , role="ctb")
