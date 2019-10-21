@@ -53,6 +53,6 @@ Examples of packages that link to `stringdist` can be found
 
 #### Resources
 
-* A [paper](http://journal.r-project.org/archive/2014-1/loo.pdf) on stringdist has been published in the R-journal
-* [Slides](http://www.slideshare.net/MarkVanDerLoo/stringdist-use-r2014) of te _useR!2014_ conference.
+* A [paper](https://journal.r-project.org/archive/2014-1/loo.pdf) on stringdist has been published in the R-journal
+* [Slides](https://www.slideshare.net/MarkVanDerLoo/stringdist-use-r2014) of te _useR!2014_ conference.
 
