@@ -45,6 +45,23 @@ stringsim <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
 }
 
 
+#' @param useNames Use input vectors as row and column names?
+#'
+#'
+#' @rdname stringsim
+#' @export
+#' @rdname stringsim
+stringsimmatrix <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
+                                              "qgram", "cosine", "jaccard", "jw", "soundex"), useBytes=FALSE, q = 1, ...) {
+  # Calculate the distance 
+  method <- match.arg(method)
+  dist <- stringdist::stringdistmatrix(a, b, method=method, useBytes=useBytes, q=q, ...)
+  
+  nctype <- if (useBytes) "bytes" else "char"
+  normalize_dist(dist, a, b, method=method, nctype=nctype, q=q)
+}
+
+
 #' Compute similarity scores between sequences of integers
 #' 
 #' @param a \code{list} of \code{integer} vectors (target)
