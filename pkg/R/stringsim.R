@@ -3,6 +3,8 @@
 #' \code{stringsim} computes pairwise string similarities between elements of
 #' \code{character} vectors \code{a} and \code{b}, where the vector with less
 #' elements is recycled. 
+#' \code{stringsimmatrix} computes the string similarity matrix with rows
+#' according to \code{a} and columns according to \code{b}.
 #'
 #' @param a R object (target); will be converted by \code{as.character}.
 #' @param b R object (source); will be converted by \code{as.character}.
@@ -11,14 +13,16 @@
 #' @param useBytes Perform byte-wise comparison, see \code{\link{stringdist-encoding}}.
 #' @param q  Size of the \eqn{q}-gram; must be nonnegative. Only applies to
 #'   \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
-#' @param ... additional arguments are passed on to \code{\link{stringdist}}.
-#'
+#' @param ... additional arguments are passed on to \code{\link{stringdist}} and
+#'   \code{\link{stringdistmatrix}} respectively.
 #' @return
-#' Returns a vector with similarities, which are values between 0 and 1 where
-#' 1 corresponds to perfect similarity (distance 0) and 0 to complete
-#' dissimilarity. \code{NA} is returned when \code{\link{stringdist}} returns 
-#' \code{NA}. Distances equal to \code{Inf} are truncated to a similarity of
-#' 0.
+#' \code{stringsim} returns a vector with similarities, which are values between
+#' 0 and 1 where 1 corresponds to perfect similarity (distance 0) and 0 to
+#' complete dissimilarity. \code{NA} is returned when \code{\link{stringdist}}
+#' returns \code{NA}. Distances equal to \code{Inf} are truncated to a
+#' similarity of 0. \code{stringsimmatrix} works the same way but, equivalent to
+#' \code{\link{stringdistmatrix}}, returns a similarity matrix instead of a
+#' vector.
 #'
 #' @details
 #' The similarity is calculated by first calculating the distance using
@@ -42,6 +46,24 @@ stringsim <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
 
   nctype <- if (useBytes) "bytes" else "char"
   normalize_dist(dist, a, b, method=method, nctype=nctype, q=q)
+}
+
+
+#' @rdname stringsim
+#' @export
+#' @rdname stringsim
+stringsimmatrix <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
+                                              "qgram", "cosine", "jaccard", "jw", "soundex"), useBytes=FALSE, q = 1, ...) {
+  # Calculate the distance 
+  method <- match.arg(method)
+  nctype <- if (useBytes) "bytes" else "char"
+  if (missing(b)){
+    dist <- stringdist::stringdistmatrix(a, method=method, useBytes=useBytes, q=q, ...)
+    normalize_dist(dist, a, b = a, method=method, nctype=nctype, q=q)
+  } else {
+    dist <- stringdist::stringdistmatrix(a, b, method=method, useBytes=useBytes, q=q, ...)
+    normalize_dist(dist, a, b, method=method, nctype=nctype, q=q)
+  }
 }
 
 
@@ -91,6 +113,8 @@ lengths.list <- function(x,...){
 
 normalize_dist <- function(dist, a, b, method, nctype="char",q=1L){
 
+  if (class(dist) == "dist") dist <- as.matrix(dist)
+  
   # Normalise the distance by dividing it by the maximum possible distance
   if (method == "hamming") {
     max_dist <- if (length(b) > length(a)) lengths(b,type=nctype) else lengths(a,type=nctype)
