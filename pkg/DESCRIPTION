@@ -11,7 +11,8 @@ Authors@R: c( person("Mark", "van der Loo", role=c("aut","cre")
             , person("Jan", "van der Laan", role="ctb")
             , person("R Core Team",""     , role="ctb")
             , person("Nick","Logan"       , role="ctb")
-            , person("Chris","Muir"       , role="ctb"))
+            , person("Chris","Muir"       , role="ctb")
+            , person("Johannes", "Gruber" , role="ctb"))
 Description: Implements an approximate string matching version of R's native
     'match' function. Can calculate various string distances based on edits
     (Damerau-Levenshtein, Hamming, Levenshtein, optimal sting alignment), qgrams (q-
@@ -20,7 +21,7 @@ Description: Implements an approximate string matching version of R's native
     character vectors while taking proper care of encoding or between integer
     vectors representing generic sequences. This package is built for speed and
     runs in parallel by using 'openMP'. An API for C or C++ is exposed as well.
-Version: 0.9.5.5
+Version: 0.9.5.6
 Depends:
     R (>= 2.15.3)
 URL: https://github.com/markvanderloo/stringdist
