@@ -1,5 +1,6 @@
 version 0.9.6.0
-- New function 'stringsimmatrix' (Thanks to Johannes Gruber)
+- New function 'stringsimmatrix' (Thanks to Johannes Gruber).
+- Internal fixes (in some cases class() == 'class' was used).
 
 version 0.9.5.5
 - Changed two URLs to canonical form in README.md (https://) to comply with
