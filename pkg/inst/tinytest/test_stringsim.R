@@ -53,10 +53,10 @@ for (method in methods[6:8]){
 # stringsimmatrix
   x <- names(islands)[1:10] 
   y <- rev(x) # o-umlaut
-  expect_equal(class(stringsimmatrix(x,y,method="osa", useBytes=FALSE)), "matrix")
+  expect_true(inherits(stringsimmatrix(x,y,method="osa", useBytes=FALSE), "matrix"))
   expect_equal(dim(stringsimmatrix(x,y,method="osa", useBytes=FALSE)), c(10, 10))
   expect_equal(stringsimmatrix(x,y,method="osa", useBytes=FALSE)[2, 2], 0.2)
-  expect_equal(class(stringsimmatrix(x,method="osa", useBytes=FALSE)), "matrix")
+  expect_true(inherits(stringsimmatrix(x,method="osa", useBytes=FALSE), "matrix"))
   expect_equal(dim(stringsimmatrix(x,method="osa", useBytes=FALSE)), c(10, 10))
   expect_equal(stringsimmatrix(x,method="osa", useBytes=FALSE)[2, 9], 0.2)
   expect_warning(stringdistmatrix(list('a')))

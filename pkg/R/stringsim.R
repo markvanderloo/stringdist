@@ -113,7 +113,7 @@ lengths.list <- function(x,...){
 
 normalize_dist <- function(dist, a, b, method, nctype="char",q=1L){
 
-  if (class(dist) == "dist") dist <- as.matrix(dist)
+  if (inherits(dist, "dist")) dist <- as.matrix(dist)
   
   # Normalise the distance by dividing it by the maximum possible distance
   if (method == "hamming") {
