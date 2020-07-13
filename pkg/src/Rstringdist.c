@@ -328,6 +328,105 @@ SEXP R_lower_tri(SEXP a, SEXP method
   return(yy);
 }
 
+// R_afind
+// For each string in 'a', return the starting position of
+// the best match with 'pattern'.
+SEXP R_afind(SEXP a, SEXP pattern, SEXP width
+  , SEXP method, SEXP weight, SEXP p, SEXP bt
+  , SEXP q, SEXP useBytes)
+{
+  
+  int na = length(a)              // nr of  texts to search
+    , npat = length(pattern)      // nr of patterns
+    , ml_a   = max_length(a)      // max length of searched string
+    , ml_b = max_length(pattern)  // max length of the pattern.
+    , intdist = 0                 // no distances between integer sequences (yet)
+    , bytes = INTEGER(useBytes)[0];
+
+
+  int *window = INTEGER(width);   // access the window widths.
+
+  // output list
+  SEXP out_list;
+  PROTECT(out_list = allocVector(VECSXP, 2));
+
+  // output location
+  SEXP out_loc;
+  out_loc = allocMatrix(INTSXP, na, npat);
+  VECTOR_ELT(out_list,0) = out_loc;
+  int *yloc = INTEGER(out_loc);
+
+  // output distance
+  SEXP out_dist;
+  out_dist = allocMatrix(REALSXP, na, npat);
+  VECTOR_ELT(out_list,1) = out_dist;
+  double *ydist = REAL(out_dist);
+
+  
+  // Setup stringdist structure.
+  // find maximum window length
+  int max_window = 0;
+  for ( int i=0; i<npat; i++){
+    if (max_window < window[i]){
+      max_window = window[i];
+    }
+  }
+  Stringdist *sd = R_open_stringdist( (Distance) INTEGER(method)[0]
+      , max_window, ml_b
+      , weight
+      , p
+      , bt
+      , q
+  );
+
+  // allocate memory to store the strings
+  unsigned int *s = NULL, *t = NULL;
+  s = (unsigned int *) malloc(( 2L + ml_a + ml_b) * sizeof(int));
+  
+  // t is the location of the pattern
+  t = s + ml_a + 1L;
+  
+  int len_s, len_t, isna_s, isna_t, max_k, k_min, current_window, offset;
+  
+  double d, d_min;
+
+
+  for( int j = 0; j < npat; j++){
+    // get pattern
+    get_elem(pattern, j, bytes, intdist, &len_t, &isna_t, t);
+    current_window = window[j];
+    offset = j*na;
+    for ( int i = 0; i < na; i++ ){
+      // get text to search
+      get_elem(a, i, bytes, intdist, &len_s, &isna_s, s);
+      if (isna_s || isna_t){ // something to search in, or find?
+        yloc[offset + i]  = NA_INTEGER;
+        ydist[offset + i] = NA_REAL;
+      } else if ( current_window >= len_s ){ // is the text shorter than the pattern?
+        yloc[offset + i]  = 1L;
+        ydist[offset + i] = stringdist(sd, s, len_s, t, len_t); 
+      } else { // slide window over text and compute distances
+        max_k = len_s - current_window;
+        d_min = R_PosInf;
+        k_min = 0;
+        for (int k = 0; k <= max_k; k++){
+          d = stringdist(sd, s + k, current_window, t, len_t);
+          if ( d < d_min ){
+            d_min = d;
+            k_min = k;
+          } // end loop over windows
+        }
+        yloc[offset + i]  = k_min + 1;
+        ydist[offset + i] = d_min;
+      }
+    } // end loop over strings
+  } // end loop over patterns.
+
+  close_stringdist(sd);
+  UNPROTECT(1);
+  return(out_list);
+
+}
 
 // helper function to determine  whether all is INTSXP
 

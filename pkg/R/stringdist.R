@@ -1,6 +1,5 @@
 #' A package for string distance calculation and approximate string matching.
 #'
-#' @section Introduction:
 #'
 #' The \pkg{stringdist} package offers fast and platform-independent string
 #' metrics. Its main purpose is to compute various string distances and to do 
@@ -118,7 +117,7 @@ This warning can be avoided by explicitly converting the argument(s).
 #' @param nthread Maximum number of threads to use. By default, a sensible
 #'   number of threads is chosen, see \code{\link{stringdist-parallelization}}.
 #'  
-#' @seealso \code{\link{stringsim}}, \code{\link{qgrams}}, \code{\link{amatch}}
+#' @seealso \code{\link{stringsim}}, \code{\link{qgrams}}, \code{\link{amatch}}, \code{\link{afind}}
 #'
 #' @return For \code{stringdist},  a vector with string distances of size
 #'   \code{max(length(a),length(b))}.
@@ -194,7 +193,6 @@ stringdist <- function(a, b
 #'
 #' @rdname stringdist
 #' @export
-#' @rdname stringdist
 stringdistmatrix <- function(a, b
   , method=c("osa","lv","dl","hamming","lcs","qgram","cosine","jaccard","jw","soundex")
   , useBytes = FALSE

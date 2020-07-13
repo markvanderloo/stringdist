@@ -72,6 +72,8 @@
 #'   \code{logical} vector of length \code{length(x)} indicating wether an
 #'   element of \code{x} approximately matches an element in \code{table}.
 #'
+#' @family matching
+#'
 #' @example ../examples/amatch.R
 #' @export
 amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
