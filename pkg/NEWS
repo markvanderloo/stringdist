@@ -1,4 +1,5 @@
 version 0.9.6.0
+- New function 'afind': find approximate matches in text based on string distance.
 - New function 'stringsimmatrix' (Thanks to Johannes Gruber).
 - Internal fixes (in some cases class() == 'class' was used).
 
