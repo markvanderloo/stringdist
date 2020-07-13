@@ -29,6 +29,7 @@
 #' \item{\code{match}. \code{[character]}, the first, best matching window.}
 #'
 #' }
+#' 
 #' @family matching
 #'
 #' @examples
