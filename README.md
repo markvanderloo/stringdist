@@ -23,6 +23,7 @@ The package offers the following main functions:
 * `stringsim` computes a string similarity between 0 and 1, based on `stringdist`
 * `amatch` is a fuzzy matching equivalent of R's native `match` function
 * `ain` is a fuzzy matching equivalent of R's native `%in%` operator
+* `afind` finds the location of fuzzy matches of a short string in a long string.
 * `seq_dist`, `seq_distmatrix`, `seq_amatch` and `seq_ain` for distances between, and matching of integer sequences. (see also the [hashr](https://github.com/markvanderloo/hashr) package).
 
 These functions are built upon `C`-code that re-implements some common (weighted) string
