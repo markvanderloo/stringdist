@@ -328,7 +328,7 @@ SEXP R_lower_tri(SEXP a, SEXP method
   return(yy);
 }
 
-// R_afind
+// afind
 // For each string in 'a', return the starting position of
 // the best match with 'pattern'.
 SEXP R_afind(SEXP a, SEXP pattern, SEXP width
