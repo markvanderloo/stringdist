@@ -28,7 +28,7 @@
 #'
 #' The functions \code{grab} and \code{grabl} are approximate string matching
 #' functions that mimic base R's \code{\link[base]{grep}} and
-#' \code{\link[base]{grepl}}. They are implemented as convenience wrappers
+#' \code{\link[base:grep]{grepl}}. They are implemented as convenience wrappers
 #' of \code{find}.
 #'
 #'
