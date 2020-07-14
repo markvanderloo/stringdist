@@ -108,7 +108,7 @@
 #' \eqn{d} is the Jaro-distance. Here,  \eqn{l} is obtained by counting, from
 #' the start of the input strings, after how many characters the first
 #' character mismatch between the two strings occurs, with a maximum of four. The
-#' factor \eqn{p} is a penalty factor, which in the work of Winkler is often
+#' factor \eqn{p} is a 'prefix' factor, which in the work of Winkler is often
 #' chosen \eqn{0.1}.
 #'
 #' For the \bold{soundex} distance (method='soundex'), strings are translated to a soundex code 

@@ -24,10 +24,10 @@
 #'   \code{'Jaccard'}, or \code{'lcs'}
 #' @param q  Size of the \eqn{q}-gram; must be nonnegative. Only applies to
 #'   \code{method='qgram'}, \code{'jaccard'} or \code{'cosine'}.
-#' @param p Penalty factor for Jaro-Winkler distance. The valid range for 
+#' @param p Prefix factor for Jaro-Winkler distance. The valid range for 
 #'   \code{p} is \code{0 <= p <= 0.25}. If \code{p=0} (default), the
 #'   Jaro-distance is returned. Applies only to \code{method='jw'}.
-#' @param bt Winkler's boost threshold. Winkler's penalty factor is
+#' @param bt Winkler's boost threshold. Winkler's prefix factor is
 #'   only applied when the Jaro distance is larger than \code{bt}
 #'   Applies only to \code{method='jw'} and \code{p>0}.
 #' @param nthread Maximum number of threads to use. By default, a sensible
