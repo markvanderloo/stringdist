@@ -1,6 +1,7 @@
 version 0.9.6.0
 - New function 'afind': find approximate matches in text based on string distance.
 - New functions 'grab', 'grabl': fuzzy matching equivalent to 'grep' and 'grepl'.
+- New function 'extract': fuzzy matching equivalent of stringr::str_extract.
 - New function 'stringsimmatrix' (Thanks to Johannes Gruber).
 - Internal fixes (in some cases class() == 'class' was used).
 

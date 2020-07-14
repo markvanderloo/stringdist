@@ -50,7 +50,7 @@
 #'
 #' @examples
 #' texts = c("When I grow up, I want to be"
-#'        , "one of the harversters of the sea"
+#'        , "one of the harvesters of the sea"
 #'        , "I think before my days are gone"
 #'        , "I want to be a fisherman")
 #' patterns = c("fish", "gone","to be")
@@ -140,7 +140,7 @@ afind <- function(x, pattern, window=NULL
 #' @return 
 #' For \code{grab}, an \code{integer} vector, indicating in which elements of
 #' \code{x} a match was found with a distance \code{<= maxDist}. The matched
-#' value when \code{value=TRUE} (equivalent to \code{\link{[base]{grep}}).
+#' values when \code{value=TRUE} (equivalent to \code{\link{[base]{grep}}).
 #' @export
 grab <- function(x, pattern, maxDist, value=FALSE, ...){
   stopifnot(is.numeric(maxDist), maxDist >= 0, length(pattern) == 1)
@@ -155,7 +155,7 @@ grab <- function(x, pattern, maxDist, value=FALSE, ...){
 #' @rdname afind
 #' @param ... passed to \code{afind}.
 #' @return 
-#' For \code{grabl}, an \code{logical} vector, indicating in which elements of
+#' For \code{grabl}, a \code{logical} vector, indicating in which elements of
 #' \code{x} a match was found with a distance \code{<= maxDist}.  (equivalent
 #' to \code{\link[base]{grepl}}).
 #' @export
@@ -163,6 +163,22 @@ grabl <- function(x, pattern, maxDist, ...){
   stopifnot(is.numeric(maxDist), maxDist >= 0, length(pattern) == 1)
   L <- afind(x, pattern, value=FALSE, ...)
   L$distance <= maxDist
+}
+
+
+#' @rdname extract
+#'
+#' @return
+#' For \code{extract}, a \code{character} vector of \code{length(x)}, with
+#' \code{NA} where no match was found and the first matched string if there is
+#' a match. (similar to \code{stringr::str_extract}).
+#' @export
+extract <- function(x, pattern, maxDist, ...){
+  stopifnot(is.numeric(maxDist), maxDist >= 0, length(pattern) == 1)
+  L <- afind(x, pattern, value=TRUE, ...)
+  out <- L$match
+  out[L$distance > maxDist] <- NA_character_
+  out
 }
 
 

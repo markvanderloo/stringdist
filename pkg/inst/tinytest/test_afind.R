@@ -50,8 +50,11 @@ expect_equal(length(out2), 2)
 
 expect_equal(grab(texts, "harvester", maxDist=2), 2)
 expect_equal(grab(texts, "harvester", value=TRUE, maxDist=2), "harverste")
-expect_equal(grabl(texts, "harvester", maxDist=2), matrix(c(FALSE,TRUE,FALSE,FALSE),nrow=4))
+expect_equal(grabl(texts, "harvester", maxDist=2)
+            , matrix(c(FALSE,TRUE,FALSE,FALSE),nrow=4))
 
+expect_equal(extract(texts, "harvester", maxDist=2)
+            , matrix(c(NA, "harverste",NA,NA), nrow=4) )
 
 
 
