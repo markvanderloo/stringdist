@@ -1,4 +1,4 @@
-
+options(sd_num_thread=1L)
 
 texts = c("When I grow up, I want to be"
   , "one of the harversters of the sea"
@@ -36,7 +36,13 @@ expect_equal(out$location, location)
 expect_equal(out$distance, distance)
 expect_equal(out$match,    match)
 
+# test paralellization
 
+out1 <- afind(texts, patterns, method="osa", nthread=2L)
+expect_identical(out, out1)
 
+# test option
 
+out2 <- afind(texts, patterns, value=FALSE)
+expect_equal(length(out2), 2)
 

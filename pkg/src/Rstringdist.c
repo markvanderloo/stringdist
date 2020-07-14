@@ -32,7 +32,7 @@
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 
-// TODO: catch error and report.
+
 static Stringdist *R_open_stringdist(Distance d, int max_len_a, int max_len_b, SEXP weight, SEXP p, SEXP bt, SEXP q){
 
   Stringdist *sd = NULL;
@@ -333,7 +333,7 @@ SEXP R_lower_tri(SEXP a, SEXP method
 // the best match with 'pattern'.
 SEXP R_afind(SEXP a, SEXP pattern, SEXP width
   , SEXP method, SEXP weight, SEXP p, SEXP bt
-  , SEXP q, SEXP useBytes)
+  , SEXP q, SEXP useBytes, SEXP nthrd)
 {
   
   int na = length(a)              // nr of  texts to search
@@ -371,58 +371,76 @@ SEXP R_afind(SEXP a, SEXP pattern, SEXP width
       max_window = window[i];
     }
   }
-  Stringdist *sd = R_open_stringdist( (Distance) INTEGER(method)[0]
-      , max_window, ml_b
-      , weight
-      , p
-      , bt
-      , q
-  );
 
-  // allocate memory to store the strings
-  unsigned int *s = NULL, *t = NULL;
-  s = (unsigned int *) malloc(( 2L + ml_a + ml_b) * sizeof(int));
   
-  // t is the location of the pattern
-  t = s + ml_a + 1L;
-  
-  int len_s, len_t, isna_s, isna_t, max_k, k_min, current_window, offset;
-  
-  double d, d_min;
+  #ifdef _OPENMP 
+  int  nthreads = MIN(INTEGER(nthrd)[0],na);
+  #pragma omp parallel num_threads(nthreads) default(none) \
+      shared(yloc,ydist, na, npat, R_PosInf, NA_REAL, NA_INTEGER, bytes, intdist, \
+      method, weight, p, bt, q, ml_a, ml_b, window, max_window, a, pattern)
+  #endif
+  {  // start parallel region
 
 
-  for( int j = 0; j < npat; j++){
-    // get pattern
-    get_elem(pattern, j, bytes, intdist, &len_t, &isna_t, t);
-    current_window = window[j];
-    offset = j*na;
-    for ( int i = 0; i < na; i++ ){
+    Stringdist *sd = R_open_stringdist( (Distance) INTEGER(method)[0]
+        , max_window, ml_b
+        , weight
+        , p
+        , bt
+        , q
+    );
+
+    // allocate memory to store the strings
+    unsigned int *s = NULL, *t = NULL;
+    s = (unsigned int *) malloc(( 2L + ml_a + ml_b) * sizeof(int));
+    
+    // t is the location of the pattern
+    t = s + ml_a + 1L;
+    
+    int len_s, len_t, isna_s, isna_t, max_k, k_min, current_window, offset;
+    int ID, num_threads;
+    
+    double d, d_min;
+
+
+    #ifdef _OPENMP
+    ID = omp_get_thread_num();
+    num_threads = omp_get_num_threads();
+    #endif
+    for ( int i = ID; i < na; i += num_threads ){
       // get text to search
       get_elem(a, i, bytes, intdist, &len_s, &isna_s, s);
-      if (isna_s || isna_t){ // something to search in, or find?
-        yloc[offset + i]  = NA_INTEGER;
-        ydist[offset + i] = NA_REAL;
-      } else if ( current_window >= len_s ){ // is the text shorter than the pattern?
-        yloc[offset + i]  = 1L;
-        ydist[offset + i] = stringdist(sd, s, len_s, t, len_t); 
-      } else { // slide window over text and compute distances
-        max_k = len_s - current_window;
-        d_min = R_PosInf;
-        k_min = 0;
-        for (int k = 0; k <= max_k; k++){
-          d = stringdist(sd, s + k, current_window, t, len_t);
-          if ( d < d_min ){
-            d_min = d;
-            k_min = k;
-          } // end loop over windows
+      for( int j = 0; j < npat; j++){
+        // get pattern
+        get_elem(pattern, j, bytes, intdist, &len_t, &isna_t, t);
+        current_window = window[j];
+        offset = j*na;
+        if (isna_s || isna_t){ // something to search in, or find?
+          yloc[offset + i]  = NA_INTEGER;
+          ydist[offset + i] = NA_REAL;
+        } else if ( current_window >= len_s ){ // is the text shorter than the pattern?
+          yloc[offset + i]  = 1L;
+          ydist[offset + i] = stringdist(sd, s, len_s, t, len_t); 
+        } else { // slide window over text and compute distances
+          max_k = len_s - current_window;
+          d_min = R_PosInf;
+          k_min = 0;
+          for (int k = 0; k <= max_k; k++){
+            d = stringdist(sd, s + k, current_window, t, len_t);
+            if ( d < d_min ){
+              d_min = d;
+              k_min = k;
+            } // end loop over windows
+          }
+          yloc[offset + i]  = k_min + 1;
+          ydist[offset + i] = d_min;
         }
-        yloc[offset + i]  = k_min + 1;
-        ydist[offset + i] = d_min;
-      }
-    } // end loop over strings
-  } // end loop over patterns.
+      } // end loop over strings
+    } // end loop over patterns.
 
-  close_stringdist(sd);
+    close_stringdist(sd);
+  } // end parallel region
+
   UNPROTECT(1);
   return(out_list);
 

@@ -9,12 +9,22 @@
 #' @param x \code{[character]} strings to search in
 #' @param pattern \code{[character]} strings to find (not a regular expression).
 #' @param window \code{[integer]} width of moving window
+#' @param value \code{[logical]} toggle return matrix with matched strings.
 #' @inheritParams amatch
 #'
 #' @details
 #' Matching is case-sensitive.  Both \code{x} and \code{pattern} are converted
 #' to \code{UTF-8} prior to search, unless \code{useBytes=TRUE}, in which case
 #' the distances are measured bytewise.
+#'
+#' Code is parallelized over the \code{x} variable: each value of \code{x}
+#' is scanned for every element in \code{pattern} using a separate thread (when \code{nthread}
+#' is larger then 1).
+#'
+#' The current implementation is naive, in the sense that for each string
+#' \code{s} in \code{x}, \code{nchar(s) - window + 1} separate distances are
+#' computed. At the moment no attempt is made to speed up the calculation by
+#' using that consecutive windows overlap.
 #'
 #'
 #' @return
@@ -27,7 +37,7 @@
 #' \item{\code{distance}. \code{[character]}, the string distance between pattern and
 #'       the best matching window.}
 #' \item{\code{match}. \code{[character]}, the first, best matching window.}
-#'
+#' 
 #' }
 #' 
 #' @family matching
@@ -44,12 +54,15 @@
 #'
 #' @export
 afind <- function(x, pattern, window=nchar(enc2utf8(pattern))
+  , value=TRUE
   , method = c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw","soundex")
   , useBytes = FALSE
   , weight=c(d=1,i=1,s=1,t=1) 
   , q  = 1
   , p  = 0
-  , bt = 0){
+  , bt = 0
+  , nthread = getOption("sd_num_thread")
+  ){
   
   stopifnot(
     all(is.finite(weight))
@@ -62,6 +75,7 @@ afind <- function(x, pattern, window=nchar(enc2utf8(pattern))
     , is.logical(useBytes)
     , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
     , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
+    , nthread > 0
   )
   x <- as.character(x)
   pattern <- as.character(pattern)
@@ -80,7 +94,9 @@ afind <- function(x, pattern, window=nchar(enc2utf8(pattern))
     stop(sprintf("method '%s' is not defined",method))
   }
   
-  L <- .Call("R_afind", x, pattern
+  L <- .Call("R_afind"
+    , x
+    , pattern
     , as.integer(window)
     , method
     , as.double(weight)
@@ -88,18 +104,19 @@ afind <- function(x, pattern, window=nchar(enc2utf8(pattern))
     , as.double(bt)
     , as.integer(q)
     , as.integer(useBytes)
+    , as.integer(nthread)
     , PACKAGE="stringdist")
   
+  names(L) <- c("location", "distance")
 
-  matches = sapply(seq_along(pattern), function(i){ 
-    substr(x, L[[1]][,i], L[[1]][,i] + window[i]-1)
-  })
+  if (isTRUE(value)){
+    matches = sapply(seq_along(pattern), function(i){ 
+      substr(x, L[[1]][,i], L[[1]][,i] + window[i]-1)
+    })
+    L$match <- matrix(matches, nrow=length(x))
+  }
 
-  list(location = L[[1]]
-     , distance = L[[2]]
-     , match = matrix(matches,nrow=length(x))
-  )
-
+  L
 }
 
 

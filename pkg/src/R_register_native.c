@@ -8,7 +8,7 @@
 */
 
 /* .Call calls */
-extern SEXP R_afind(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP R_afind(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP R_all_int(SEXP);
 extern SEXP R_amatch(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP R_get_qgrams(SEXP, SEXP);
@@ -18,7 +18,7 @@ extern SEXP R_soundex(SEXP, SEXP);
 extern SEXP R_stringdist(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-    {"R_afind",      (DL_FUNC) &R_afind,       9},
+    {"R_afind",      (DL_FUNC) &R_afind,      10},
     {"R_all_int",    (DL_FUNC) &R_all_int,     1},
     {"R_amatch",     (DL_FUNC) &R_amatch,     12},
     {"R_get_qgrams", (DL_FUNC) &R_get_qgrams,  2},
