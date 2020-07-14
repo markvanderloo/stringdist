@@ -157,7 +157,7 @@ grab <- function(x, pattern, maxDist, value=FALSE, ...){
 #' @return 
 #' For \code{grabl}, a \code{logical} vector, indicating in which elements of
 #' \code{x} a match was found with a distance \code{<= maxDist}.  (equivalent
-#' to \code{\link[base]{grepl}}).
+#' to \code{\link[base:grep]{grepl}}).
 #' @export
 grabl <- function(x, pattern, maxDist, ...){
   stopifnot(is.numeric(maxDist), maxDist >= 0, length(pattern) == 1)
@@ -166,7 +166,7 @@ grabl <- function(x, pattern, maxDist, ...){
 }
 
 
-#' @rdname extract
+#' @rdname afind
 #'
 #' @return
 #' For \code{extract}, a \code{character} vector of \code{length(x)}, with
