@@ -21,14 +21,20 @@
 #' is scanned for every element in \code{pattern} using a separate thread (when \code{nthread}
 #' is larger then 1).
 #'
-#' The current implementation is naive, in the sense that for each string
-#' \code{s} in \code{x}, \code{nchar(s) - window + 1} separate distances are
-#' computed. At the moment no attempt is made to speed up the calculation by
-#' using that consecutive windows overlap.
+#' The current implementation of \code{afind} is naive, in the sense that for
+#' each string \code{s} in \code{x}, \code{nchar(s) - window + 1} separate
+#' distances are computed. At the moment no attempt is made to speed up the
+#' calculation by using that consecutive windows overlap.
+#'
+#' The functions \code{grab} and \code{grabl} are approximate string matching
+#' functions that mimic base R's \code{\link[base]{grep}} and
+#' \code{\link[base]{grepl}}. They are implemented as convenience wrappers
+#' of \code{find}.
+#'
 #'
 #'
 #' @return
-#' A \code{list} of three matrices, each of with \code{length(x)} rows and \code{length(pattern)}
+#' For \code{afind} A \code{list} of three matrices, each of with \code{length(x)} rows and \code{length(pattern)}
 #' columns. In each matrix, element \eqn{(i,j)} corresponds to \code{x[i]} and \code{pattern[j]}.
 #' \itemize{
 #' \item{\code{location}. \code{[integer]}, location of the start of best matching window.
@@ -53,7 +59,7 @@
 #'
 #'
 #' @export
-afind <- function(x, pattern, window=nchar(enc2utf8(pattern))
+afind <- function(x, pattern, window=NULL
   , value=TRUE
   , method = c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw","soundex")
   , useBytes = FALSE
@@ -68,20 +74,26 @@ afind <- function(x, pattern, window=nchar(enc2utf8(pattern))
     all(is.finite(weight))
     , all(weight > 0)
     , all(weight <=1)
-    , window > 0
+    , is.null(window) || window >= 1
     , q >= 0
     , p <= 0.25
     , p >= 0
-    , is.logical(useBytes)
+    , is.logical(useBytes) && !is.na(useBytes)
+    , is.logical(value) && !is.na(value)
     , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
     , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
     , nthread > 0
   )
+
   x <- as.character(x)
   pattern <- as.character(pattern)
   if ( !useBytes ){
     x <- enc2utf8(x)
     pattern <- enc2utf8(pattern)
+  }
+
+  if (is.null(window)){ 
+    window = nchar(pattern, type = if (useBytes) "bytes" else "char")
   }
 
   if (length(x) == 0) return(numeric(0))
@@ -119,5 +131,38 @@ afind <- function(x, pattern, window=nchar(enc2utf8(pattern))
   L
 }
 
+
+
+
+#' @rdname afind
+#' @param ... passed to \code{afind}.
+#' @param maxDist Only windows with distance \code{<= maxDist} are considered a match.
+#' @return 
+#' For \code{grab}, an \code{integer} vector, indicating in which elements of
+#' \code{x} a match was found with a distance \code{<= maxDist}. The matched
+#' value when \code{value=TRUE} (equivalent to \code{\link{[base]{grep}}).
+#' @export
+grab <- function(x, pattern, maxDist, value=FALSE, ...){
+  stopifnot(is.numeric(maxDist), maxDist >= 0, length(pattern) == 1)
+  L <- afind(x, pattern, value=value, ...)
+  if (!value){
+    which(L$distance <= maxDist)
+  } else {
+    L$match[L$distance <= maxDist ]
+  }
+}
+
+#' @rdname afind
+#' @param ... passed to \code{afind}.
+#' @return 
+#' For \code{grabl}, an \code{logical} vector, indicating in which elements of
+#' \code{x} a match was found with a distance \code{<= maxDist}.  (equivalent
+#' to \code{\link[base]{grepl}}).
+#' @export
+grabl <- function(x, pattern, maxDist, ...){
+  stopifnot(is.numeric(maxDist), maxDist >= 0, length(pattern) == 1)
+  L <- afind(x, pattern, value=FALSE, ...)
+  L$distance <= maxDist
+}
 
 

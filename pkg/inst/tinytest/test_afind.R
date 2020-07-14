@@ -41,8 +41,17 @@ expect_equal(out$match,    match)
 out1 <- afind(texts, patterns, method="osa", nthread=2L)
 expect_identical(out, out1)
 
-# test option
-
+# test 'value' option
 out2 <- afind(texts, patterns, value=FALSE)
 expect_equal(length(out2), 2)
+
+
+# test grep/grepl equivalents 'grab', 'grabl'
+
+expect_equal(grab(texts, "harvester", maxDist=2), 2)
+expect_equal(grab(texts, "harvester", value=TRUE, maxDist=2), "harverste")
+expect_equal(grabl(texts, "harvester", maxDist=2), matrix(c(FALSE,TRUE,FALSE,FALSE),nrow=4))
+
+
+
 

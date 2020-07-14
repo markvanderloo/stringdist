@@ -3,6 +3,8 @@
 export(afind)
 export(ain)
 export(amatch)
+export(grab)
+export(grabl)
 export(phonetic)
 export(printable_ascii)
 export(qgrams)
