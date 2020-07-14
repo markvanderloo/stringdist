@@ -140,7 +140,7 @@ afind <- function(x, pattern, window=NULL
 #' @return 
 #' For \code{grab}, an \code{integer} vector, indicating in which elements of
 #' \code{x} a match was found with a distance \code{<= maxDist}. The matched
-#' values when \code{value=TRUE} (equivalent to \code{\link{[base]{grep}}).
+#' values when \code{value=TRUE} (equivalent to \code{\link[base]{grep}}).
 #' @export
 grab <- function(x, pattern, maxDist, value=FALSE, ...){
   stopifnot(is.numeric(maxDist), maxDist >= 0, length(pattern) == 1)

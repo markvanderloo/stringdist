@@ -51,7 +51,6 @@ stringsim <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
 
 #' @rdname stringsim
 #' @export
-#' @rdname stringsim
 stringsimmatrix <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs",
                                               "qgram", "cosine", "jaccard", "jw", "soundex"), useBytes=FALSE, q = 1, ...) {
   # Calculate the distance 
