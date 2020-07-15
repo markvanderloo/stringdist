@@ -81,9 +81,9 @@
 #' The computation is aborted when \code{q} is is larger than the length of 
 #' any of the strings. In that case \code{Inf}  is returned.
 #'
-#' The \bold{cosine distance} (method='cosine') is computed as \eqn{1-x\cdot y/(\|x\|\|y\|)}, where \eqn{x} and 
-#' \eqn{y} were defined above.
-#' 
+#' The \bold{cosine distance} (method='cosine') is computed as \eqn{1-x\cdot
+#' y/(\|x\|\|y\|)}, where \eqn{x} and \eqn{y} were defined above.
+#'
 #' Let \eqn{X} be the set of unique \eqn{q}-grams in \code{a} and \eqn{Y} the set of unique 
 #' \eqn{q}-grams in \code{b}. The \bold{Jaccard distance} (\code{method='jaccard'}) is given by \eqn{1-|X\cap Y|/|X\cup Y|}.
 #'
@@ -118,6 +118,16 @@
 #' in the ranges a-z and A-Z. A warning is emitted when non-printable or non-ascii
 #' characters are encountered. Also see \code{\link{printable_ascii}}.
 #'
+#' The \bold{running_cosine} distance is an implementatation of the cosine
+#' distance especially meant for fuzzy text search as in \code{\link{afind}}.
+#' In fuzzy search a window of \code{n} characters slides accros a (long)
+#' string while for each position of the window the distance between the part
+#' of the string in the window and a search pattern is computed. The (position
+#' of) the window with the shortest distance to the search pattern is returned.
+#' Sliding the window with a single position only affects the \eqn{q}-grams at
+#' the beginning and end of the window, and the 'running cosine' distance uses
+#' this and a few other tricks to save calculations.
+#' 
 #'
 #'
 #' @references

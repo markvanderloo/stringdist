@@ -38,7 +38,7 @@ static Stringdist *R_open_stringdist(Distance d, int max_len_a, int max_len_b, S
   Stringdist *sd = NULL;
   if (d == osa || d == lv || d == dl || d == hamming || d == lcs){
     sd = open_stringdist(d, max_len_a, max_len_b, REAL(weight));
-  } else if ( d == qgram || d == cosine || d == jaccard ){
+  } else if (d == qgram || d == cosine || d == jaccard || d == running_cosine){
     sd = open_stringdist(d, max_len_a, max_len_b, (unsigned int) INTEGER(q)[0]);
   } else if ( d == jw ){
     sd = open_stringdist(d, max_len_a, max_len_b, REAL(weight), REAL(p)[0], REAL(bt)[0]);
@@ -372,7 +372,7 @@ SEXP R_afind(SEXP a, SEXP pattern, SEXP width
     }
   }
 
-  
+ 
   #ifdef _OPENMP 
   int  nthreads = MIN(INTEGER(nthrd)[0],na);
   #pragma omp parallel num_threads(nthreads) default(none) \
@@ -430,17 +430,16 @@ SEXP R_afind(SEXP a, SEXP pattern, SEXP width
             if ( d < d_min ){
               d_min = d;
               k_min = k;
-            } // end loop over windows
-          }
+            }
+          } // end loop over windows
           yloc[offset + i]  = k_min + 1;
           ydist[offset + i] = d_min;
+          reset_stringdist(sd);
         }
-      } // end loop over strings
-    } // end loop over patterns.
-
+      } // end loop over patterns
+    } // end loop over strings
     close_stringdist(sd);
   } // end parallel region
-
   UNPROTECT(1);
   return(out_list);
 

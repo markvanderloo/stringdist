@@ -221,8 +221,9 @@ static int compare(unsigned int *q1, unsigned int *q2, int q){
  * q     : the 'q' in q-gram
  * iLoc  : To wich count location does this q-gram contribute?
  * nLoc  : how many locations are there?
+ * node  : int array of length nLoc, will contain contents of a node.
  */
-static qtree *push(qtree *Q, unsigned int *qgram, unsigned int q, int iLoc, int nLoc ){
+static qtree *push(qtree *Q, unsigned int *qgram, unsigned int q, int iLoc, int nLoc, double *node ){
   int cond;  
   if( Q == NULL ){ // new qgram
     Q = (qtree *) alloc( Qtree);
@@ -238,22 +239,52 @@ static qtree *push(qtree *Q, unsigned int *qgram, unsigned int q, int iLoc, int 
     memcpy(Q->qgram, qgram, sizeof(int) * q);
     Q->left = NULL;
     Q->right= NULL;
+    // copy content for all iLocs to output parameter.
+    if (node != NULL ) memcpy(node, Q->n, sizeof(double) * nLoc);
 
   } else if ( ( cond = compare(qgram, Q->qgram, q) ) == 1)  { // qgram larger than the stored qgram
-    Q->left = push(Q->left, qgram, q, iLoc, nLoc);
+    Q->left = push(Q->left, qgram, q, iLoc, nLoc, node);
   } else if ( cond == -1 ){ // qgram smaller than the stored qgram
-    Q->right = push(Q->right, qgram, q, iLoc, nLoc);
+    Q->right = push(Q->right, qgram, q, iLoc, nLoc, node);
   } else { // qgram equal to stored qgram
     Q->n[iLoc] += 1;
+    // copy content for all iLocs to output parameter.
+    if (node != NULL ) memcpy(node,Q->n, sizeof(double) * nLoc);
   }
   return Q;
 }
+
+/* pull qgram from binary tree: decrease valaue for one of the strings.
+ * 
+ * qtree : see above
+ * qgram : see above
+ * q     : the 'q' in q-gram
+ * iLoc  : To wich count location does this q-gram contribute?
+ * nLoc  : how many locations are there?
+ * node  : int array of length nLoc, will contain contents of a node.
+ */
+static qtree *pull(qtree *Q, unsigned int *qgram, unsigned int q, int iLoc, int nLoc, double *node){
+  if (Q == NULL) return(NULL);
+  int cond = compare(qgram, Q->qgram, q);
+
+  if ( cond == -1 ){ // qgram smaller than stored qgram
+    pull(Q->right, qgram, q, iLoc, nLoc, node);
+  } else if (cond == 1) { //qram larger than stored qgram
+    pull(Q->left, qgram, q, iLoc, nLoc, node);
+  } else { // qgram equal to stored qgram
+    Q->n[iLoc] -= 1;
+    // copy content for all iLocs to output parameter.
+    if (node != NULL) memcpy(node, Q->n, sizeof(double) * nLoc);
+  }
+  return Q;
+}
+
 
 /* push qgrams of a string into binary tree */
 static qtree *push_string(unsigned int *str, int strlen, unsigned int q, qtree *Q, int iLoc, int nLoc){
   qtree *P;
   for ( int i=0; i < (int) (strlen - q + 1); i++ ){
-    P = push(Q, str + i, q, iLoc, nLoc);
+    P = push(Q, str + i, q, iLoc, nLoc, NULL);
     if ( P == NULL ){ 
       free_qtree();
       return NULL;
@@ -281,7 +312,7 @@ static void getdist(qtree *Q, double *d){
 /* get x.y,||x||and ||y|| for cosine distance from the tree and set all qgram-freqencies 
  * to 0 so the tree van be reused.
  */
-static void getcosine(qtree *Q, double *d){
+static void getcosine(qtree *Q, double *d, int clean){
   if ( Q == NULL ) return;
   // inner product
   d[0] += (double) Q->n[0] * Q->n[1];
@@ -289,11 +320,25 @@ static void getcosine(qtree *Q, double *d){
   d[1] += (double) Q->n[0]*Q->n[0];
   d[2] += (double) Q->n[1]*Q->n[1];
   // clean up and continue
-  Q->n[0] = 0;
-  Q->n[1] = 0;
-  getcosine(Q->left,d);
-  getcosine(Q->right,d);
+  if (clean){
+    Q->n[0] = 0;
+    Q->n[1] = 0;
+  }
+  getcosine(Q->left, d, clean);
+  getcosine(Q->right, d, clean);
 }
+
+static double cosdist(double xy, double xx, double yy){
+  // x and y are equal: return precisely zero.
+  if (xy == xx && xy == yy){
+    return 0.0;
+  } else {
+  // use fabs to avoid numerical -0.
+    return ( fabs(1.0- xy/( sqrt(xx) * sqrt(yy))) );
+  }
+}
+
+
 
 /* get jaccard distance from the tree and set all qgram-freqencies 
  * to 0 so the tree van be reused.
@@ -375,16 +420,8 @@ double qgram_dist(
       getdist(Q,dist);
       break;
     case 1:
-      getcosine(Q, dist);
-      if (dist[0]==dist[1] && dist[0]==dist[2]){
-        // strings are equal. Prevent machine rounding about 0.0
-        dist[0] =  0.0;
-      } else {
-        // there are several ways to express the rhs (including ones that give 0L 
-        // at equal strings) but this has least chance of overflow
-        // fabs is taken to avoid numerical -0.
-        dist[0] = fabs(1.0 - dist[0]/(sqrt(dist[1]) * sqrt(dist[2])));
-      }
+      getcosine(Q, dist, 1);
+      dist[0] = cosdist(dist[0],dist[1],dist[2]);
       break;
     case 2:
       getjaccard(*Qp,dist);
@@ -396,6 +433,74 @@ double qgram_dist(
 
   return dist[0];
 }
+
+
+
+
+/*
+* s: text to search
+* x: length of s
+* t: pattern
+* y: length of pattern
+* q: size of q-gram
+* qtree: a qtree object.
+* store: length 3 array to store intermediate values;
+*/
+double running_cosine_dist(
+  unsigned int *s,
+  int x,
+  unsigned int *t,
+  int y,
+  unsigned int q,
+  qtree **Qp,
+  double *store
+  ){
+  
+  double d, ww, wp, pp;
+
+  unsigned int *first_qgram;
+  unsigned int *last_qgram;
+
+  // pwi: value of qgram table of pattern and window at location 
+  //      where one qgram is removed. 
+  // pwj: value of qgram table of pattern and window at location
+  //      where one qgram is added.
+  double pwi[2] = {0.,0.}, pwj[2] = {0.,0.};
+
+  
+  if ( *Qp == NULL ){ // new tree, 
+    // push the search pattern, location 0
+    *Qp = push_string(t, y, q, *Qp, 0, 2);
+    // push the first window
+    *Qp = push_string(s, x, q, *Qp, 1, 2);
+    store[0] = store[1] = store[2] = 0;
+    // store[0]: w.p (inner product)
+    // store[1]: p.p (squared norm of pattern)
+    // store[2]: w.w (squared norm of window)
+    getcosine(*Qp, store, 0);
+    d = cosdist(store[0], store[1], store[2]); 
+  } else { // we are running
+    first_qgram = s - 1;
+    last_qgram  = s + y - q;
+    // special case: q-gram to remove is equal to qgram to add
+    if (compare(first_qgram, last_qgram, q) == 0){
+      d = cosdist(store[0], store[1], store[2]); 
+    } else { 
+      // take first q-gram of the previous window from the table.
+      *Qp = pull(*Qp, s-1, q, 1, 2, pwi);
+      // add last qgram of the current window to the table.
+      *Qp = push(*Qp, s+y-q, q, 1, 2, pwj);
+     
+      store[0] = store[0] - pwi[0] + pwj[0];
+      store[2] = store[2] + 2*(pwj[1] - pwi[1] - 1);
+      d  = cosdist(store[0], store[2], store[1]);
+    }
+  }
+
+  return d;
+
+}
+
 
 
 /* R interface to qgram tabulator */

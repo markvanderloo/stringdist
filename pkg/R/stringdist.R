@@ -304,6 +304,7 @@ METHODS <- c(
   , jaccard = 7L
   , jw      = 8L
   , soundex = 9L
+  , running_cosine = 10L
 )
 
 

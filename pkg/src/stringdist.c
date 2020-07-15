@@ -74,6 +74,11 @@ Stringdist *open_stringdist(Distance d, int str_len_a, int str_len_b, ...){
       S->q = va_arg(args, unsigned int);
       S->tree = new_qtree(S->q, 2L); 
       break;
+    case running_cosine :
+      S->q = va_arg(args, unsigned int);
+      S->tree = new_qtree(S->q, 2L);
+      S->work = (double *) malloc(3*sizeof(double));
+      break;
     case jw :
       S->work = (double *) malloc( sizeof(double) * (str_len_a+str_len_b));
       S->weight = (double *) malloc(3L*sizeof(double));
@@ -110,6 +115,15 @@ void close_stringdist(Stringdist *S){
   free(S);
 }
 
+void reset_stringdist(Stringdist *S){
+  if (S->distance == running_cosine){
+      free_qtree(S->tree);
+      S->tree = new_qtree(S->q, 2L);
+  }
+}
+
+
+
 
 
 double stringdist(Stringdist *S, unsigned int *str_a, int len_a, unsigned int *str_b, int len_b){
@@ -132,6 +146,8 @@ double stringdist(Stringdist *S, unsigned int *str_a, int len_a, unsigned int *s
       return qgram_dist(str_a, len_a, str_b, len_b, S->q, &S->tree, 1L);
     case jaccard :
       return qgram_dist(str_a, len_a, str_b, len_b, S->q, &S->tree, 2L);
+    case running_cosine:
+      return running_cosine_dist(str_a, len_a, str_b, len_b, S->q, &S->tree, S->work);
     case jw :
       return jaro_winkler_dist(str_a, len_a, str_b, len_b, S->p, S->bt, S->weight, S->work);
     case soundex :

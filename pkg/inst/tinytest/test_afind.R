@@ -56,5 +56,38 @@ expect_equal(grabl(texts, "harvester", maxDist=2)
 expect_equal(extract(texts, "harvester", maxDist=2)
             , matrix(c(NA, "harverste",NA,NA), nrow=4) )
 
+## Test running_cosine
+pattern <- c("phish", "want to")
+
+expect_identical(
+    afind(texts, pattern, method="cosine",         q=3)
+  , afind(texts, pattern, method="running_cosine", q=3)
+)
+
+
+## test whether the correct positions are returned for all methods.
+
+methods = names(stringdist:::METHODS)
+methods = methods[!methods %in% c("soundex","hamming")]
+text <- "If you squeeze my lizzard, I put my snake on you."
+pattern <- "lizard"
+
+for ( method in methods ){
+  expect_equal(afind(text, pattern, method=method, q=3, p=0.1)$location[1,1], 19, info=method)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

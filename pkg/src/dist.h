@@ -17,7 +17,7 @@ double osa_dist(unsigned int *, int, unsigned int *, int, double *, double *);
 double jaro_winkler_dist(unsigned int *, int, unsigned int *, int, double, double, double *, double *);
 qtree *new_qtree(int, int);
 void free_qtree();
-double qgram_dist(unsigned int *, int, unsigned int *t, int, unsigned int, qtree **, int);
+double qgram_dist(unsigned int *, int, unsigned int *, int, unsigned int, qtree **, int);
 double soundex_dist(unsigned int *, int, unsigned int *, int, unsigned int *);
-
+double running_cosine_dist(unsigned int *, int, unsigned int *, int, unsigned int, qtree **, double *);
 #endif

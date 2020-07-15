@@ -26,7 +26,19 @@
 #include "qtree.h"
 #include "dist.h"
 
-typedef enum Distance { osa, lv, dl, hamming, lcs, qgram, cosine, jaccard, jw, soundex} Distance;
+typedef enum Distance { 
+    osa
+  , lv
+  , dl
+  , hamming
+  , lcs
+  , qgram
+  , cosine
+  , jaccard
+  , jw
+  , soundex
+  , running_cosine} Distance;
+
 typedef struct {
   Distance distance;
   // workspace
@@ -52,6 +64,7 @@ Stringdist *open_stringdist(Distance, int, int, ...);
 double stringdist(Stringdist *, unsigned int *, int, unsigned int *, int);
 
 void close_stringdist(Stringdist *S);
+void reset_stringdist(Stringdist *S);
 
 
 

@@ -21,16 +21,21 @@
 #' is scanned for every element in \code{pattern} using a separate thread (when \code{nthread}
 #' is larger then 1).
 #'
-#' The current implementation of \code{afind} is naive, in the sense that for
-#' each string \code{s} in \code{x}, \code{nchar(s) - window + 1} separate
-#' distances are computed. At the moment no attempt is made to speed up the
-#' calculation by using that consecutive windows overlap.
+#' The current implementation of all distances except for
+#' \code{"running_cosine"} is naive, in the sense that for each string \code{s}
+#' in \code{x}, \code{nchar(s) - window + 1} separate distances are computed.
+#' At the moment no attempt is made to speed up the calculation by using that
+#' consecutive windows overlap.
 #'
 #' The functions \code{grab} and \code{grabl} are approximate string matching
 #' functions that mimic base R's \code{\link[base]{grep}} and
 #' \code{\link[base:grep]{grepl}}. They are implemented as convenience wrappers
 #' of \code{find}.
 #'
+#' @section Running cosine distance:
+#' This algorithm gains efficiency by using that two consecutive windows have
+#' a large overlap in their q-gram profiles. It gives the same result as
+#' the \code{"cosine"} distance, but much faster.
 #'
 #'
 #' @return
@@ -61,7 +66,7 @@
 #' @export
 afind <- function(x, pattern, window=NULL
   , value=TRUE
-  , method = c("osa","lv","dl","hamming","lcs", "qgram","cosine","jaccard","jw","soundex")
+  , method = c("osa","lv","dl","hamming","lcs", "qgram","cosine","running_cosine","jaccard","jw","soundex")
   , useBytes = FALSE
   , weight=c(d=1,i=1,s=1,t=1) 
   , q  = 1
@@ -100,6 +105,7 @@ afind <- function(x, pattern, window=NULL
 
   method <- match.arg(method)
   if (method == 'jw') weight <- weight[c(2,1,3)]
+
 
   method <- METHODS[method]
   if ( is.na(method) ){
