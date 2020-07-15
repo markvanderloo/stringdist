@@ -1,7 +1,7 @@
 Package: stringdist
 Maintainer: Mark van der Loo <mark.vanderloo@gmail.com>
 License: GPL-3
-Title: Approximate String Matching and String Distance Functions
+Title: Approximate String Matching, Fuzzy Text Search, and String Distance Functions
 LazyData: no
 Type: Package
 LazyLoad: yes
@@ -14,7 +14,8 @@ Authors@R: c( person("Mark", "van der Loo", role=c("aut","cre")
             , person("Chris","Muir"       , role="ctb")
             , person("Johannes", "Gruber" , role="ctb"))
 Description: Implements an approximate string matching version of R's native
-    'match' function. Can calculate various string distances based on edits
+    'match' function. Also offers fuzzy text search based on various string
+     distance measures. Can calculate various string distances based on edits
     (Damerau-Levenshtein, Hamming, Levenshtein, optimal sting alignment), qgrams (q-
     gram, cosine, jaccard distance) or heuristic metrics (Jaro, Jaro-Winkler). An
     implementation of soundex is provided as well. Distances can be computed between
