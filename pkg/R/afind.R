@@ -148,7 +148,7 @@ afind <- function(x, pattern, window=NULL
 #' \code{x} a match was found with a distance \code{<= maxDist}. The matched
 #' values when \code{value=TRUE} (equivalent to \code{\link[base]{grep}}).
 #' @export
-grab <- function(x, pattern, maxDist, value=FALSE, ...){
+grab <- function(x, pattern, maxDist=Inf, value=FALSE, ...){
   stopifnot(is.numeric(maxDist), maxDist >= 0, length(pattern) == 1)
   L <- afind(x, pattern, value=value, ...)
   if (!value){
@@ -165,7 +165,7 @@ grab <- function(x, pattern, maxDist, value=FALSE, ...){
 #' \code{x} a match was found with a distance \code{<= maxDist}.  (equivalent
 #' to \code{\link[base:grep]{grepl}}).
 #' @export
-grabl <- function(x, pattern, maxDist, ...){
+grabl <- function(x, pattern, maxDist=Inf, ...){
   stopifnot(is.numeric(maxDist), maxDist >= 0, length(pattern) == 1)
   L <- afind(x, pattern, value=FALSE, ...)
   L$distance <= maxDist
@@ -179,7 +179,7 @@ grabl <- function(x, pattern, maxDist, ...){
 #' \code{NA} where no match was found and the first matched string if there is
 #' a match. (similar to \code{stringr::str_extract}).
 #' @export
-extract <- function(x, pattern, maxDist, ...){
+extract <- function(x, pattern, maxDist = Inf, ...){
   stopifnot(is.numeric(maxDist), maxDist >= 0, length(pattern) == 1)
   L <- afind(x, pattern, value=TRUE, ...)
   out <- L$match
