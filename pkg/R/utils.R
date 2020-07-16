@@ -28,7 +28,6 @@ mymsg <- message
   nthread <- min(omp_thread_limit,nthread)
  
   options(sd_num_thread=nthread)
-  packageStartupMessage(sprintf("stringdist uses %d threads.", nthread))
 }
 
 # When necessary and possible, argument is coverted to integers.
