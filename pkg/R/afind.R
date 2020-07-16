@@ -1,15 +1,16 @@
 #' Stringdist-based fuzzy text search
 #'
 #' \code{afind} slides a window of fixed width over a string \code{x} and
-#' computes the distance between the current window and the sought-after
+#' computes the distance between the each window and the sought-after
 #' \code{pattern}. The location, content, and distance corresponding to the
 #' window with the best match is returned.
 #'
 #'
-#' @param x \code{[character]} strings to search in
-#' @param pattern \code{[character]} strings to find (not a regular expression).
-#' @param window \code{[integer]} width of moving window
-#' @param value \code{[logical]} toggle return matrix with matched strings.
+#' @param x  strings to search in
+#' @param pattern strings to find (not a regular expression). For \code{grab},
+#' \code{grabl}, and \code{extract} this must be a single string.
+#' @param window  width of moving window.
+#' @param value toggle return matrix with matched strings.
 #' @inheritParams amatch
 #'
 #' @details
@@ -39,8 +40,10 @@
 #'
 #'
 #' @return
-#' For \code{afind} A \code{list} of three matrices, each of with \code{length(x)} rows and \code{length(pattern)}
-#' columns. In each matrix, element \eqn{(i,j)} corresponds to \code{x[i]} and \code{pattern[j]}.
+#' For \code{afind}: a \code{list} of three matrices, each with
+#' \code{length(x)} rows and \code{length(pattern)} columns. In each matrix,
+#' element \eqn{(i,j)} corresponds to \code{x[i]} and \code{pattern[j]}. The 
+#' names and description of each matrix is as follows.
 #' \itemize{
 #' \item{\code{location}. \code{[integer]}, location of the start of best matching window.
 #'       When \code{useBytes=FALSE}, this corresponds to the location of a \code{UTF} code point
@@ -60,7 +63,10 @@
 #'        , "I want to be a fisherman")
 #' patterns = c("fish", "gone","to be")
 #'
-#' afind(texts, patterns, method="cosine", q=3)
+#' afind(texts, patterns, method="running_cosine", q=3)
+#'
+#' grabl(texts,"grew", maxDist=1)
+#' extract(texts, "harvested", maxDist=3)
 #'
 #'
 #' @export
