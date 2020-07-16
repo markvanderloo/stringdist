@@ -456,7 +456,7 @@ double running_cosine_dist(
   double *store
   ){
   
-  double d, ww, wp, pp;
+  double d;
 
   unsigned int *first_qgram;
   unsigned int *last_qgram;

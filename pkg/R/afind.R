@@ -31,7 +31,10 @@
 #' The functions \code{grab} and \code{grabl} are approximate string matching
 #' functions that mimic base R's \code{\link[base]{grep}} and
 #' \code{\link[base:grep]{grepl}}. They are implemented as convenience wrappers
-#' of \code{find}.
+#' of \code{find}. For \code{grabl} there is one difference with \code{grepl}.
+#' The result of \code{grepl("foo",NA)} is \code{FALSE}, which seems inconsistent
+#' with \code{grepl(NA, NA)} and \code{grepl(NA, "foo")} which return \code{NA}.
+#' \code{grabl} returns \code{NA} when either \code{pattern} or \code{x} is \code{NA}.
 #'
 #' @section Running cosine distance:
 #' This algorithm gains efficiency by using that two consecutive windows have
@@ -174,16 +177,16 @@ grab <- function(x, pattern, maxDist=Inf, value=FALSE, ...){
 grabl <- function(x, pattern, maxDist=Inf, ...){
   stopifnot(is.numeric(maxDist), maxDist >= 0, length(pattern) == 1)
   L <- afind(x, pattern, value=FALSE, ...)
-  L$distance <= maxDist
+  as.logical(L$distance <= maxDist)
 }
 
 
 #' @rdname afind
 #'
 #' @return
-#' For \code{extract}, a \code{character} vector of \code{length(x)}, with
-#' \code{NA} where no match was found and the first matched string if there is
-#' a match. (similar to \code{stringr::str_extract}).
+#' For \code{extract}, a \code{character} matrix with \code{length(x)} rows and
+#' \code{length(pattern)} columns.  If match was found, element \eqn{(i,j)}
+#' contains the match, otherwise it is set to \code{NA}.
 #' @export
 extract <- function(x, pattern, maxDist = Inf, ...){
   stopifnot(is.numeric(maxDist), maxDist >= 0, length(pattern) == 1)

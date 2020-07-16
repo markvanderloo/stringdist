@@ -418,7 +418,7 @@ SEXP R_afind(SEXP a, SEXP pattern, SEXP width
         if (isna_s || isna_t){ // something to search in, or find?
           yloc[offset + i]  = NA_INTEGER;
           ydist[offset + i] = NA_REAL;
-        } else if ( current_window >= len_s ){ // is the text shorter than the pattern?
+        } else if ( current_window >= len_s ){ // is the text shorter than the window?
           yloc[offset + i]  = 1L;
           ydist[offset + i] = stringdist(sd, s, len_s, t, len_t); 
         } else { // slide window over text and compute distances

@@ -51,10 +51,10 @@ expect_equal(length(out2), 2)
 expect_equal(grab(texts, "harvester", maxDist=2), 2)
 expect_equal(grab(texts, "harvester", value=TRUE, maxDist=2), "harverste")
 expect_equal(grabl(texts, "harvester", maxDist=2)
-            , matrix(c(FALSE,TRUE,FALSE,FALSE),nrow=4))
+            , c(FALSE,TRUE,FALSE,FALSE))
 
 expect_equal(extract(texts, "harvester", maxDist=2)
-            , matrix(c(NA, "harverste",NA,NA), nrow=4) )
+            , matrix(c(NA, "harverste",NA,NA),nrow=4) )
 
 ## Test running_cosine
 pattern <- c("phish", "want to")
@@ -76,7 +76,30 @@ for ( method in methods ){
   expect_equal(afind(text, pattern, method=method, q=3, p=0.1)$location[1,1], 19, info=method)
 }
 
+## test the usual edge cases
 
+# notice: window size = 0.
+expect_equal(afind("foo","")$distance[1], 0)
+
+expect_equal(afind("foo",NA)$distance[1], NA_real_)
+expect_equal(afind("foo",NA)$location[1], NA_integer_)
+expect_equal(afind("foo",NA)$match[1], NA_character_)
+
+expect_equal(afind(NA,"foo")$distance[1], NA_real_)
+expect_equal(afind(NA,"foo")$location[1], NA_integer_)
+expect_equal(afind(NA,"foo")$match[1], NA_character_)
+
+expect_equal(afind("","foo")$distance[1], 3)
+expect_equal(afind("","foo")$location[1], 1)
+expect_equal(afind("","foo")$match[1], "")
+
+expect_equal(grab("foo", ""), 1L)
+expect_equal(grabl("foo",""), TRUE)
+expect_equal(grab("foo",NA), integer(0))
+
+# note that 'grepl' gives FALSE in this case (which is inconsistent with
+# grepl(NA, NA), grepl(NA, "foo").
+expect_equal(grabl("foo",NA), NA)
 
 
 
