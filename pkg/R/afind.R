@@ -3,7 +3,7 @@
 #' \code{afind} slides a window of fixed width over a string \code{x} and
 #' computes the distance between the each window and the sought-after
 #' \code{pattern}. The location, content, and distance corresponding to the
-#' window with the best match is returned.
+#' window with the best match is returned. 
 #'
 #'
 #' @param x  strings to search in
@@ -20,21 +20,12 @@
 #'
 #' Code is parallelized over the \code{x} variable: each value of \code{x}
 #' is scanned for every element in \code{pattern} using a separate thread (when \code{nthread}
-#' is larger then 1).
-#'
-#' The current implementation of all distances except for
-#' \code{"running_cosine"} is naive, in the sense that for each string \code{s}
-#' in \code{x}, \code{nchar(s) - window + 1} separate distances are computed.
-#' At the moment no attempt is made to speed up the calculation by using that
-#' consecutive windows overlap.
+#' is larger than 1).
 #'
 #' The functions \code{grab} and \code{grabl} are approximate string matching
-#' functions that mimic base R's \code{\link[base]{grep}} and
+#' functions that somewhat resemble base R's \code{\link[base]{grep}} and
 #' \code{\link[base:grep]{grepl}}. They are implemented as convenience wrappers
-#' of \code{find}. For \code{grabl} there is one difference with \code{grepl}.
-#' The result of \code{grepl("foo",NA)} is \code{FALSE}, which seems inconsistent
-#' with \code{grepl(NA, NA)} and \code{grepl(NA, "foo")} which return \code{NA}.
-#' \code{grabl} returns \code{NA} when either \code{pattern} or \code{x} is \code{NA}.
+#' of \code{afind}. 
 #'
 #' @section Running cosine distance:
 #' This algorithm gains efficiency by using that two consecutive windows have
