@@ -1,3 +1,7 @@
+version 0.9.6.2
+- Resubmit, fixing url issues detected at CRAN, added doi to description
+  as per CRAN request.
+
 version 0.9.6.1
 - Bugfix: afind/grab/grabl returned wrong results on MacOS only.  
   (thanks to Prof. Brian Ripley for the notification and for running tests 
