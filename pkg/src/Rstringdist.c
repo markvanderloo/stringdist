@@ -398,7 +398,7 @@ SEXP R_afind(SEXP a, SEXP pattern, SEXP width
     t = s + ml_a + 1L;
     
     int len_s, len_t, isna_s, isna_t, max_k, k_min, current_window, offset;
-    int ID, num_threads;
+    int ID=0, num_threads=1;
     
     double d, d_min;
 

@@ -1,4 +1,10 @@
-version 0.9.6.0
+version 0.9.6.1
+- Bugfix: afind/grab/grabl returned wrong results on MacOS only.  
+  (thanks to Prof. Brian Ripley for the notification and for running tests 
+   on his personal machine and to Tomas Kalibera for making the 
+   ubuntu-rchk docker image available).
+
+version 0.9.6
 - New function 'afind': find approximate matches in text based on string distance.
 - New functions 'grab', 'grabl': fuzzy matching equivalent to 'grep' and 'grepl'.
 - New function 'extract': fuzzy matching equivalent of stringr::str_extract.
