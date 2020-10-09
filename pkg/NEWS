@@ -1,5 +1,8 @@
+version 0.9.6.3
+- Resubmit. Fixed an URL redirect that was detected by CRAN.
+
 version 0.9.6.2
-- Resubmit, fixing url issues detected at CRAN, added doi to description
+- Resubmit. Fixed url issues detected by CRAN, added doi to description
   as per CRAN request.
 
 version 0.9.6.1
