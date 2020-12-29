@@ -352,17 +352,15 @@ SEXP R_afind(SEXP a, SEXP pattern, SEXP width
 
   // output location
   SEXP out_loc;
-  out_loc = allocMatrix(INTSXP, na, npat);
+  PROTECT(out_loc = allocMatrix(INTSXP, na, npat));
   VECTOR_ELT(out_list,0) = out_loc;
   int *yloc = INTEGER(out_loc);
 
   // output distance
   SEXP out_dist;
-  out_dist = allocMatrix(REALSXP, na, npat);
+  PROTECT(out_dist = allocMatrix(REALSXP, na, npat));
   VECTOR_ELT(out_list,1) = out_dist;
   double *ydist = REAL(out_dist);
-
-  
   // Setup stringdist structure.
   // find maximum window length
   int max_window = 0;
@@ -402,7 +400,6 @@ SEXP R_afind(SEXP a, SEXP pattern, SEXP width
     
     double d, d_min;
 
-
     #ifdef _OPENMP
     ID = omp_get_thread_num();
     num_threads = omp_get_num_threads();
@@ -440,7 +437,7 @@ SEXP R_afind(SEXP a, SEXP pattern, SEXP width
     } // end loop over strings
     close_stringdist(sd);
   } // end parallel region
-  UNPROTECT(1);
+  UNPROTECT(3);
   return(out_list);
 
 }

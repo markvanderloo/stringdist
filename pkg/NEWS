@@ -1,3 +1,7 @@
+version 0.9.6.4
+- Fixed bug that caused a segfault when 'afind' was called with many
+  search patterns or many texts to be searched.
+
 version 0.9.6.3
 - Resubmit. Fixed an URL redirect that was detected by CRAN.
 
