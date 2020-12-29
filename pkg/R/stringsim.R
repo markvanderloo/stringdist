@@ -58,10 +58,10 @@ stringsimmatrix <- function(a, b, method = c("osa", "lv", "dl", "hamming", "lcs"
   nctype <- if (useBytes) "bytes" else "char"
   if (missing(b)){
     dist <- stringdist::stringdistmatrix(a, method=method, useBytes=useBytes, q=q, ...)
-    normalize_dist(dist, a, b = a, method=method, nctype=nctype, q=q)
+    normalize_dist(dist, a= rep(a,length(a)), b = rep(a,each=length(a)), method=method, nctype=nctype, q=q)
   } else {
     dist <- stringdist::stringdistmatrix(a, b, method=method, useBytes=useBytes, q=q, ...)
-    normalize_dist(dist, a, b, method=method, nctype=nctype, q=q)
+    normalize_dist(dist, a=rep(a,length(b)), b=rep(b,each=length(a)), method=method, nctype=nctype, q=q)
   }
 }
 

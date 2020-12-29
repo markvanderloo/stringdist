@@ -1,6 +1,9 @@
 version 0.9.6.4
-- Fixed bug that caused a segfault when 'afind' was called with many
-  search patterns or many texts to be searched.
+- Fix: segfault when 'afind' was called with many search patterns or many
+  texts to be searched.
+- Fix: stringsimmatrix was not normalized correctly (Thanks to Tamas Ferenci
+  for reporting GH).
+
 
 version 0.9.6.3
 - Resubmit. Fixed an URL redirect that was detected by CRAN.

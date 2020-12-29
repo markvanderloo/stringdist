@@ -61,7 +61,7 @@ for (method in methods[6:8]){
   expect_equal(stringsimmatrix(x,method="osa", useBytes=FALSE)[2, 9], 0.2)
   expect_warning(stringdistmatrix(list('a')))
   expect_warning(stringdistmatrix(list('a'),list('b')))
-  
+ 
 ## seq_sim
 
 # We used to have list(1:3, 2:4) and list(1:3). This occasionally
