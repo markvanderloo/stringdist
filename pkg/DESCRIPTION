@@ -2,7 +2,6 @@ Package: stringdist
 Maintainer: Mark van der Loo <mark.vanderloo@gmail.com>
 License: GPL-3
 Title: Approximate String Matching, Fuzzy Text Search, and String Distance Functions
-LazyData: no
 Type: Package
 LazyLoad: yes
 Authors@R: c( person("Mark", "van der Loo", role=c("aut","cre")
@@ -23,7 +22,7 @@ Description: Implements an approximate string matching version of R's native
     vectors representing generic sequences. This package is built for speed and
     runs in parallel by using 'openMP'. An API for C or C++ is exposed as well.
     Reference: MPJ van der Loo (2014) <doi:10.32614/RJ-2014-011>.
-Version: 0.9.6.3.2
+Version: 0.9.6.3.7
 Depends:
     R (>= 2.15.3)
 URL: https://github.com/markvanderloo/stringdist

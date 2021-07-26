@@ -26,9 +26,18 @@
 
 unsigned int max_length(SEXP x){
   unsigned int t=0, m;
-  for (int i=0; i<length(x); ++i){
-    m = length(VECTOR_ELT(x,i));
-    if (t < m) t = m;
+
+  if (TYPEOF(x) == VECSXP){
+    for (int i=0; i<length(x); ++i){
+      m = length(VECTOR_ELT(x,i));
+      if (t < m) t = m;
+    }
+  } else {
+    for (int i=0; i<length(x); ++i){
+      m = length(STRING_ELT(x,i));
+      if (t < m) t = m;
+    }
+
   }
   return t;
 }

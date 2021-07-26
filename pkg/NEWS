@@ -1,4 +1,6 @@
 version 0.9.6.4
+- Fixes in use of INTEGER() and VECTOR_ELT() after updates in R's C API.
+  this affected 'afind' and 'max_length' (internally).
 - Fix: segfault when 'afind' was called with many search patterns or many
   texts to be searched.
 - Fix: stringsimmatrix was not normalized correctly (Thanks to Tamas Ferenci

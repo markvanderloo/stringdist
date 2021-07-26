@@ -138,7 +138,7 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
     , ntable = length(table)
     , no_match = INTEGER(nomatch)[0]
     , match_na = INTEGER(matchNA)[0]
-    , bytes = INTEGER(x)[0]
+    , bytes = INTEGER(useBytes)[0]
     , ml_x = max_length(x)
     , ml_t = max_length(table)
     , intdist = TYPEOF(x) == VECSXP ? 1 : 0; // list of integers?
@@ -149,6 +149,7 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
   // convert to integer. 
   Stringset *X = new_stringset(x, bytes, intdist);
   Stringset *T = new_stringset(table, bytes, intdist);
+
 
   // output vector
   SEXP yy;
@@ -351,15 +352,13 @@ SEXP R_afind(SEXP a, SEXP pattern, SEXP width
   PROTECT(out_list = allocVector(VECSXP, 2));
 
   // output location
-  SEXP out_loc;
-  PROTECT(out_loc = allocMatrix(INTSXP, na, npat));
-  VECTOR_ELT(out_list,0) = out_loc;
+  SEXP out_loc = PROTECT(allocMatrix(INTSXP, na, npat));
+  SET_VECTOR_ELT(out_list,0, out_loc); 
   int *yloc = INTEGER(out_loc);
 
   // output distance
-  SEXP out_dist;
-  PROTECT(out_dist = allocMatrix(REALSXP, na, npat));
-  VECTOR_ELT(out_list,1) = out_dist;
+  SEXP out_dist =  PROTECT(allocMatrix(REALSXP, na, npat));
+  SET_VECTOR_ELT(out_list,1, out_dist);
   double *ydist = REAL(out_dist);
   // Setup stringdist structure.
   // find maximum window length
