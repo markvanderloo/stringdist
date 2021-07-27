@@ -1,6 +1,7 @@
 version 0.9.6.4
 - Fixes in use of INTEGER() and VECTOR_ELT() after updates in R's C API.
-  this affected 'afind' and 'max_length' (internally).
+  this affected 'afind' and 'max_length' (internally). (Thanks to Luke
+  Tierny and Kurt Hornik for the notification).
 - Fix in 'amatch' causing utf-8 characters to be ignored in some
   cases (thanks to Joan Mime for reporting #78).
 - Fix: segfault when 'afind' was called with many search patterns or many
