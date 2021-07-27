@@ -27,7 +27,7 @@ mymsg <- message
   if ( is.na(omp_thread_limit) ) omp_thread_limit <- nthread
   nthread <- min(omp_thread_limit,nthread)
  
-  options(sd_num_thread=nthread)
+  options(sd_num_thread=as.integer(nthread))
 }
 
 # When necessary and possible, argument is coverted to integers.
