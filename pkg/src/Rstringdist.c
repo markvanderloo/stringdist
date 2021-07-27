@@ -150,7 +150,6 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
   Stringset *X = new_stringset(x, bytes, intdist);
   Stringset *T = new_stringset(table, bytes, intdist);
 
-
   // output vector
   SEXP yy;
   PROTECT(yy = allocVector(INTSXP, nx));
