@@ -16,6 +16,27 @@
 * All distance and matching operations are system- and encoding-independent.
 * Built for speed, using [openMP](https://www.openmp.org/) for parallel computing.
 
+
+## Citing
+
+Please cite the [R-Journal article](https://journal.r-project.org/archive/2014/RJ-2014-011/index.html)
+
+```
+@article{RJ-2014-011,
+  author = {Mark P.J. van der Loo},
+  title = {{The stringdist Package for Approximate String Matching}},
+  year = {2014},
+  journal = {{The R Journal}},
+  doi = {10.32614/RJ-2014-011},
+  url = {https://doi.org/10.32614/RJ-2014-011},
+  pages = {111--122},
+  volume = {6},
+  number = {1}
+}
+```
+
+## Functionality 
+
 The package offers the following main functions:
 
 * `stringdist`  computes pairwise distances between two input character vectors (shorter one is recycled)
