@@ -12,7 +12,7 @@
 
 ## stringdist
 
-* Approximate matching and string distance calculations for R. 
+* Approximate matching, fuzzy text search, and string distance calculations for R. 
 * All distance and matching operations are system- and encoding-independent.
 * Built for speed, using [openMP](https://www.openmp.org/) for parallel computing.
 
