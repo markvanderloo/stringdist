@@ -1,4 +1,11 @@
-version 0.9.6.4
+version 0.9.8
+- Fixed some issues on C-level causing problems with the
+  CLANG compiler. (Thanks to Brian Ripley for not only
+  reporting this, but also sending updated code with 
+  fixes).
+
+
+version 0.9.7
 - Fixes in use of INTEGER() and VECTOR_ELT() after updates in R's C API.
   this affected 'afind' and 'max_length' (internally). (Thanks to Luke
   Tierny and Kurt Hornik for the notification).

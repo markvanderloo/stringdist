@@ -18,9 +18,6 @@
  */
 
 #include "utils.h"
-#ifdef _OPENMP
-#include <omp.h>
-#endif
 
 /* Optimal string alignment algorithm. 
  * Computes Damerau-Levenshtein distance, restricted to single transpositions.

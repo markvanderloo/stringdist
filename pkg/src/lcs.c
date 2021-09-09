@@ -17,9 +17,6 @@
  *  You can contact the author at: mark _dot_ vanderloo _at_ gmail _dot_ com
  */
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
 #include "utils.h"
 
 /* Longest common substring

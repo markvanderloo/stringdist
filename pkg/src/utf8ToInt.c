@@ -17,14 +17,8 @@
  *  You can contact the author at: mark _dot_ vanderloo _at_ gmail _dot_ com
  */
 
-//#define USE_RINTERNALS
-#include <R.h>
-#include <Rdefines.h>
-#include "utils.h"
 #include <string.h>
-#ifdef _OPENMP
-#include <omp.h>
-#endif
+#include "utils.h"
 
 
 /* This function is gratefully copied from the R core distribution.
@@ -152,7 +146,7 @@ static int utf8_to_int(const char *str, unsigned int *outbuf){
 
 // Get one element from x (VECSXP or STRSXP) convert to usigned int if necessary and store in c
 // TODO: this can probably be a bit optimized by decreasing the use of the *_ELT macros.
-unsigned int *get_elem(SEXP x, int i, int bytes, int intdist, int *len, int *isna, unsigned int *c){
+unsigned int *get_elem(SEXP x, R_xlen_t i, int bytes, int intdist, int *len, int *isna, unsigned int *c){
 
   if ( intdist ){
     // we need a copy with trailing zero in this case since some distances 

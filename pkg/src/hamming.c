@@ -25,9 +25,6 @@
 
 
 #include "utils.h"
-#ifdef _OPENMP
-#include <omp.h>
-#endif
 
 double hamming_dist(unsigned int *a, int len_a, unsigned int *b, int len_b){
   double h=0;

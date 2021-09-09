@@ -19,9 +19,6 @@
 
 #include "utils.h"
 #include <string.h>
-#ifdef _OPENMP
-#include <omp.h>
-#endif
 
 
 // Winkler's l-factor (nr of matching characters at beginning of the string).

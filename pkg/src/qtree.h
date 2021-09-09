@@ -1,10 +1,6 @@
 #ifndef SD_QTREE_H
 #define SD_QTREE_H
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
 /* binary tree; dictionary of qgrams */
 
 typedef struct qnode {

@@ -17,17 +17,14 @@
  *  You can contact the author at: mark _dot_ vanderloo _at_ gmail _dot_ com
  */
 
-#define USE_RINTERNALS
 #include <stdlib.h>
 #include <stdint.h>
-#include <R.h>
-#include <Rdefines.h>
 #include <math.h>
-#include "utils.h"
-#include "stringdist.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+#include "utils.h"
+#include "stringdist.h"
 
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
@@ -217,7 +214,7 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
 
 // Lower tridiagonal distance matrix for a single vector argument.
 
-static int get_j(R_xlen_t k, int n){
+static int get_j(R_xlen_t k, R_xlen_t n){
   double nd = (double) n;
   double kd = (double) k;
   double u = ceil( (2.*nd - 3.)/2. - sqrt(pow(nd-.5,2.) - 2.*(kd + 1.)) );
@@ -282,13 +279,14 @@ SEXP R_lower_tri(SEXP a, SEXP method
     t = s + ml + 1L;
       
     int len_s, len_t, isna_s, isna_t
-      , i = 0, j = 0
+      , j = 0
       , thread_id = 0
-      , n_threads = 1
-      , col_max = n-1;
+      , n_threads = 1;
 
     R_xlen_t pp = 0
       , k_start = 0
+      , i = 0
+      , col_max = n-1
       , k_end = N;
 
     #ifdef _OPENMP
@@ -299,7 +297,7 @@ SEXP R_lower_tri(SEXP a, SEXP method
       pp = N / n_threads;
       k_start = thread_id * pp;
       k_end   = (thread_id < n_threads - 1 ) ? k_start + pp : N;
-      j = get_j(k_start,n);
+      j = get_j(k_start, n);
       i = k_start + j * (j - 2*n + 3)/2;
     for ( R_xlen_t k=k_start; k < k_end; k++ ){
       i++;

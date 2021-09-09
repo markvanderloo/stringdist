@@ -17,16 +17,14 @@
  *  You can contact the author at: mark _dot_ vanderloo _at_ gmail _dot_ com
  */
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 #define USE_RINTERNALS
 #include <stdlib.h>
 #include <string.h>
-#include <R.h>
-#include <Rdefines.h>
 #include "utils.h"
-#ifdef _OPENMP
-#include <omp.h>
-#endif
 #include "qtree.h"
 
 
@@ -79,7 +77,7 @@ typedef struct {
   Box *box[MAXBOXES];
   int nboxes;         // number of boxes on the shelf
   int q;              // the q in q-gram
-  int nstr;           // the number of stings compared
+  int nstr;           // the number of strings compared
 } Shelf;
 
 // A wall with shelfs: one for each thread.

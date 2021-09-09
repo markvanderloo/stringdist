@@ -17,14 +17,8 @@
  *  You can contact the author at: mark _dot_ vanderloo _at_ gmail _dot_ com
  */
 
-#define USE_RINTERNALS
-#include <R.h>
-#include <Rdefines.h>
 #include "utils.h"
 #include <ctype.h>
-#ifdef _OPENMP
-#include <omp.h>
-#endif
 
 // Translate similar sounding consonants to numeric codes; vowels are all 
 // translated to 'a' and voiceless characters (and other characters) are 
@@ -245,7 +239,7 @@ SEXP R_soundex(SEXP x, SEXP useBytes) {
         SET_STRING_ELT(y, i, R_NaString);
       } else { 
         nfail += soundex(s, len_s, sndx_int);
-        for (unsigned int j = 0; j < 4; ++j) sndx[j] = sndx_int[j];
+        for (unsigned int j = 0; j < 4; ++j) sndx[j] = (char) sndx_int[j];
         sndx[4] = 0;
         SET_STRING_ELT(y, i, mkChar(sndx));
       } 
