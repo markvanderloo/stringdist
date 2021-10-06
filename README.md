@@ -1,6 +1,4 @@
 
-[![Build Status](https://travis-ci.org/markvanderloo/stringdist.svg?branch=master)](https://travis-ci.org/markvanderloo/stringdist)
-[![Coverage Status](https://coveralls.io/repos/markvanderloo/stringdist/badge.svg)](https://coveralls.io/r/markvanderloo/stringdist) 
 [![CRAN](http://www.r-pkg.org/badges/version/stringdist)](http://cran.r-project.org/web/packages/stringdist/NEWS)
 [![status](https://tinyverse.netlify.com/badge/stringdist)](https://CRAN.R-project.org/package=stringdist)
 [![Downloads](http://cranlogs.r-pkg.org/badges/stringdist)](http://cran.r-project.org/package=stringdist/)[![Research software impact](http://depsy.org/api/package/cran/stringdist/badge.svg)](http://depsy.org/package/r/stringdist)[![Mentioned in Awesome Official Statistics ](https://awesome.re/mentioned-badge.svg)](http://www.awesomeofficialstatistics.org)
