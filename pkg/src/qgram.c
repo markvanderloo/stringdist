@@ -84,7 +84,7 @@ typedef struct {
 static Shelf wall[MAX_NUM_THREADS];
 
 // When multithreaded, check what shelf we're storing stuff.
-static inline int get_shelf_num(){
+static inline int get_shelf_num(void){
   int thread_num=0;
   #ifdef _OPENMP
   thread_num = omp_get_thread_num();
@@ -129,7 +129,7 @@ static int add_box(int nnodes){
   
 }
 
-static void clear_shelf(){
+static void clear_shelf(void){
   Shelf *shelf = &wall[get_shelf_num()];
   for ( int i = 0; i < shelf->nboxes; i++ ){
     free_box(shelf->box[i]);
@@ -193,7 +193,7 @@ qtree *new_qtree(int q, int nstr){
   return NULL;
 }
 
-void free_qtree(){
+void free_qtree(void){
   clear_shelf();
 }
 
