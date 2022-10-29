@@ -110,14 +110,14 @@ void close_stringdist(Stringdist *S){
     free_dictionary(S->dict);
   }
   if (S->distance == qgram || S->distance == cosine || S->distance == jaccard){
-    free_qtree(S->tree);
+    free_qtree();
   }
   free(S);
 }
 
 void reset_stringdist(Stringdist *S){
   if (S->distance == running_cosine){
-      free_qtree(S->tree);
+      free_qtree();
       S->tree = new_qtree(S->q, 2L);
   }
 }
