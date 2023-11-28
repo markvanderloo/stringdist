@@ -64,7 +64,7 @@ SEXP R_stringdist(SEXP a, SEXP b, SEXP method
  
   // output vector
   SEXP yy;
-  PROTECT(yy = allocVector(REALSXP, nt));
+  yy = PROTECT(allocVector(REALSXP, nt));
   double *y = REAL(yy);
 
   #ifdef _OPENMP 
@@ -149,7 +149,7 @@ SEXP R_amatch(SEXP x, SEXP table, SEXP method
 
   // output vector
   SEXP yy;
-  PROTECT(yy = allocVector(INTSXP, nx));
+  yy = PROTECT(allocVector(INTSXP, nx));
   int *y = INTEGER(yy);
   
   #ifdef _OPENMP
@@ -244,13 +244,13 @@ SEXP R_lower_tri(SEXP a, SEXP method
     , N = n*(n-1)/2;
 
   if ( n > MAXN ){
-    error("Length of input vector (%d) exceeds maximum allowed for this platform (%d)",n,MAXN);
+    error("Length of input vector (%1.0f) exceeds maximum allowed for this platform (%1.0f)",(double) n,(double) MAXN);
   }  
  
  
   // output vector
   SEXP yy;
-  PROTECT(yy = allocVector(REALSXP, N));
+  yy = PROTECT(allocVector(REALSXP, N));
   // nothing to do if n=1 
   if (n == 1L) goto end ;
   double *y = REAL(yy);
@@ -346,7 +346,7 @@ SEXP R_afind(SEXP a, SEXP pattern, SEXP width
 
   // output list
   SEXP out_list;
-  PROTECT(out_list = allocVector(VECSXP, 2));
+  out_list = PROTECT(allocVector(VECSXP, 2));
 
   // output location
   SEXP out_loc = PROTECT(allocMatrix(INTSXP, na, npat));
@@ -441,7 +441,7 @@ SEXP R_afind(SEXP a, SEXP pattern, SEXP width
 // helper function to determine  whether all is INTSXP
 
 SEXP R_all_int(SEXP X){
-  PROTECT(X);
+  
   SEXP all_int;
   all_int = PROTECT(allocVector(LGLSXP,1L));
 
@@ -454,7 +454,7 @@ SEXP R_all_int(SEXP X){
     }
   }
 
-  UNPROTECT(2);
+  UNPROTECT(1);
   return all_int;
 
 }

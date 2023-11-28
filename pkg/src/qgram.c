@@ -568,8 +568,8 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
   count_qtree(Q,nqgram);  
 
   SEXP qgrams, qcount;
-  PROTECT(qgrams = allocVector(INTSXP, q*nqgram[0]));
-  PROTECT(qcount = allocVector(REALSXP, nLoc*nqgram[0]));
+  qgrams = PROTECT(allocVector(INTSXP, q*nqgram[0]));
+  qcount = PROTECT(allocVector(REALSXP, nLoc*nqgram[0]));
 
   get_counts(Q, q, INTEGER(qgrams), nLoc, index, REAL(qcount));
   
