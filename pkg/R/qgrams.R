@@ -23,12 +23,21 @@
 #' @example ../examples/qgrams.R
 #' @export
 qgrams <- function(..., .list=NULL,q=1L,useBytes=FALSE, useNames=!useBytes){
+  stopifnot(is.numeric(q), length(q)==1, !is.na(q), q>=0)
   q <- as.integer(q)
 
   if (!is.null(.list) && length(.list) == 0) .list=NULL
   L <- lapply(c(list(...),.list), as.character)
   if (length(L) == 0) return(array(dim=c(0,0)))
   L <- setnames(L)
+
+  if (q==0){
+    return( matrix( sapply(L,function(x) sum(x==""))
+                  , ncol=1
+                  , dimnames = list(names(L), NULL)) )
+  }
+
+
   L <- lapply(L,char2int)
 
   v <- .Call("R_get_qgrams",L,as.integer(q),PACKAGE="stringdist")

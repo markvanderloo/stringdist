@@ -17,7 +17,7 @@
 #' not be trusted. If non-ascii or non-printable ascii charcters are encountered, a warning 
 #' is emitted.
 #' 
-#' @seealso \code{\link{printable_ascii}}, \code{\link{stringdist-package}}
+#' @seealso \code{\link{printable_ascii}}
 #' 
 #' 
 #' @return

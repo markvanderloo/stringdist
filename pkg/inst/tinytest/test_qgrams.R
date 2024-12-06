@@ -9,7 +9,7 @@ options(sd_num_thread=2)
   expect_equivalent(qgrams(NA,q=1), matrix(0,nrow=1,ncol=0))          # skip all
   expect_equivalent(qgrams(c("a","ab"), q=2), as.matrix(table("ab"))) # skip q>nchar
   expect_equivalent(qgrams(c("a"),q=2), matrix(0,nrow=1,ncol=0))      # skip all
-  expect_equivalent(qgrams(c(''),q=0), as.matrix(table('')))          # empty string, q=0
+  expect_equivalent(qgrams(c(''),q=0), matrix(table('')))          # empty string, q=0
 
 
 ## qgrams

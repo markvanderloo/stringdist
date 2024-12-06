@@ -63,7 +63,7 @@
 #' }
 #' Or use \code{citation('stringdist')} to get a bibtex item.
 #'
-#' @name stringdist-package
+#' @aliases stringdist-package
 #' @docType package
 #' @useDynLib stringdist, .registration=TRUE
 #' @importFrom parallel detectCores 

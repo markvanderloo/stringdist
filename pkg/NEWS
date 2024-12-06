@@ -1,3 +1,7 @@
+version 0.9.13
+- Fixed issue with zero-length strings in 'qgrams' (Thanks to Brian Ripley
+  for the notification and pointer to the origin of the problem)
+
 version 0.9.12
 - apparently R_xlen_t is long long int on CLANG/Windows and long int on gcc-13/debian
 

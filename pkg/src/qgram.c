@@ -546,7 +546,8 @@ SEXP R_get_qgrams(SEXP a, SEXP qq){
     for ( int i=0; i < nstr; ++i ){
       str   = (unsigned int *) INTEGER(VECTOR_ELT(strlist,i));
       nchar = length(VECTOR_ELT(strlist,i));
-      if ( str[0] == NA_INTEGER 
+      if ( nchar == 0
+          || str[0] == NA_INTEGER 
           || q > nchar
           || ( q == 0 && nchar > 0 )
         ){
