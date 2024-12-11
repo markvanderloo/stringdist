@@ -1,4 +1,9 @@
-version 0.9.13
+version 0.9.15
+- Fixe issue with zero-length 'nthreads' argument in all exported functions
+  with this parameter. (Thanks to Brian Ripley for the notification and pointer
+  to the problem)
+
+version 0.9.14
 - Fixed issue with zero-length strings in 'qgrams' (Thanks to Brian Ripley
   for the notification and pointer to the origin of the problem)
 

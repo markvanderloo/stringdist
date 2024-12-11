@@ -1,5 +1,16 @@
 options(sd_num_thread=1L)
 
+# tests against cases that used to segfault when we did not check
+# NULL cases.
+expect_error(afind("a","b",nthread=1:4))
+expect_error(afind("a","b",nthread="foo"))
+expect_error(afind("a","b",nthread=integer(0)))
+expect_error(afind("a","b",nthread=NULL))
+
+
+
+
+
 texts = c("When I grow up, I want to be"
   , "one of the harversters of the sea"
   , "I think before my days are gone"

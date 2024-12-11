@@ -63,14 +63,14 @@
 #' }
 #' Or use \code{citation('stringdist')} to get a bibtex item.
 #'
-#' @aliases stringdist-package
+#' @name stringdist-package
 #' @docType package
 #' @useDynLib stringdist, .registration=TRUE
 #' @importFrom parallel detectCores 
 #'
 #'
 #' 
-{}
+"_PACKAGE"
 
 listwarning <- function(x,y){
 sprintf("
@@ -156,6 +156,8 @@ stringdist <- function(a, b
     , is.logical(useBytes)
     , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
     , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
+    , length(nthread) == 1
+    , is.numeric(nthread)
     , nthread > 0
   )
   
@@ -224,6 +226,8 @@ stringdistmatrix <- function(a, b
     , is.logical(useBytes)
     , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
     , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
+    , length(nthread) == 1
+    , is.numeric(nthread)
     , nthread > 0
   )
   
@@ -342,7 +346,7 @@ lower_tri <- function(a
   if (is.na(method)){
     stop(sprintf("method '%s' is not defined",method))
   }
-  
+
   x <- .Call("R_lower_tri", a, methnr
          , as.double(weight), as.double(p), as.double(bt)
          , as.integer(q), as.integer(useBytes), as.integer(nthread)

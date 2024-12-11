@@ -104,6 +104,8 @@ amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
       , is.logical(useBytes)
       , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
+      , length(nthread) == 1
+      , is.numeric(nthread)
       , nthread > 0
   )
   if (method == 'jw') weight <- weight[c(2,1,3)]
@@ -212,6 +214,8 @@ seq_amatch <- function(x, table, nomatch=NA_integer_, matchNA=TRUE
       , matchNA %in% c(TRUE,FALSE)
       , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
       , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
+      , length(nthread) == 1
+      , is.numeric(nthread)
       , nthread > 0
   )
   if (method == 'jw') weight <- weight[c(2,1,3)]

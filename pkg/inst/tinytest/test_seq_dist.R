@@ -1,5 +1,11 @@
 options(sd_num_thread=2)
 ## seq_dist
+# tests against cases that used to segfault when we did not check
+# NULL cases.
+expect_error(seq_dist(a=list(c(1L,2L,3L)), b=list(c(2L,1L,3L)),nthread=1:4))
+expect_error(seq_dist(a=list(c(1L,2L,3L)), b=list(c(2L,1L,3L)),nthread="foo"))
+expect_error(seq_dist(a=list(c(1L,2L,3L)), b=list(c(2L,1L,3L)),nthread=integer(0)))
+expect_error(seq_dist(a=list(c(1L,2L,3L)), b=list(c(2L,1L,3L)),nthread=NULL))
 
 # A simple test to see that everything is passed on to the correct
 # algorithm

@@ -87,6 +87,8 @@ afind <- function(x, pattern, window=NULL
     , is.logical(value) && !is.na(value)
     , ifelse(method %in% c('osa','dl'), length(weight) >= 4, TRUE)
     , ifelse(method %in% c('lv','jw') , length(weight) >= 3, TRUE)
+    , length(nthread) == 1
+    , is.numeric(nthread)
     , nthread > 0
   )
 

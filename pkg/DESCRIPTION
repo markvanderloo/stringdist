@@ -23,7 +23,7 @@ Description: Implements an approximate string matching version of R's native
     vectors representing generic sequences. This package is built for speed and
     runs in parallel by using 'openMP'. An API for C or C++ is exposed as well.
     Reference: MPJ van der Loo (2014) <doi:10.32614/RJ-2014-011>.
-Version: 0.9.13
+Version: 0.9.15
 Depends:
     R (>= 2.15.3)
 URL: https://github.com/markvanderloo/stringdist

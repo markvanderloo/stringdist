@@ -1,5 +1,12 @@
 options(sd_num_thread=2)
 ## amatch: Optimal String Alignment
+# tests against cases that used to segfault when we did not check
+# NULL cases.
+expect_error(amatch("a","b",nthread=1:4))
+expect_error(amatch("a","b",nthread="foo"))
+expect_error(amatch("a","b",nthread=integer(0)))
+expect_error(amatch("a","b",nthread=NULL))
+
 
 ## simple test and multiple edge cases
   expect_equal(amatch("aa",c("ba","bb"), method="osa",maxDist=1L), 1L)
@@ -187,5 +194,9 @@ options(sd_num_thread=2)
   expect_false(seq_ain(x,table))
 
 
+expect_error(seq_amatch(x,table,nthread=1:4))
+expect_error(seq_amatch(x,table,nthread="foo"))
+expect_error(seq_amatch(x,table,nthread=integer(0)))
+expect_error(seq_amatch(x,table,nthread=NULL))
 
 
